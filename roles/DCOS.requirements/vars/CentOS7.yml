@@ -5,5 +5,7 @@ dcos_prereq_packages:
   - unzip
   - curl
   - ipset
+  - net-tools # `ifconfig` has been a non documented requirement for 1.12.0,
+  #             fixed with https://github.com/dcos/dcos/pull/3734
   - jq # not technically required by DC/OS but by this Ansible role for checks
 
