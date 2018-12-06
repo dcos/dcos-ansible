@@ -17,8 +17,6 @@
   notify: reload facts
 - meta: flush_handlers
 
-- import_tasks: pre_dcos.yml
-
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
   when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
