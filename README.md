@@ -104,6 +104,9 @@ Please see [the official Mesosphere DC/OS configuration reference](https://docs.
 There are a few parameters that are used by these roles outside the DC/OS config.yml, namingly:
 
 * `bootstrap_url`: Should point to http://*your bootstrap node*:8080. Will be used internally and conviniently overwritten for the installer/upgrader to point to a version specific sub-directory.
+* `ip_detect_contents`: Is used to determine a user-supplied IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
+* `ip_detect_public_contents`: Is used to determine a user-supplied public IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
+* `fault_domain_detect_contents`: Is used to determine a user-supplied fault domain detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
 
 #### Ansible dictionary merge behavior caveat
 

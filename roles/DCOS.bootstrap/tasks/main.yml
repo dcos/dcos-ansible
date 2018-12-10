@@ -4,6 +4,21 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
+- name: "Finding the provider / environment running on (AWS or, if nothing detected, on premise)"
+  # 4th gen or earlier, Xen based types:
+  #   looking at `product_version` or `bios_verion`.
+  # 5th gen HVM based instance types:
+  #   looking at `system_vendor`.
+  set_fact:
+    dcos_environment: >-
+        {{
+        (('amazon' in ansible_product_version) or
+        ('amazon' in ansible_bios_version) or
+        ('EC2' in ansible_system_vendor))
+        | ternary('ec2', 'onprem')
+        }}
+  changed_when: false
+
 - name: double check the prefix/cluster name and version
   pause:
     prompt: |
@@ -54,24 +69,42 @@
 #  vvv DOWNLOAD vvv
 
 - name: download installation file
-  get_url: url="{{ dcos['download'] }}" dest={{ download_path }}/dcos_generate_config.ee.sh mode=0440
+  get_url:
+    url: "{{ dcos['download'] }}"
+    dest: "{{ download_path }}/dcos_generate_config.ee.sh"
+    mode: 0440
 
 # vvv POST DOWNLOAD / configuration vvv
 
-- name: set IP detection script
-  template: src=ip-detect.j2 dest={{ download_path }}/genconf/ip-detect mode=0644
+- name: "Set default IP detection script for {{dcos_environment}} (overwrite by setting `dcos.config.ip_detect_contents`)"
+  template:
+    src: "{{dcos_environment}}/ip-detect.j2"
+    dest: "{{ download_path }}/genconf/ip-detect"
+    mode: 0644
+  when: "dcos.config.ip_detect_contents is not defined"
   notify: trigger_new_config
 
-- name: set public IP detection script
-  template: src=ip-detect-public.j2 dest={{ download_path }}/genconf/ip-detect-public mode=0644
+- name: "Set default public IP detection script for {{dcos_environment}} (overwrite by setting `dcos.config.ip_detect_public_contents`)"
+  template:
+    src: "{{dcos_environment}}/ip-detect-public.j2"
+    dest: "{{ download_path }}/genconf/ip-detect-public"
+    mode: 0644
+  when: "dcos.config.ip_detect_public_contents is not defined"
   notify: trigger_new_config
 
-- name: set fault domain detection script
-  template: src=fault-domain-detect.sh.j2 dest={{ download_path }}/genconf/fault-domain-detect mode=0644
+- name: "Set default dault domain detection script for {{dcos_environment}} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
+  template:
+    src: "{{dcos_environment}}/fault-domain-detect.sh.j2"
+    dest: "{{ download_path }}/genconf/fault-domain-detect"
+    mode: 0644
+  when: "dcos.config.fault_domain_detect_contents is not defined"
   notify: trigger_new_config
 
-- name: "generate DC/OS configuration"
-  template: src=config.yaml.j2 dest={{ download_path }}/genconf/config.yaml mode=0644
+- name: Generate DC/OS configuration
+  template:
+    src: "config.yaml.j2"
+    dest: "{{ download_path }}/genconf/config.yaml"
+    mode: 0644
   notify: trigger_new_config
 
 - name: Flush handler now

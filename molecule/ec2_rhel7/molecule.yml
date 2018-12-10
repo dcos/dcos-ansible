@@ -31,7 +31,7 @@ provisioner:
     ec2:
       create: ../ec2/create.yml
       destroy: ../ec2/destroy.yml
-    converge: ../default/playbook.yml
+    converge: ../ec2/playbook.yml
   config_options:
     defaults:
       hash_behaviour: merge

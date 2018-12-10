@@ -22,7 +22,7 @@ CentOS current stable plus its EL variant (as per [Mesosphere version policy](ht
 
 ### ii. Infrastrucuture / Provider
 
-* AWS
+* AWS EC2
 * Vagrant/Virtualbox
 
 ### iii. DC/OS version
