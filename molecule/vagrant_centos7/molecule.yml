@@ -21,8 +21,8 @@ platforms:
       - bootstraps
   - name: master1-centos7
     box: centos/7
-    memory: 1024
-    cpus: 1
+    memory: 2048
+    cpus: 2
     interfaces:
       - auto_config: true
         network_name: private_network
@@ -45,8 +45,6 @@ provisioner:
   config_options:
     defaults:
       hash_behaviour: merge
-  playbooks:
-    converge: ../default/playbook.yml
   env:
     ANSIBLE_ROLES_PATH: "../../roles/"
   inventory:
