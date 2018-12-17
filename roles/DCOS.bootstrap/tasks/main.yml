@@ -62,6 +62,7 @@
 - name: Setting download dir
   set_fact:
      download_path: "{{ download_base_dir }}/{{ dcos_version_specifier }}"
+     install_file: "{{ dcos['download']|basename }}"
 
 - name: "create install directory/genconf"
   file: path={{ download_path }}/genconf state=directory mode=0755
@@ -71,7 +72,7 @@
 - name: download installation file
   get_url:
     url: "{{ dcos['download'] }}"
-    dest: "{{ download_path }}/dcos_generate_config.ee.sh"
+    dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
 
 # vvv POST DOWNLOAD / configuration vvv
@@ -113,14 +114,14 @@
 # vvv GENERATE INSTALLER vvv
 
 - name: generate DC/OS bootstrap files
-  shell: "bash dcos_generate_config.ee.sh"
+  shell: "bash {{ install_file }}"
   args:
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 - name: generate DC/OS upgrade files
-  shell: "bash dcos_generate_config.ee.sh --generate-node-upgrade-script {{ dcos['version_to_upgrade_from'] }}; mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}"
+  shell: "bash {{ install_file }} --generate-node-upgrade-script {{ dcos['version_to_upgrade_from'] }}; mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}"
   args:
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}/"
