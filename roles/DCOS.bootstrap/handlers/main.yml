@@ -1,8 +1,3 @@
-- name: install docker
-  yum:
-    name: docker
-    state: present
-
 - name: "Same version config update: Remove old dcos_install.sh"
   file:
     state: absent
@@ -10,6 +5,8 @@
   listen: trigger_new_config
 
 - name: "Same version config update: Remove old upgrade.sh"
-  shell: "rm -rf {{ download_path }}/genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}/"
+  file:
+    path: "{{ download_path }}/genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}/"
+    state: absent
   when: "dcos['version'] is version('1.9', '>=') and dcos['version_to_upgrade_from'] is defined"
   listen: trigger_new_config

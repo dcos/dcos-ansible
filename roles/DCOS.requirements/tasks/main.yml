@@ -47,10 +47,12 @@
       enablerepo: "{{ rhel_exras_repo_name.stdout | default('') }}"
       state: present
   rescue:
-    - fail:
+    - name: Output
+      fail:
         msg: "ABORTING! Could not install '{{ dcos_docker_pkg_name }}'. Please make sure RHEL *extras* repository is availble!"
       when: ansible_distribution == 'RedHat'
-    - fail:
+    - name: Output
+      fail:
         msg: "ABORTING! Could not install '{{ dcos_docker_pkg_name }}'."
       when: ansible_distribution != 'RedHat'
 
@@ -72,7 +74,8 @@
         name: "{{ dcos_prereq_packages }}"
         state: present
   rescue:
-    - fail:
+    - name: Output
+      fail:
         msg: "ABORTING! Could not install '{{ dcos_prereq_packages }}'. Please make sure the systems repositories are enabled and reachable!"
 
 - name: "SELinux '{{ dcos['selinux_mode'] | default('permissive') }}'"
