@@ -7,4 +7,3 @@ dcos_prereq_packages:
   - curl
   - ipset
   - jq # not technically required by DC/OS but by this Ansible role for checks
-
