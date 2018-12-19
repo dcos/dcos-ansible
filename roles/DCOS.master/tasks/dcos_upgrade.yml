@@ -15,6 +15,7 @@
   args:
     chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
     executable: "/usr/bin/bash"
+  when: latest_dcos_config_setup_is_installed.rc != 0
 
 # TODO: The below checks should be managed from within the DC/OS installer.
 # Check procedure: https://docs.mesosphere.com/1.11/installing/production/upgrading/#dcos-masters
@@ -29,6 +30,7 @@
   delay: 15
   register: mesos_master_exhibitor_result
   until: mesos_master_exhibitor_result.stdout  == 'serving'
+  when: latest_dcos_config_setup_is_installed.rc != 0
 
 # (Almost) step 2 and 3 on upgrading procedure. Actually getting data from mesos-master requires
 # a valid JWT in strict mode, so for simplicity only checking the two conditions below.
@@ -39,7 +41,8 @@
     delay: 10
 - name: "Upgrade: Check for mesos-master systemd unit to be 'running'"
   shell: systemctl status dcos-mesos-master | grep '(running)'
-  become: true
+  args:
+    warn: false # We are not interested in changing the state itself, just if it's 'running'
   retries: 12
   delay: 10
   changed_when: false
@@ -52,4 +55,4 @@
   delay: 10
   register: cockroachdb_result
   until: cockroachdb_result.stdout  == '0'
-  when: dcos['enterprise_dcos'] == true
+  when: dcos['enterprise_dcos']

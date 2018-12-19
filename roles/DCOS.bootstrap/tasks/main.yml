@@ -40,11 +40,19 @@
   yum:
     name: python-pip
     state: present
+  register: dcos_yum_pythonpip_install
+  retries: 3
+  delay: 60
+  until: dcos_yum_pythonpip_install | success
 
 - name: Install python docker bindings
   pip:
     name: docker
     state: present
+  register: dcos_pip_docker_install
+  retries: 3
+  delay: 60
+  until: dcos_pip_docker_install | success
 
 - name: Setting download dir
   set_fact:
@@ -63,25 +71,25 @@
 
 # vvv POST DOWNLOAD / configuration vvv
 
-- name: "Set default IP detection script for {{dcos_environment}} (overwrite by setting `dcos.config.ip_detect_contents`)"
+- name: "Set default IP detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_contents`)"
   template:
-    src: "{{dcos_environment}}/ip-detect.j2"
+    src: "{{ dcos_environment }}/ip-detect.j2"
     dest: "{{ download_path }}/genconf/ip-detect"
     mode: 0644
   when: "dcos.config.ip_detect_contents is not defined"
   notify: trigger_new_config
 
-- name: "Set default public IP detection script for {{dcos_environment}} (overwrite by setting `dcos.config.ip_detect_public_contents`)"
+- name: "Set default public IP detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_public_contents`)"
   template:
-    src: "{{dcos_environment}}/ip-detect-public.j2"
+    src: "{{ dcos_environment }}/ip-detect-public.j2"
     dest: "{{ download_path }}/genconf/ip-detect-public"
     mode: 0644
   when: "dcos.config.ip_detect_public_contents is not defined"
   notify: trigger_new_config
 
-- name: "Set default dault domain detection script for {{dcos_environment}} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
+- name: "Set default dault domain detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
   template:
-    src: "{{dcos_environment}}/fault-domain-detect.sh.j2"
+    src: "{{ dcos_environment }}/fault-domain-detect.sh.j2"
     dest: "{{ download_path }}/genconf/fault-domain-detect"
     mode: 0644
   when: "dcos.config.fault_domain_detect_contents is not defined"
@@ -107,7 +115,9 @@
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 - name: generate DC/OS upgrade files
-  shell: "bash dcos_generate_config.ee.sh --generate-node-upgrade-script {{ dcos['version_to_upgrade_from'] }}; mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}"
+  shell: >
+    bash dcos_generate_config.ee.sh --generate-node-upgrade-script {{ dcos['version_to_upgrade_from'] }};
+    mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ dcos['version_to_upgrade_from'] }}
   args:
     warn: false
     chdir: "{{ download_path }}"

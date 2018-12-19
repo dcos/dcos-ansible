@@ -15,3 +15,4 @@
   args:
     chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
     executable: "/usr/bin/bash"
+  when: latest_dcos_config_setup_is_installed.rc != 0
