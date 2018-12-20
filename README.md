@@ -1,6 +1,6 @@
 # Ansible Roles: Mesosphere DC/OS
 
-A set of Ansible Roles that install DC/OS on RedHat/CentOS Linux.
+A set of Ansible Roles that manage a DC/OS cluster live cycle on RedHat/CentOS Linux.
 
 ## Requirements
 
@@ -110,13 +110,21 @@ There are a few parameters that are used by these roles outside the DC/OS config
 
 #### Ansible dictionary merge behavior caveat
 
-Due to the nested structure of the `dcos` configuration, it might be required to set Ansible to [merge instead over replacing](https://docs.ansible.com/ansible/2.4/intro_configuration.html#hash-behaviour), when combining config from multiple places.
+Due to the nested structure of the `dcos` configuration, it might be required to set Ansible to ['merge' instead of 'replace'](https://docs.ansible.com/ansible/2.4/intro_configuration.html#hash-behaviour), when combining config from multiple places.
 
 ##### Example
 
 ```ini
 # ansible.cfg
 hash_behaviour = merge
+```
+
+#### Safeguard on interactive use: `dcos_cluster_name_confirmed`
+
+When invoking these roles interactively (for example from the operators machine), the `DCOS.bootstrap` role will require a manual confirmation of the cluster to run against. This is a safe guarding mechanism to avoid unintendet upgrade or config changes. In non-interactive plays, a variable can be set to skip this step, e.g.:
+
+```bash
+ansible-playbook -e 'dcos_cluster_name_confirmed=True' dcos.yml
 ```
 
 ## Example playbook
@@ -130,11 +138,13 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 ## Tested OS and Mesosphere DC/OS versions
 
-* CentOS 7
+* CentOS 7, RHEL 7
 * DC/OS 1.12, both open as well as enterprise version
 
 ## License
+
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Author Information
+
 This role was created by team SRE @ Mesosphere and others in 2018, based on multiple internal tools and non-public Ansible roles that have been developed internally over the years.
