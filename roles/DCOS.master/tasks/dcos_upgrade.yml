@@ -34,9 +34,13 @@
 
 # (Almost) step 2 and 3 on upgrading procedure. Actually getting data from mesos-master requires
 # a valid JWT in strict mode, so for simplicity only checking the two conditions below.
+- name: "Upgrade: Wait for mesos-master - detect local IPv4 address"
+  command: /opt/mesosphere/bin/detect_ip
+  register: dcos_command_detect_ip
+  changed_when: false
 - name: "Upgrade: Wait for mesos-master tcp/5050 to be listening"
   wait_for:
-    host: "{{ ansible_default_ipv4['address'] }}"
+    host: "{{ dcos_command_detect_ip.stdout }}"
     port: 5050
     delay: 10
 - name: "Upgrade: Check for mesos-master systemd unit to be 'running'"
