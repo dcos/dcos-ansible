@@ -21,6 +21,7 @@
 
 - name: double check the prefix/cluster name and version
   pause:
+    seconds: 30
     prompt: |
         Please double check the prefix/cluster name and version of this cluster:
 
