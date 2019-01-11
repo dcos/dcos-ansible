@@ -42,10 +42,8 @@
 
 # Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
 # or the installed 'image_commit' != the one specified for this installation.
+# or if its a config change
 - import_tasks: dcos_upgrade.yml
   when:
     - ansible_local is defined and ansible_local.dcos_installation is defined
-    - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit'])
-
-- import_tasks: dcos_upgrade.yml
-  when: latest_dcos_config_setup_is_installed.rc != 0
+    - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
