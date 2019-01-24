@@ -1,0 +1,23 @@
+---
+scenario:
+  name: default
+platforms:
+  - name: not-a-real-instance
+provisioner:
+  name: ansible
+  log: true
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  env:
+    ANSIBLE_ROLES_PATH: "../../roles/"
+  inventory:
+    links:
+      group_vars: ../../group_vars/
+  lint:
+    name: ansible-lint
+    enabled: True
+lint:
+  name: yamllint
+  options:
+    config-file: .yamllint.yml

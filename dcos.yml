@@ -1,3 +1,4 @@
+---
 - name: DC/OS Requirements
   hosts: all
   become: true

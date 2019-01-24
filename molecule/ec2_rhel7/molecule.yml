@@ -46,4 +46,5 @@ provisioner:
     enabled: True
 lint:
   name: yamllint
-  enabled: False
+  options:
+    config-file: .yamllint.yml

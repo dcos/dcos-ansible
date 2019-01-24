@@ -46,4 +46,3 @@
   when:
     - ansible_local is defined and ansible_local.dcos_installation is defined 
     - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
-
