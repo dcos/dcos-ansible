@@ -21,14 +21,6 @@
 - import_tasks: dcos_install.yml
   when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
 
-# Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
-- import_tasks: dcos_upgrade.yml
-  when:
-    - ansible_local is defined and ansible_local.dcos_installation is defined
-    - ansible_local.dcos_installation['version'] != dcos['version']
-    - dcos['dcos-image-commit'] is not defined or ansible_local.dcos_installation['dcos-image-commit'] != dcos['dcos-image-commit']
-
-
 # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
 - name: "Same version config update? Register latest DC/OS-config--setup version from bootstrap"
   shell: |
@@ -48,5 +40,10 @@
   register: latest_dcos_config_setup_is_installed
   changed_when: latest_dcos_config_setup_is_installed.rc != 0
 
+# Upgrades for existing nodes, given the installed version doesnt match `dcos['version']`
+# or the installed 'image_commit' != the one specified for this installation.
 - import_tasks: dcos_upgrade.yml
-  when: latest_dcos_config_setup_is_installed.rc != 0
+  when:
+    - ansible_local is defined and ansible_local.dcos_installation is defined 
+    - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
+
