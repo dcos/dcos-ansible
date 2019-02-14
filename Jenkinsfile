@@ -12,9 +12,6 @@ pipeline {
 
     stages {
         stage('docker login') {
-            when {
-                branch 'master'
-            }
             steps {
                 // Login to the Docker registry.
                 sh("docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}")
@@ -22,9 +19,6 @@ pipeline {
         }
 
         stage('build') {
-            when {
-                branch 'master'
-            }
             steps {
                 // Build Docker image.
                 sh("docker build -t mesosphere/${IMAGE}:latest .")
@@ -32,10 +26,6 @@ pipeline {
         }
 
         stage('publish') {
-            // Only run this step on the master branch.
-            when {
-                branch 'master'
-            }
             steps {
                 script {
                     // Calculate Docker image tag based on commit number and id.
