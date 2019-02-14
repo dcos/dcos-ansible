@@ -34,6 +34,7 @@ pipeline {
                     // Tag and push the image we built earlier.
                     sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
                     sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
+                    sh("docker push mesosphere/${IMAGE}:latest")
                 }
             }
         }
