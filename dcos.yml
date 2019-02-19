@@ -1,4 +1,10 @@
 ---
+- name: Collect DC/OS versions
+  hosts: all
+  tasks:
+    - name: Collect DC/OS versions
+      setup:
+
 - name: DC/OS Requirements
   hosts: all
   become: true
