@@ -24,30 +24,57 @@ pipeline {
       }
     }
 
-
-    stage('molecule test (ec2_centos7)') {
-      agent {
-        label "py36"
-      }
-      // try {
-        // Requires more recent Pipeline plugin
-        // options {
-        //   retry(3)
-        //   timeout(time: 5, unit: 'MINUTES')
-        // }
-
-        steps {
-          sh("pip install -r test_requirements.txt")
-          sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-          // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
-          withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-            ]) {
-            sh("molecule test --scenario-name ec2_centos7")
+    stage('molecule test') {
+      parallel {
+        stage('molecule test (ec2_centos7)') {
+          agent {
+            label "py36"
           }
+          // try {
+            // Requires more recent Pipeline plugin
+            // options {
+            //   retry(3)
+            //   timeout(time: 60, unit: 'MINUTES')
+            // }
+
+            steps {
+              sh("pip install -r test_requirements.txt")
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                sh("molecule test --scenario-name ec2_centos7")
+              }
+            }
+          // } finally {
+          //    sh("molecule destroy --scenario-name ec2_centos7")
+          // }
         }
-      // } finally {
-      //    sh("molecule destroy --scenario-name ec2_centos7")
-      // }
+        stage('molecule test (ec2_rhel7)') {
+          agent {
+            label "py36"
+          }
+          // try {
+            // Requires more recent Pipeline plugin
+            // options {
+            //   retry(3)
+            //   timeout(time: 60, unit: 'MINUTES')
+            // }
+
+            steps {
+              sh("pip install -r test_requirements.txt")
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                sh("molecule test --scenario-name ec2_rhel7")
+              }
+            }
+          // } finally {
+          //    sh("molecule destroy --scenario-name ec2_rhel7")
+          // }
+        }
+      }
     }
 
     stage('docker bundle build and publish') {
