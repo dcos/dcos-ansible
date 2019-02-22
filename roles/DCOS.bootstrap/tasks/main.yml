@@ -124,7 +124,7 @@
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/upgrade_from_{{ item }}/"
   when: "dcos['version'] is version('1.9', '>=')"
-  loop: "{{ groups['dcos'] | map('extract',hostvars,'ansible_local')| list | select('defined') | selectattr('dcos_installation', 'defined') |  map(attribute='dcos_installation') | map(attribute='version') | list | union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}"
+  loop: "{{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list | select('defined') | selectattr('dcos_installation', 'defined') | map(attribute='dcos_installation') | map(attribute='version') | list | union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}"
 
 - name: get upgrade directory hash
   shell: "ls -td -- */ | head -n 1 | cut -d'/' -f1"
@@ -133,7 +133,7 @@
   changed_when: false
   register: upgrade_dir_hash
   when: "dcos['version'] is version('1.9', '>=')"
-  loop: "{{ groups['dcos'] | map('extract',hostvars,'ansible_local')| list | select('defined') | selectattr('dcos_installation', 'defined') |  map(attribute='dcos_installation') | map(attribute='version') | list | union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}"
+  loop: "{{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list | select('defined') | selectattr('dcos_installation', 'defined') | map(attribute='dcos_installation') | map(attribute='version') | list | union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}"
 
 - name: create latest/ symlink for upgrade.sh
   file:
