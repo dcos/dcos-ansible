@@ -1,3 +1,7 @@
+@Library('sec_ci_libs@v2-latest') _
+
+def master_branches = ["master", ] as String[]
+
 pipeline {
   agent none
   environment {
@@ -8,6 +12,13 @@ pipeline {
   }
 
   stages {
+    stage("Verify author") {
+      agent {
+        label "mesos"
+      }
+      user_is_authorized(master_branches, '8b793652-f26a-422f-a9ba-0d1e47eb9d89', '#sre')
+    }
+
     stage('lint') {
       agent {
         label "py36"
