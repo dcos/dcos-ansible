@@ -89,6 +89,7 @@ pipeline {
     }
 
     stage('docker bundle build and publish') {
+      when { branch 'master'; }
       agent {
         label "mesos"
       }
