@@ -20,6 +20,7 @@ platforms:
         type: dhcp
     groups:
       - bootstraps
+      - dcos
   - name: master1-centos7
     box: centos/7
     memory: 2048
@@ -30,6 +31,7 @@ platforms:
         type: dhcp
     groups:
       - masters
+      - dcos
   - name: agent1-centos7
     box: centos/7
     memory: 1024
@@ -41,6 +43,7 @@ platforms:
     groups:
       - agents_private
       - agents
+      - dcos
 provisioner:
   name: ansible
   playbooks:

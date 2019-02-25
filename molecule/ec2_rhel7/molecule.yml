@@ -10,12 +10,14 @@ platforms:
     instance_type: m5.large
     groups:
       - bootstraps
+      - dcos
   - name: master1-rhel7
     image: ami-011b3ccf1bd6db744
     region: us-east-1
     instance_type: m5.large
     groups:
       - masters
+      - dcos
   - name: agent1-rhel7
     image: ami-011b3ccf1bd6db744
     region: us-east-1
@@ -23,6 +25,7 @@ platforms:
     groups:
       - agents_private
       - agents
+      - dcos
 
 provisioner:
   name: ansible

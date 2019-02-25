@@ -11,6 +11,7 @@ platforms:
     ssh_user: centos
     groups:
       - bootstraps
+      - dcos
   - name: master1-centos7
     image: ami-9887c6e7
     region: us-east-1
@@ -18,6 +19,7 @@ platforms:
     ssh_user: centos
     groups:
       - masters
+      - dcos
   - name: agent1-centos7
     image: ami-9887c6e7
     region: us-east-1
@@ -26,6 +28,7 @@ platforms:
     groups:
       - agents_private
       - agents
+      - dcos
 
 provisioner:
   name: ansible
