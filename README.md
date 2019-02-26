@@ -1,12 +1,12 @@
 # Ansible Roles: Mesosphere DC/OS
 
-A set of Ansible Roles that manage a DC/OS cluster live cycle on RedHat/CentOS Linux.
+A set of Ansible Roles that manage a DC/OS cluster lifecycle on RedHat/CentOS Linux.
 
 ## Requirements
 
-To make best use of these rolens, you nodes should resemble the Mesosphere recommended way of setting up infrastructure. Depending on your setup, it is expected to deploy to:
+To make best use of these roles, your nodes should resemble the Mesosphere recommended way of setting up infrastructure. Depending on your setup, it is expected to deploy to:
 
-* One ore more master node ('masters')
+* One or more master node ('masters')
 * One bootstrap node ('bootstraps')
 * Zero or more agent nodes, used for public facing services ('agents_public')
 * One or more agent nodes, not used for public facing services ('agents_private')
@@ -40,11 +40,11 @@ agents
 agents_public
 ```
 
-## Roles Variables
+## Role Variables
 
-The Mesosphere DC/OS Ansible roles make use of two sets of variables
+The Mesosphere DC/OS Ansible roles make use of two sets of variables:
 
-1. A set of per node type `group_var`'s
+1. A set of per-node type `group_var`'s
 2. A multi-level dictory called `dcos`, that should be available to all nodes
 
 ### Per group vars
@@ -101,7 +101,7 @@ dcos:
 
 #### DC/OS config.yml parameters
 Please see [the official Mesosphere DC/OS configuration reference](https://docs.mesosphere.com/1.12/installing/production/advanced-configuration/configuration-reference/) for a full list of possible parameters.
-There are a few parameters that are used by these roles outside the DC/OS config.yml, namingly:
+There are a few parameters that are used by these roles outside the DC/OS config.yml, specifically:
 
 * `bootstrap_url`: Should point to http://*your bootstrap node*:8080. Will be used internally and conviniently overwritten for the installer/upgrader to point to a version specific sub-directory.
 * `ip_detect_contents`: Is used to determine a user-supplied IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
@@ -119,9 +119,9 @@ Due to the nested structure of the `dcos` configuration, it might be required to
 hash_behaviour = merge
 ```
 
-#### Safeguard on interactive use: `dcos_cluster_name_confirmed`
+#### Safeguard during interactive use: `dcos_cluster_name_confirmed`
 
-When invoking these roles interactively (for example from the operators machine), the `DCOS.bootstrap` role will require a manual confirmation of the cluster to run against. This is a safe guarding mechanism to avoid unintendet upgrade or config changes. In non-interactive plays, a variable can be set to skip this step, e.g.:
+When invoking these roles interactively (for example from the operator's machine), the `DCOS.bootstrap` role will require a manual confirmation of the cluster to run against. This is a safeguarding mechanism to avoid unintentional upgrade or config changes. In non-interactive plays, a variable can be set to skip this step, e.g.:
 
 ```bash
 ansible-playbook -e 'dcos_cluster_name_confirmed=True' dcos.yml

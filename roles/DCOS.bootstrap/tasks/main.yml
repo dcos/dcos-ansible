@@ -88,7 +88,7 @@
   when: "dcos.config.ip_detect_public_contents is not defined"
   notify: trigger_new_config
 
-- name: "Set default dault domain detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
+- name: "Set default fault domain detection script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_contents`)"
   template:
     src: "{{ dcos_environment }}/fault-domain-detect.sh.j2"
     dest: "{{ download_path }}/genconf/fault-domain-detect"
