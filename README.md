@@ -45,7 +45,7 @@ agents_public
 The Mesosphere DC/OS Ansible roles make use of two sets of variables:
 
 1. A set of per-node type `group_var`'s
-2. A multi-level dictory called `dcos`, that should be available to all nodes
+2. A multi-level dictionary called `dcos`, that should be available to all nodes
 
 ### Per group vars
 
