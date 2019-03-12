@@ -5,7 +5,7 @@ bootstrap_port: 8080
 s3_prefix: "ansible-dcos-exhibitor"
 
 customer_key: "00000000-0000-0000-0000-000000000000"
-
+dcos_config: {}
 ip_detect: eth0
 resolvers: |
   - 8.8.4.4
