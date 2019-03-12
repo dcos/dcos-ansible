@@ -129,7 +129,6 @@
     dcos_config: "{{ dcos_config | combine({item.key: item.value}) }}"
   when: "item.key not in ['ip_detect_contents','ip_detect_public_contents','fault_domain_detect_contents']"
   with_dict: "{{ dcos['config'] }}"
-  notify: trigger_new_config
 
 - name: Generate DC/OS configuration
   template:
