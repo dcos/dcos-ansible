@@ -96,6 +96,40 @@
   when: "dcos.config.fault_domain_detect_contents is not defined"
   notify: trigger_new_config
 
+# vvv FIXME: workaround for bad multi-line handling in DC/OS config vvv
+
+- name: "Generate IP detection script from ip_detect_contents"
+  copy:
+    dest: "{{ download_path }}/genconf/ip-detect"
+    mode: 0644
+    content: "{{ dcos.config.ip_detect_contents }}"
+  when: "dcos.config.ip_detect_contents is defined"
+  notify: trigger_new_config
+
+- name: "Generate IP detection script from ip_detect_public_contents"
+  copy:
+    dest: "{{ download_path }}/genconf/ip-detect-public"
+    mode: 0644
+    content: "{{ dcos.config.ip_detect_public_contents }}"
+  when: "dcos.config.ip_detect_public_contents is defined"
+  notify: trigger_new_config
+
+- name: "Generate IP detection script from fault_domain_detect_contents"
+  copy:
+    dest: "{{ download_path }}/genconf/fault-domain-detect"
+    mode: 0644
+    content: "{{ dcos.config.fault_domain_detect_contents }}"
+  when: "dcos.config.fault_domain_detect_contents is defined"
+  notify: trigger_new_config
+
+# vvv filter and generate config vvv
+
+- name: Filter Config. Get rid of ip_detect_contents,ip_detect_contents and fault_domain_detect_contents
+  set_fact:
+    dcos_config: "{{ dcos_config | combine({item.key: item.value}) }}"
+  when: "item.key not in ['ip_detect_contents','ip_detect_public_contents','fault_domain_detect_contents']"
+  with_dict: "{{ dcos['config'] }}"
+
 - name: Generate DC/OS configuration
   template:
     src: "config.yaml.j2"
