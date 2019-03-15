@@ -1,4 +1,12 @@
 ---
+- name: Wait for instances to become reachable
+  hosts: all
+  tasks:
+    - name: Wait for instances to become reachable
+      wait_for_connection:
+        sleep: 10
+        timeout: 120
+
 - name: Collect DC/OS versions
   hosts: all
   tasks:
