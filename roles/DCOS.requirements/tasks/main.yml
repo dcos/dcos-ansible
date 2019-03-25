@@ -23,6 +23,24 @@
     enabled: false
   when: "'dnsmasq.service' in ansible_facts.services"
 
+- name: "linux kernel activate bridge module ip4 (CentOS systems)"
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    state: present
+  when: 
+    - selinux_mode == 'enforcing'
+    - ansible_distribution == 'CentOS'
+
+- name: "linux kernel activate bridge module ip6 (CentOS systems)"
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+    state: present
+  when: 
+    - selinux_mode == 'enforcing'
+    - ansible_distribution == 'CentOS'
+
 - name: "Docker CE (stable) repository (Only non-EL systems)"
   yum_repository:
     name: docker-ce
