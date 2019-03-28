@@ -1,6 +1,7 @@
 ---
 - name: Wait for instances to become reachable
   hosts: all
+  gather_facts: no
   tasks:
     - name: Wait for instances to become reachable
       wait_for_connection:
