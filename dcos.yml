@@ -3,9 +3,13 @@
   hosts: all
   tasks:
     - name: Wait for instances to become reachable
-      wait_for_connection:
-        sleep: 10
-        timeout: 120
+      wait_for:
+        port: 22
+        sleep: 3
+        timeout: 180
+        delay: 30
+        connect_timeout: 10
+        state: started
 
 - name: Collect DC/OS versions
   hosts: all
