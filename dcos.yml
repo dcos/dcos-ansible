@@ -5,10 +5,10 @@
     - name: Wait for instances to become reachable
       wait_for:
         port: 22
-        sleep: 3
-        timeout: 180
-        delay: 30
-        connect_timeout: 10
+        sleep: 1
+        timeout: 600
+        delay: 10
+        connect_timeout: 5
         search_regex: '.*SSH.*'
         state: started
 
