@@ -9,6 +9,7 @@
         timeout: 180
         delay: 30
         connect_timeout: 10
+        search_regex: '.*SSH.*'
         state: started
 
 - name: Collect DC/OS versions

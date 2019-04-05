@@ -4,4 +4,3 @@ RUN pip install ansible==2.7.6
 COPY dcos.yml /dcos_playbook.yml
 COPY roles /roles
 COPY ansible.cfg /ansible.cfg
-
