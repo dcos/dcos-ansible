@@ -2,17 +2,23 @@
 - name: Wait for instances to become reachable
   hosts: all
   tasks:
-    - name: Wait for instances to respond to pings
-      wait_for_connection:
+    - name: Check that hosts are available
+      block:
+        - name: Wait for instances to respond to pings
+          wait_for_connection:
 
-    - name: Wait for port 22 to be open
-      wait_for:
-        port: 22
-        sleep: 1
-        timeout: 660
-        delay: 60
-        connect_timeout: 5
-        state: started
+        - name: Wait for port 22 to be open
+          wait_for:
+            port: 22
+            sleep: 1
+            timeout: 660
+            delay: 60
+            connect_timeout: 5
+            state: started
+      rescue:
+        - name: Connection check failure
+          fail:
+            msg: "One of the hosts above did not respond to a ping or port check"
 
 - name: Collect DC/OS versions
   hosts: all
