@@ -1,24 +1,22 @@
 ---
 - name: Wait for instances to become reachable
   hosts: all
+  gather_facts: no
   tasks:
-    - name: Check that hosts are available
-      block:
-        - name: Wait for instances to respond to pings
-          wait_for_connection:
+    - name: Wait for instances to respond to ping
+      wait_for_connection:
 
-        - name: Wait for port 22 to be open
-          wait_for:
-            port: 22
-            sleep: 1
-            timeout: 660
-            delay: 60
-            connect_timeout: 5
-            state: started
-      rescue:
-        - name: Connection check failure
-          fail:
-            msg: "One of the hosts above did not respond to a ping or port check"
+    - name: Wait for port 22 to be open
+      wait_for:
+        port: 22
+        timeout: 660
+        state: started
+
+- name: Now we gather facts (lol yep)
+  hosts: all
+  tasks:
+    - name: Now lets gather facts
+      setup:
 
 - name: Collect DC/OS versions
   hosts: all
