@@ -149,6 +149,12 @@
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
+
+- name: Purge old upgrade directory
+  file:
+    path: "{{ download_path }}/genconf/serve"
+    state: absent
+
 - name: Generate DC/OS upgrade files
   shell: >
     bash {{ install_file }} --generate-node-upgrade-script {{ item }};
