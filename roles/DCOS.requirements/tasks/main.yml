@@ -28,8 +28,8 @@
     list:
       - docker
       - docker-ce
-  # If not installed yum_list.results[*].yumstate != installed
-  register: yum_list
+  # If not installed yum_list_docker.results[*].yumstate != installed
+  register: yum_list_docker
 
 - name: "Docker CE (stable) repository (Only non-EL systems)"
   yum_repository:
@@ -39,7 +39,7 @@
     enabled: yes
     gpgcheck: yes
     gpgkey: https://download.docker.com/linux/centos/gpg
-  when: ansible_distribution == 'CentOS' and yum_list.results | selectattr("yumstate", "match", "installed") | list | length == 0
+  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
 - block:
   - name: "Finding RHEL extras repository name (Only EL systems)"
@@ -68,7 +68,7 @@
     - name: Output
       fail:
         msg: "ABORTING! Could not install '{{ dcos_docker_pkg_name }}'."
-      when: ansible_distribution != 'RedHat' and yum_list.results | selectattr("yumstate", "match", "installed") | list | length == 0
+      when: ansible_distribution != 'RedHat' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
 - name: "Docker running (Only on some platforms)"
   systemd:
