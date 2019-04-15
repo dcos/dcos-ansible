@@ -12,7 +12,7 @@
 - name: "Upgrade: Download dcos_node_upgrade.sh"
   get_url:
     url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/latest/dcos_node_upgrade.sh"
-    dest: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+    dest: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/dcos_node_upgrade.sh"
     mode: 0740
     force: yes
 
