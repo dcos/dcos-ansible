@@ -32,7 +32,7 @@
     curl --silent http://localhost:8181/exhibitor/v1/cluster/status | jq -r '.[].description' | uniq
   args:
     warn: false # Curl inside shell is what we need, silence warning.
-  retries: 30
+  retries: 12
   delay: 15
   register: mesos_master_exhibitor_result
   until: mesos_master_exhibitor_result.stdout  == 'serving'
