@@ -1,6 +1,6 @@
 - name: "Upgrade: Purge old directory"
   file:
-    path: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+    path: "{{ path_base_tmp }}/"
     state: absent
 
 - name: "Upgrade: Create download directory"
