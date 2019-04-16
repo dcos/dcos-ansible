@@ -59,6 +59,11 @@
      download_path: "{{ download_base_dir }}/{{ dcos_version_specifier }}"
      install_file: "{{ dcos['download']|basename }}"
 
+- name: Purge old upgrade directory
+  file:
+    path: "{{ download_path }}/genconf/serve"
+    state: absent
+
 - name: Ceate install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
@@ -149,6 +154,7 @@
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
+
 - name: Generate DC/OS upgrade files
   shell: >
     bash {{ install_file }} --generate-node-upgrade-script {{ item }};

@@ -23,6 +23,14 @@
     enabled: false
   when: "'dnsmasq.service' in ansible_facts.services"
 
+- name: Check if docker is already installed
+  yum:
+    list:
+      - docker
+      - docker-ce
+  # If not installed yum_list_docker.results[*].yumstate != installed
+  register: yum_list_docker
+
 - name: "Docker CE (stable) repository (Only non-EL systems)"
   yum_repository:
     name: docker-ce
@@ -31,7 +39,7 @@
     enabled: yes
     gpgcheck: yes
     gpgkey: https://download.docker.com/linux/centos/gpg
-  when: ansible_distribution == 'CentOS'
+  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
 - block:
   - name: "Finding RHEL extras repository name (Only EL systems)"
@@ -40,6 +48,7 @@
     register: rhel_exras_repo_name
     changed_when: false
     when: ansible_distribution == 'RedHat'
+
   - name: "Docker installed"
     yum:
       name: "{{ dcos_docker_pkg_name }}"
@@ -59,7 +68,7 @@
     - name: Output
       fail:
         msg: "ABORTING! Could not install '{{ dcos_docker_pkg_name }}'."
-      when: ansible_distribution != 'RedHat'
+      when: ansible_distribution != 'RedHat' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
 - name: "Docker running (Only on some platforms)"
   systemd:
