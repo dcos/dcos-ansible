@@ -27,7 +27,7 @@ pipeline {
       }
       steps {
         retry(3) {
-          sh("pip install ansible-lint==4.0.1 yamllint==1.11.1")
+          sh("pip install -r test_requirements.txt")
         }
         sh("yamllint -c .yamllint.yml .")
         sh("ansible-lint roles/")

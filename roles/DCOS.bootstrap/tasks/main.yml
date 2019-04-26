@@ -61,8 +61,14 @@
 
 - name: Purge old upgrade directory
   file:
-    path: "{{ download_path }}/genconf/serve"
+    path: "{{ download_path }}/genconf/serve/*"
     state: absent
+  when: "dcos['version'] is version('1.9', '>=')"
+  loop: >
+    {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_installation', 'defined') |
+     map(attribute='dcos_installation') | map(attribute='version') | list |
+     union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Ceate install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
@@ -171,7 +177,9 @@
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Get upgrade directory hash
-  shell: "ls -td -- */ | head -n 1 | cut -d'/' -f1"
+  shell: |
+    set -o pipefail
+    ls -td -- */ | head -n 1 | cut -d'/' -f1
   args:
     chdir: "{{ download_path }}/genconf/serve/upgrade_from_{{ item }}"
   changed_when: false
@@ -189,7 +197,7 @@
     src:  "{{ item.stdout }}"
     state: link
   when: "dcos['version'] is version('1.9', '>=')"
-  loop: "{{upgrade_dir_hash.results}}"
+  loop: "{{ upgrade_dir_hash.results }}"
 
 # vvv serve files via http vvv
 
