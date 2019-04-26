@@ -90,7 +90,7 @@
           instance: "{{ item.name }}"
           molecule_region: "{{ item.region }}"
           molecule_ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
-        wait: true
+        wait: yes
         exact_count: 1
         count_tag:
           instance: "{{ item.name }}"
@@ -113,9 +113,9 @@
       set_fact:
         instance_conf_dict: {
           'instance': "{{ item.instances[0].tags.instance }}",
-          'region': "{{ item.instances[0].tags['molecule_region'] }}",
+          'region': "{{ item.instances[0].tags.molecule_region }}",
           'address': "{{ item.instances[0].public_ip }}",
-          'user': "{{ item.instances[0].tags['molecule_ssh_user'] }}",
+          'user': "{{ item.instances[0].tags.molecule_ssh_user }}",
           'port': "{{ ssh_port }}",
           'identity_file': "{{ keypair_path }}",
           'instance_ids': "{{ item.instance_ids }}", }
@@ -136,10 +136,10 @@
 
     - name: Wait for SSH
       wait_for:
-        port: "{{ ssh_port }}"
+        port: "{{ item.port }}"
         host: "{{ item.address }}"
         search_regex: SSH
-        delay: 10
+        delay: 60
         timeout: 320
       with_items: "{{ lookup('file', molecule_instance_config) | molecule_from_yaml }}"
 

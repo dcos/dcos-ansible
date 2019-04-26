@@ -29,6 +29,7 @@
 # Step 1 on upgrading prcedure
 - name: "Upgrade: Check for all-green Exhibitor status"
   shell: |
+    set -o pipefail
     curl --silent http://localhost:8181/exhibitor/v1/cluster/status | jq -r '.[].description' | uniq
   args:
     warn: false # Curl inside shell is what we need, silence warning.
@@ -50,7 +51,9 @@
     port: 5050
     delay: 10
 - name: "Upgrade: Check for mesos-master systemd unit to be 'running'"
-  shell: systemctl status dcos-mesos-master | grep '(running)'
+  shell: |
+    set -o pipefail
+    systemctl status dcos-mesos-master | grep '(running)'
   args:
     warn: false # We are not interested in changing the state itself, just if it's 'running'
   retries: 12
@@ -60,6 +63,7 @@
 # Step 5 on upgrading procedure
 - name: "Upgrade: Check for CockrockDB replication status (Enterprise only)"
   shell: |
+    set -o pipefail
     /opt/mesosphere/bin/cockroach node status --ranges --certs-dir=/run/dcos/pki/cockroach --host=$(/opt/mesosphere/bin/detect_ip) --format tsv 2>/dev/null | tail -n+2 | head -n-1 | cut -f 10 | uniq
   retries: 12
   delay: 10

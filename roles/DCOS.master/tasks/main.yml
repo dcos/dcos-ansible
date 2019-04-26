@@ -24,6 +24,7 @@
 # Same version config updates for nodes that are on the same version, but differ in `dcos-config--setup` package version
 - name: "Same version config update? Register latest DC/OS-config--setup version from bootstrap"
   shell: |
+    set -o pipefail
     curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest).package_list.json | \
     jq -r '.[] | select(.|test("dcos-config--setup"))' | sed s/dcos-config--//
   args:
@@ -33,6 +34,7 @@
 
 - name: "Same version config update? Is latest DC/OS-config--setup package installed?"
   shell: |
+    set -o pipefail
     /opt/mesosphere/bin/dcos-path/dcos-shell pkgpanda list | grep {{ latest_dcos_config_setup.stdout }}
   args:
     executable: bash
