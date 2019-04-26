@@ -5,6 +5,7 @@
   tasks:
     - name: Wait for instances to become reachable
       wait_for_connection:
+        delay: 10
         sleep: 10
         timeout: 120
 
