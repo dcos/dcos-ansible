@@ -1,0 +1,4 @@
+---
+- name: "NVIDIA Gpu - CentOS 7"
+  include_tasks: nvidia-gpu-CentOS7.yml
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == '7'

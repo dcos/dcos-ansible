@@ -1,0 +1,8 @@
+---
+- name: Ensure pciutils installed
+  yum:
+    name: pciutils
+    state: present
+# only NVIDIA for now
+- name: "NVIDIA Gpu"
+  include_tasks: nvidia-gpu.yml

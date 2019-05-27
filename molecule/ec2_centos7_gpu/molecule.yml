@@ -1,0 +1,55 @@
+---
+scenario:
+  name: ec2_centos7_gpu
+driver:
+  name: ec2
+platforms:
+  # - name: gputestagent-centos7.5
+  #   image: ami-9887c6e7
+  #   region: us-east-1
+  #   instance_type: p2.xlarge
+  #   ssh_user: centos
+  #   groups:
+  #     - agents
+  #     - dcos
+  # - name: gputestagent-centos7.4
+  #   image: ami-4bf3d731
+  #   region: us-east-1
+  #   instance_type: g3.4xlarge
+  #   ssh_user: centos
+  #   groups:
+  #     - agents
+  #     - dcos
+  - name: gputestagent-centos7.6
+    image: ami-02eac2c0129f6376b
+    region: us-east-1
+    instance_type: p2.xlarge
+    ssh_user: centos
+    groups:
+      - agents
+      - dcos
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    ec2:
+      create: ../ec2/create.yml
+      destroy: ../ec2/destroy.yml
+    converge: ./converge.yml
+    # prepare: ./converge.yml
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  env:
+    ANSIBLE_ROLES_PATH: "../../roles/"
+  inventory:
+    links:
+      group_vars: ../../group_vars/
+  lint:
+    name: ansible-lint
+    enabled: True
+lint:
+  name: yamllint
+  options:
+    config-file: .yamllint.yml
