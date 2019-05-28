@@ -8,9 +8,6 @@
     src: /etc/centos-release
   register: os_release_file
 
-- name: pkgheaders debug
-  debug:
-    msg: "{{ pkgheaders }}"
 # If possible we use headers from main OS repo for this kernel.
 - name: Install Kernel Header and Devel from OS repo for Current Kernel
   yum:
@@ -23,7 +20,7 @@
   yum_repository:
     name: ThisVault
     description: This Vault
-    baseurl: "http://vault.centos.org/{{ os_release_file['content'] |b64decode | regex_search('\\d+\\.\\d+\\.\\d+') }}/os/$basearch/"
+    baseurl: "{{ vault_repo_baseurl }}"
     enabled: false
   when: pkgheaders.results|length == 0
 - name: Install Kernel Headers for Current Kernel
@@ -54,9 +51,13 @@
 
 # Install NVIDIA repository, driver and tools
 - name: Add NVIDIA repository for CUDA drivers and tools
-  yum:
-    name: https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-repo-rhel7-10.1.168-1.x86_64.rpm
-    state: present
+  yum_repository:
+    name: cuda
+    description: NVIDIA cuda repository
+    enabled: true
+    baseurl: "{{ nvidia_repo_baseurl }}"
+    gpgkey: "{{ nvidia_repo_gpgkey }}"
+    gpgcheck: true
 - name: Install cuda drivers and tools
   yum:
     name:
