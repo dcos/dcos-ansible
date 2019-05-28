@@ -41,6 +41,24 @@ platforms:
     groups:
       - agents
       - dcos
+  # RHEL 7.6 / current version
+  - name: gputestagent-rhel7.6M60
+    image: ami-000db10762d0c4c05
+    region: us-east-1
+    instance_type: g3.4xlarge
+    ssh_user: ec2-user
+    groups:
+      - agents
+      - dcos
+  # RHEL 7.5 / previous version
+  - name: gputestagent-rhel7.5M60
+    image: ami-6871a115
+    region: us-east-1
+    instance_type: g3.4xlarge
+    ssh_user: ec2-user
+    groups:
+      - agents
+      - dcos
 
 provisioner:
   name: ansible

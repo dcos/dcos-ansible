@@ -1,0 +1,43 @@
+---
+# If possible we use headers from main OS repo for this kernel.
+- name: Install Kernel Header and Devel from OS repo for Current Kernel
+  yum:
+      name:
+        - "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+        - "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel }}"
+
+# ensure nouveau being unloaded
+- name: Ensure nouveau being unloaded
+  modprobe:
+    name: nouveau
+    state: absent
+  changed_when: False
+
+- name: Use Centos Base Repo for vulkan-filesystem
+  yum_repository:
+    name: vulkanfs-repo
+    description: Workaround repo to get vulkan-filesystem
+    baseurl: "{{ rhel7_vulkan_repo_baseurl }}"
+    gpgkey: "{{ rhel7_vulkan_repo_gpgkey }}"
+    enabled: false
+
+- name: Use vulkan-filesystem from centos
+  yum:
+    name: vulkan-filesystem
+    enablerepo: vulkanfs-repo
+
+# Install NVIDIA repository, driver and tools
+- name: Add NVIDIA repository for CUDA drivers and tools
+  yum_repository:
+    name: cuda
+    description: NVIDIA cuda repository
+    enabled: true
+    baseurl: "{{ nvidia_repo_baseurl }}"
+    gpgkey: "{{ nvidia_repo_gpgkey }}"
+    gpgcheck: true
+- name: Install cuda drivers and tools
+  yum:
+    enablerepo: epel
+    name:
+      - cuda
+    state: present
