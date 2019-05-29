@@ -21,6 +21,8 @@
   tasks:
     - include_role:
         name: DCOS.requirements
+    - include_role:
+        name: DCOS.gpu
 
 - name: "Setup and configure BOOTSTRAP nodes"
   hosts: bootstraps

@@ -10,18 +10,12 @@ platforms:
     region: us-east-1
     instance_type: p2.xlarge
     ssh_user: centos
-    groups:
-      - agents
-      - dcos
   # current version
   - name: gputestagent-centos7.6
     image: ami-02eac2c0129f6376b
     region: us-east-1
     instance_type: p2.xlarge
     ssh_user: centos
-    groups:
-      - agents
-      - dcos
   # Tesla V100
   - name: gputestagent-centosV100
     # centos7.6 ami-02eac2c0129f6376b freezes on boot on p3 instances
@@ -29,36 +23,24 @@ platforms:
     region: us-east-1
     instance_type: p3.2xlarge
     ssh_user: centos
-    groups:
-      - agents
-      - dcos
   # Tesla M60
   - name: gputestagent-centosM60
     image: ami-02eac2c0129f6376b
     region: us-east-1
     instance_type: g3.4xlarge
     ssh_user: centos
-    groups:
-      - agents
-      - dcos
   # RHEL 7.6 / current version
   - name: gputestagent-rhel7.6M60
     image: ami-000db10762d0c4c05
     region: us-east-1
     instance_type: g3.4xlarge
     ssh_user: ec2-user
-    groups:
-      - agents
-      - dcos
   # RHEL 7.5 / previous version
   - name: gputestagent-rhel7.5M60
     image: ami-6871a115
     region: us-east-1
     instance_type: g3.4xlarge
     ssh_user: ec2-user
-    groups:
-      - agents
-      - dcos
 
 provisioner:
   name: ansible
@@ -67,8 +49,7 @@ provisioner:
     ec2:
       create: ../ec2/create.yml
       destroy: ../ec2/destroy.yml
-    converge: ./converge.yml
-    # prepare: ./converge.yml
+    converge: ../../dcos.yml
   config_options:
     defaults:
       hash_behaviour: merge
