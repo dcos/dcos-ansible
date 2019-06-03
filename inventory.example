@@ -16,6 +16,7 @@ mountvolumeagent1-dcos112s.example.com
 remoteagent1-dcos112s.example.com
 remoteagent2-dcos112s.example.com
 remoteagent3-dcos112s.example.com
+gpuagent1-dcos112s.example.com
 
 [agents_public]
 publicagent1-dcos112s.example.com

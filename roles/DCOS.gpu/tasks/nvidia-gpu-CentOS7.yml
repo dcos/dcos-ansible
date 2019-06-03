@@ -1,0 +1,65 @@
+---
+- name: find this kernel headers
+  yum:
+    list: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+  register: pkgheaders
+- name: get CentOS specific release version
+  slurp:
+    src: /etc/centos-release
+  register: os_release_file
+
+# If possible we use headers from main OS repo for this kernel.
+- name: Install Kernel Header and Devel from OS repo for Current Kernel
+  yum:
+      name:
+        - "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+        - "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel }}"
+  when: pkgheaders.results|length > 0
+# CentOS VAULT - Kernel Headers not available in main OS repo anymore. Use Vault for this release
+- name: ThisVault
+  yum_repository:
+    name: ThisVault
+    description: This Vault
+    baseurl: "{{ vault_repo_baseurl }}"
+    enabled: false
+  when: pkgheaders.results|length == 0
+- name: Install Kernel Headers for Current Kernel
+  yum:
+      enablerepo: ThisVault
+      name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  when: pkgheaders|length == 0
+- name: Install Kernel Devel for Current Kernel
+  yum:
+      enablerepo: ThisVault
+      name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  when: pkgheaders.results|length == 0
+- name: Ensure to link against merged kernel headers
+  file:
+    dest: "/lib/modules/{{ hostvars[inventory_hostname].ansible_kernel }}/build"
+    src: "/usr/src/kernels/{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}.x86_64/"
+    force: yes
+    state: link
+    follow: false
+  when: pkgheaders.results|length == 0
+
+# ensure nouveau being unloaded
+- name: Ensure nouveau being unloaded
+  modprobe:
+    name: nouveau
+    state: absent
+  changed_when: False
+
+# Install NVIDIA repository, driver and tools
+- name: Add NVIDIA repository for CUDA drivers and tools
+  yum_repository:
+    name: cuda
+    description: NVIDIA cuda repository
+    enabled: true
+    baseurl: "{{ nvidia_repo_baseurl }}"
+    gpgkey: "{{ nvidia_repo_gpgkey }}"
+    gpgcheck: true
+- name: Install cuda drivers and tools
+  yum:
+    name:
+      - cuda
+    state: present
