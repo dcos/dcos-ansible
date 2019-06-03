@@ -38,7 +38,7 @@ pipeline {
       parallel {
         stage('molecule test (ec2_centos7)') {
           agent {
-            label "py36"
+            label "py27"
           }
             steps {
               retry(3) {
@@ -58,7 +58,7 @@ pipeline {
         }
         stage('molecule test (ec2_rhel7)') {
           agent {
-            label "py36"
+            label "py27"
           }
             steps {
               retry(3) {
