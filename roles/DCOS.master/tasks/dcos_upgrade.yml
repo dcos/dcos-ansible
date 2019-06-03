@@ -61,7 +61,7 @@
   changed_when: false
 
 # Step 5 on upgrading procedure
-- name: "Upgrade: Check for CockrockDB replication status (Enterprise only)"
+- name: "Upgrade: Check for CockroachDB replication status (Enterprise only)"
   shell: |
     set -o pipefail
     /opt/mesosphere/bin/cockroach node status --ranges --certs-dir=/run/dcos/pki/cockroach --host=$(/opt/mesosphere/bin/detect_ip) --format tsv 2>/dev/null | tail -n+2 | head -n-1 | cut -f 10 | uniq
