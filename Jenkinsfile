@@ -76,6 +76,26 @@ pipeline {
               }
             }
         }
+        stage('molecule test (ec2_gpu)') {
+          agent {
+            label "py27"
+          }
+            steps {
+              retry(3) {
+                sh("pip install -r test_requirements.txt")
+              }
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                retry(3) {
+                  timeout(time: 60, unit: 'MINUTES') {
+                    sh("molecule test --scenario-name ec2_gpu")
+                  }
+                }
+              }
+            }
+        }
       }
     }
 
