@@ -1,4 +1,4 @@
 #!/bin/sh
 set -o nounset -o errexit
 
-ip addr show dev eth1 primary | awk '/(inet .*\/)/ { print $2 }' | cut -d'/' -f1
+ip route get 8.8.8.8 | awk '{ for(i=1; i<NF; i++) { if($i == "src") {print $(i+1); exit} } }'

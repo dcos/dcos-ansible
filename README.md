@@ -70,9 +70,8 @@ dcos_legacy_node_type_name=slave_public
 
 ```yml
 dcos:
-  download: "https://downloads.dcos.io/dcos/EarlyAccess/dcos_generate_config.sh"
-  version: "1.12.0-beta1"
-  version_to_upgrade_from: "1.12.0-dev"
+  download: "https://downloads.dcos.io/dcos/stable/1.13.1/dcos_generate_config.sh"
+  version: "1.13.1"
   enterprise_dcos: false
   selinux_mode: enforcing
 
@@ -88,24 +87,24 @@ dcos:
 
 #### Cluster wide variables
 
-| Name  | Required?  | Description  |
-|---|---|---|
-| download | REQUIRED  | (https) URL to download the Mesosphere DC/OS install from |
-| version | REQUIRED  | Version string that reflects the version that the installer (given by `download`) installs. Can be collected by running `dcos_generate_config.sh --version`. |
-| version_to_upgrade_from  | for upgrades  | Version string of Mesosphere DC/OS the upgrade procedure expectes to upgrade FROM. A per-version upgrade script will be generated on the bootstrap machine, each cluster node downloads the proper upgrade for its currenly running DC/OS version.|
-| image_commit | no| Can be used to force same version / same config upgrades. Mostly useful for deploying/upgrading non-released versions, e.g. `1.12-dev`. This parameter takes precedence over `version`.|
-| enterprise_dcos | REQUIRED | Specifies if the installer (given by `download`) installs an 'open' or 'enterprise' version of Mesosphere DC/OS. This is required as there are additional post-upgrade checks for enterprise-only components.|
-| selinux_mode | REQUIRED | Indicates the cluster nodes operating sytems SELinux mode. Mesosphere DC/OS supports running in `enforcing` mode starting with **1.12**. Older versions require `permissive`.|
-||||
-| config | yes | Yaml structure that represents a valid Mesosphere DC/OS config.yml, see below.|
+| Name                    | Required?    | Description                                                                                                                                                                                                                                        |
+|:------------------------|:-------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| download                | REQUIRED     | (https) URL to download the Mesosphere DC/OS install from                                                                                                                                                                                          |
+| version                 | REQUIRED     | Version string that reflects the version that the installer (given by `download`) installs. Can be collected by running `dcos_generate_config.sh --version`.                                                                                       |
+| version_to_upgrade_from | for upgrades | Version string of Mesosphere DC/OS the upgrade procedure expectes to upgrade FROM. A per-version upgrade script will be generated on the bootstrap machine, each cluster node downloads the proper upgrade for its currenly running DC/OS version. |
+| image_commit            | no           | Can be used to force same version / same config upgrades. Mostly useful for deploying/upgrading non-released versions, e.g. `1.12-dev`. This parameter takes precedence over `version`.                                                            |
+| enterprise_dcos         | REQUIRED     | Specifies if the installer (given by `download`) installs an 'open' or 'enterprise' version of Mesosphere DC/OS. This is required as there are additional post-upgrade checks for enterprise-only components.                                      |
+| selinux_mode            | REQUIRED     | Indicates the cluster nodes operating sytems SELinux mode. Mesosphere DC/OS supports running in `enforcing` mode starting with **1.12**. Older versions require `permissive`.                                                                      |
+|                         |              |                                                                                                                                                                                                                                                    |
+| config                  | yes          | Yaml structure that represents a valid Mesosphere DC/OS config.yml, see below.                                                                                                                                                                     |
 
 #### DC/OS config.yml parameters
-Please see [the official Mesosphere DC/OS configuration reference](https://docs.mesosphere.com/1.12/installing/production/advanced-configuration/configuration-reference/) for a full list of possible parameters.
+Please see [the official Mesosphere DC/OS configuration reference](https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/) for a full list of possible parameters.
 There are a few parameters that are used by these roles outside the DC/OS config.yml, specifically:
 
 * `bootstrap_url`: Should point to http://*your bootstrap node*:8080. Will be used internally and conviniently overwritten for the installer/upgrader to point to a version specific sub-directory.
-* `ip_detect_contents`: Is used to determine a user-supplied IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
-* `ip_detect_public_contents`: Is used to determine a user-supplied public IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
+* `ip_detect_contents`: Is used to determine a user-supplied IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script. [Official Mesosphere DC/OS ip-detect reference](https://docs.mesosphere.com/1.13/installing/production/deploying-dcos/installation/#create-an-ip-detection-script)
+* `ip_detect_public_contents`: Is used to determine a user-supplied public IP detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script. [Official Mesosphere DC/OS ip-detect reference](https://docs.mesosphere.com/1.13/installing/production/deploying-dcos/installation/#create-an-ip-detection-script)
 * `fault_domain_detect_contents`: Is used to determine a user-supplied fault domain detection script. Overwrites the build-in enviroment detection and usage of a generic AWS and/or on premise script.
 
 #### Ansible dictionary merge behavior caveat
