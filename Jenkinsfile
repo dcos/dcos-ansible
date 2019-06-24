@@ -83,7 +83,7 @@ pipeline {
       when {
         anyOf {
           branch 'master';
-          branch 'feature/*'; 
+          branch 'feature/*';
         }
       }
       agent {
@@ -103,7 +103,7 @@ pipeline {
             sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
             if (env.BRANCH_NAME == 'master') {
               // Only overwrite latest if we're on master
-              sh("docker tag mesosphere/${IMAGE}:latest"
+              sh("docker tag mesosphere/${IMAGE}:latest")
               sh("docker push mesosphere/${IMAGE}:latest")
             }
           }
