@@ -24,14 +24,14 @@
     - include_role:
         name: dcos_gpu
 
-- name: "Setup and configure BOOTSTRAP nodes"
+- name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
   become: true
   tasks:
     - include_role:
         name: dcos_bootstrap
 
-- name: "Setup and configure MASTER nodes"
+- name: Setup and configure MASTER nodes
   hosts: masters
   serial: 1
   become: true
@@ -39,9 +39,16 @@
     - include_role:
         name: dcos_master
 
-- name: "Setup and configure AGENT nodes"
+
+- name: Setup and configure AGENT nodes (Linux)
   hosts: agents
   become: true
   tasks:
     - include_role:
         name: dcos_agent
+
+- name: Setup and configure AGENT nodes (Windows)
+  hosts: win_agents
+  tasks:
+    - include_role:
+        name: dcos_agent_windows
