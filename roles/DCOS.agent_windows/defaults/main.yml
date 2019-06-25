@@ -1,0 +1,5 @@
+---
+# AWS S3 bucket with additional files:
+# https://dcos-win.s3.amazonaws.com/vc_redist.x64.exe
+# https://dcos-win.s3.amazonaws.com/1.13/vmesos-binaries.zip
+bucket_name: "dcos-win.s3.amazonaws.com"
