@@ -73,6 +73,8 @@
       arguments:  -ExecutionPolicy Unrestricted -NonInteractive -File c:\start.ps1
     triggers:
     - type: boot
+    restart_count: 99
+    restart_interval: "PT1M"
     username: Administrator
     password: "{{ansible_password}}"
     run_level: highest
