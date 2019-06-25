@@ -74,7 +74,7 @@
     triggers:
     - type: boot
     restart_count: 99
-    restart_interval: "PT1M"
+    restart_interval: "1M"
     username: Administrator
     password: "{{ansible_password}}"
     run_level: highest
