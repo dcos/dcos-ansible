@@ -10,7 +10,7 @@ To make best use of these roles, your nodes should resemble the Mesosphere recom
 * One bootstrap node ('bootstraps')
 * Zero or more agent nodes, used for public facing services ('agents_public')
 * One or more agent nodes, not used for public facing services ('agents_private')
-
+* Zero or more windows agent nodes ('win_agents')
 ### An example inventory file is provided as shown here:
 
 ```ini
@@ -29,6 +29,10 @@ remoteagent1-dcos112s.example.com
 [agents_public]
 publicagent1-dcos112s.example.com
 
+[win_agents]
+agent1-windows.example.com
+agent2-windows.example.com
+
 [agents:children]
 agents_private
 agents_public
@@ -38,6 +42,16 @@ bootstraps
 masters
 agents
 agents_public
+
+[linux:children]
+bootstraps
+masters
+agents
+agents_public
+
+[windows:children]
+win_agents
+
 ```
 
 ## Role Variables
@@ -137,8 +151,8 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 ## Tested OS and Mesosphere DC/OS versions
 
-* CentOS 7, RHEL 7
-* DC/OS 1.12, both open as well as enterprise version
+* CentOS 7, RHEL 7, Windows Server Core 1809
+* DC/OS 1.13, both open as well as enterprise version
 
 ## License
 
