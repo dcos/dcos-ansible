@@ -1,6 +1,6 @@
 - name: Windows | Defining DC/OS by using 'version' or, more specifically, 'image_commit'
   set_fact:
-     dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
+     dcos_version_specifier: "{{ dcos_version | default('1.13') }}"
      ansible_password: '{{ hostvars[inventory_hostname].pass }}'
   tags:
       - windows_setup
