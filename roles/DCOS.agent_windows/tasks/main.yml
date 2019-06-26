@@ -26,8 +26,8 @@
 - name: Windows | get vmesos-binaries.zip file from s3 to localhost
   aws_s3:
   bucket: "{{ bucket_name }}"
-    object: /{{ dcos_version_specifier }}/vmesos-binaries.zip
-    dest: /files/{{ dcos_version_specifier }}/vmesos-binaries.zip
+    object: "/{{ dcos_version_specifier }}/vmesos-binaries.zip"
+    dest: "/files/{{ dcos_version_specifier }}/vmesos-binaries.zip"
     mode: get
   delegate_to: localhost
 
