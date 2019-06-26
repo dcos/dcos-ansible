@@ -2,14 +2,10 @@
   set_fact:
      dcos_version_specifier: "{{ dcos_version | default('1.13') }}"
      ansible_password: '{{ hostvars[inventory_hostname].pass }}'
-  tags:
-      - windows_setup
 
 
 - debug:
     msg: "dcos_version_specifier = {{ dcos_version_specifier }} , pass = {{ ansible_password }}, bucket_name = {{ bucket_name }}"
-  tags:
-    - windows_setup
 
 
 #- name: Windows | edit Powershell Start script with local IP address of Mesos Master
@@ -25,8 +21,6 @@
     path: /files
     state: directory
   delegate_to: localhost
-  tags:
-    - windows_setup
 
 
 - name: Windows | create sub folder with dcos_version
@@ -34,8 +28,6 @@
     path: /files/{{dcos_version_specifier}}
     state: directory
   delegate_to: localhost
-  tags:
-    - windows_setup
 
 
 - name: Windows | get vc_redist.x64.exe file from s3 to localhost
@@ -44,8 +36,6 @@
     dest: /files/vc_redist.x64.exe
     mode: '0660'
   delegate_to: localhost
-  tags:
-    - windows_setup
 
 
 - name: Windows | get vmesos-binaries.zip from s3 to localhost
@@ -54,8 +44,6 @@
     dest: "/files/{{ dcos_version_specifier }}/mesos-binaries.zip"
     mode: '0440'
   delegate_to: localhost
-  tags:
-    - windows_setup
 
 
 - name: Windows | initialisation windows-node (with install.ps1)
@@ -63,16 +51,12 @@
   with_items:
       - vc_redist.x64.exe
       - "{{ dcos_version_specifier }}/mesos-binaries.zip"
-  tags:
-    - windows_setup
 
 
 - name: Windows | install vc_redist
   win_shell: |
     cd C:\
     .\vc_redist.x64.exe /passive /quite /install /norestart /log  .\vcRedist_install.log
-  tags:
-    - windows_setup
 
 
 - name: Windows | Unzip a mesos-binaries file
@@ -80,8 +64,6 @@
     src: C:\mesos-binaries.zip
     dest: C:\mesos-binaries
     creates: C:\mesos-binaries
-  tags:
-    - windows_setup
 
 
 - name: Windows | create directories c:\work & c:\images
@@ -92,8 +74,6 @@
         - work
         - images
         - mesos-logs
-  tags:
-    - windows_setup
 
 
 #- name: Windows | Host IP Detection
@@ -106,8 +86,6 @@
     path: c:\start.ps1
     create: yes
     line: C:\mesos-binaries\mesos-agent.exe --master={{hostvars[groups.masters[0]].inventory_hostname}}:5050 --appc_store_dir=\\?\C:\images\ --work_dir=\\?\C:\work\ --runtime_dir=\\?\C:\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\mesos-binaries\ --log_dir=\\?\C:\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4)
-  tags:
-    - windows_setup
 
 
 - name: Windows | Register Job
@@ -126,8 +104,6 @@
     password: "{{ansible_password}}"
     run_level: highest
     state: present
-  tags:
-    - windows_setup
 
 
 #- name: Windows | Wait for start of Mesos Master
@@ -139,11 +115,7 @@
 #      timeout=180
 #  ignore_errors: true
 #  register: results
-#  tags:
-#    - windows_setup
 
 
 - name: Windows | reboot the host
   win_reboot:
-  tags:
-    - windows_setup

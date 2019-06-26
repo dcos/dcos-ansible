@@ -47,3 +47,12 @@ bootstraps
 masters
 agents
 agents_public
+
+[linux:children]
+bootstraps
+masters
+agents
+agents_public
+
+[windows:children]
+win_agents
