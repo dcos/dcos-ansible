@@ -2,9 +2,13 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
      ansible_password: '{{ hostvars[inventory_hostname].pass }}'
+  tags:
+      - windows_setup
 
 - debug:
     msg: "dcos_version_specifier = {{ dcos_version_specifier }} , pass = {{ ansible_password }}, bucket_name = {{ bucket_name }}"
+  tags:
+    - windows_setup
 
 
 #- name: Windows | edit Powershell Start script with local IP address of Mesos Master
@@ -22,6 +26,8 @@
     dest: /files/vc_redist.x64.exe
     mode: get
   delegate_to: localhost
+  tags:
+    - windows_setup
 
 
 - name: Windows | get vmesos-binaries.zip file from s3 to localhost
