@@ -6,12 +6,12 @@
   - debug:
      msg: "pass = {{ansible_password}}"
 
-- name: Windows | edit Powershell Start script with local IP address of Mesos Master
-  replace:
-    path: /files/start.ps1
-    regexp: 'local_ip_master'
-    replace: '{{  hostvars[groups.masters[0]].inventory_hostname }}'
-  delegate_to: localhost
+#- name: Windows | edit Powershell Start script with local IP address of Mesos Master
+#  replace:#
+#    path: /files/start.ps1
+#    regexp: 'local_ip_master'
+#    replace: '{{  hostvars[groups.masters[0]].inventory_hostname }}'
+#  delegate_to: localhost
 
 
 - name: Windows | get vc_redist.x64.exe file from s3 to localhost
@@ -53,15 +53,24 @@
 
 - name: Windows | create directories c:\work & c:\images
   win_file:
-      path: C:/{{ item }}
+      path: C:\{{ item }}
       state: directory
   with_items:
         - work
         - images
+        - mesos-logs
 
-- name: Windows | Host IP Detection
-  win_shell: |
-    $env:HostIP = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.Status -ne "Disconnected"}).IPv4Address.IPAddress
+
+#- name: Windows | Host IP Detection
+#  win_shell: |
+#    $env:HostIP = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null -and $_.NetAdapter.Status -ne "Disconnected"}).IPv4Address.IPAddress
+
+- name: Windows | Create start file
+  win_lineinfile:
+    path: c:\start.ps1
+    create: yes
+    line: C:\mesos-binaries\mesos-agent.exe --master={{hostvars[groups.masters[0]].inventory_hostname}}:5050 --appc_store_dir=\\?\C:\images\ --work_dir=\\?\C:\work\ --runtime_dir=\\?\C:\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\mesos-binaries\ --log_dir=\\?\C:\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4)
+
 
 - name: Windows | Register Job
   win_scheduled_task:
@@ -80,15 +89,15 @@
     run_level: highest
     state: present
 
-- name: Windows | Wait for start of Mesos Master
-  local_action:
-    module: wait_for
-      host={{  hostvars[groups.masters[0]].inventory_hostname }}
-      port=5050
-      delay=2
-      timeout=180
-  ignore_errors: true
-  register: results
+#- name: Windows | Wait for start of Mesos Master
+#  local_action:
+#    module: wait_for
+#      host={{  hostvars[groups.masters[0]].inventory_hostname }}
+#      port=5050
+#      delay=2
+#      timeout=180
+#  ignore_errors: true
+#  register: results
 
 
 - name: Windows | reboot the host
