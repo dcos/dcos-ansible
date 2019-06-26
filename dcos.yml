@@ -62,6 +62,7 @@
 
 - name: Setup and configure AGENT nodes (Windows)
   hosts: win_agents
+  gather_facts: no
   tasks:
     - include_role:
         name: DCOS.agent_windows
