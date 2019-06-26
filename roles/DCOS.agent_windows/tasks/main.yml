@@ -3,8 +3,8 @@
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
      ansible_password: '{{ hostvars[inventory_hostname].pass }}'
 
-  - debug:
-     msg: "pass = {{ansible_password}}"
+#  - debug:
+#     msg: "pass = {{ansible_password}}"
 
 #- name: Windows | edit Powershell Start script with local IP address of Mesos Master
 #  replace:#
