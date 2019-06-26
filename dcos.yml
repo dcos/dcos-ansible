@@ -8,12 +8,16 @@
         delay: 10
         sleep: 10
         timeout: 120
+      tags:
+        - linux_install
 
 - name: Collect DC/OS versions
   hosts: all
   tasks:
     - name: Collect DC/OS versions
       setup:
+      tags:
+        - linux_install
 
 - name: DC/OS Requirements
   hosts: all
@@ -23,6 +27,8 @@
         name: DCOS.requirements
     - include_role:
         name: DCOS.gpu
+      tags:
+        - linux_install
 
 - name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
@@ -30,6 +36,8 @@
   tasks:
     - include_role:
         name: DCOS.bootstrap
+      tags:
+        - linux_install
 
 - name: Setup and configure MASTER nodes
   hosts: masters
@@ -38,6 +46,8 @@
   tasks:
     - include_role:
         name: DCOS.master
+      tags:
+        - linux_install
 
 
 - name: Setup and configure AGENT nodes (Linux)
@@ -46,6 +56,8 @@
   tasks:
     - include_role:
         name: DCOS.agent
+      tags:
+        - linux_install
 
 
 - name: Setup and configure AGENT nodes (Windows)
@@ -53,3 +65,5 @@
   tasks:
     - include_role:
         name: DCOS.agent_windows
+      tags:
+        - windows_install
