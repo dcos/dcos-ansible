@@ -13,6 +13,7 @@
 
 - name: Collect DC/OS versions
   hosts: all
+  gather_facts: no
   tasks:
     - name: Collect DC/OS versions
       setup:
@@ -21,6 +22,7 @@
 
 - name: DC/OS Requirements
   hosts: all
+  gather_facts: no
   become: true
   tasks:
     - include_role:
