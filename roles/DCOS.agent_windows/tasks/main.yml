@@ -1,28 +1,8 @@
 - name: Windows | Defining DC/OS by using 'version' or, more specifically, 'image_commit'
   set_fact:
-     dcos_version_specifier: "{{ dcos_version | default('1.13') }}"
+     dcos_version_specifier: "{{ dcos['version'] }}"
      ansible_password: '{{ hostvars[inventory_hostname].pass }}'
-
-
-- name: Windows | Create folders and sub folders for dcos_version
-  file:
-    path: /dcos/files/{{dcos_version_specifier}}
-    state: directory
-  delegate_to: localhost
-
-
-- name: Windows | Get mesos-binaries.zip to localhost
-  get_url:
-    url: "{{ url_to_mesosbin }}"
-    dest: "/dcos/files/{{ dcos_version_specifier }}/mesos-binaries.zip"
-    mode: '0440'
-  delegate_to: localhost
-
-
-- name: Windows | Initialisation windows-node (with install.ps1)
-  win_copy: src=/dcos/files/{{ item }} dest=C:\dcos\
-  with_items:
-      - "{{ dcos_version_specifier }}/mesos-binaries.zip"
+  no_log: True
 
 
 - name: Windows | Install vcredist140
@@ -31,24 +11,30 @@
     state: present
 
 
-- name: Windows | Unzip a mesos-binaries file
+- name: Windows | Create folders and subfolder for DCOS binaries
+  win_file:
+    path: C:\dcos\{{ item }}
+    state: directory
+  with_items:
+    - work
+    - images
+    - mesos-logs
+
+
+- name: Windows | Download mesos-binaries
+  win_get_url:
+    url: "{{ url_to_mesosbin }}"
+    dest: C:\dcos\mesos-binaries.zip
+
+
+- name: Windows | Unzip the mesos-binaries
   win_unzip:
     src: C:\dcos\mesos-binaries.zip
     dest: C:\dcos\mesos-binaries
     creates: C:\dcos\mesos-binaries
 
 
-- name: Windows | Create sub directories for Mesos agent
-  win_file:
-      path: C:\dcos\{{ item }}
-      state: directory
-  with_items:
-        - work
-        - images
-        - mesos-logs
-
-
-- name: Windows | Create start script
+- name: Windows | Create a Start script
   win_lineinfile:
     path: C:\dcos\start.ps1
     create: yes
