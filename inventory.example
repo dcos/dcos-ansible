@@ -42,17 +42,12 @@ dcos_legacy_node_type_name=slave_public
 agents_private
 agents_public
 
+[win_agents]
+agent1-windows.example.com
+agent2-windows.example.com
+
 [common:children]
 bootstraps
 masters
 agents
 agents_public
-
-[linux:children]
-bootstraps
-masters
-agents
-agents_public
-
-[windows:children]
-win_agents

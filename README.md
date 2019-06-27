@@ -43,15 +43,6 @@ masters
 agents
 agents_public
 
-[linux:children]
-bootstraps
-masters
-agents
-agents_public
-
-[windows:children]
-win_agents
-
 ```
 
 ## Role Variables
@@ -151,7 +142,7 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 ## Tested OS and Mesosphere DC/OS versions
 
-* CentOS 7, RHEL 7, Windows Server Core 1809
+* CentOS 7, RHEL 7,  Windows Server 1809
 * DC/OS 1.13, both open as well as enterprise version
 
 ## License
