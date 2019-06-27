@@ -53,6 +53,21 @@
         name: DCOS.agent
 
 
+- name: Wait for Windows instances to become reachable
+  hosts: win_agents
+  gather_facts: no
+  tasks:
+      - name: Windows | set password for WinRM connection
+        set_fact:
+          ansible_password: '{{ hostvars[inventory_hostname].pass }}'
+        no_log: True
+
+      - name: Windows | Wait for Windows instances to become reachable
+        wait_for_connection:
+          delay: 10
+          sleep: 10
+
+
 - name: Setup and configure AGENT nodes (Windows)
   hosts: win_agents
   gather_facts: no
