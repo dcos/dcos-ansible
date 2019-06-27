@@ -1,6 +1,6 @@
 ---
 - name: Wait for instances to become reachable
-  hosts: linux
+  hosts: all!win_agents
   gather_facts: no
   tasks:
     - name: Wait for instances to become reachable
@@ -10,7 +10,7 @@
         timeout: 120
 
 - name: Collect DC/OS versions
-  hosts: linux
+  hosts: all!win_agents
   gather_facts: no
   tasks:
     - name: Collect DC/OS versions
@@ -18,7 +18,7 @@
 
 
 - name: DC/OS Requirements
-  hosts: linux
+  hosts: all!win_agents
   gather_facts: no
   become: true
   tasks:
@@ -50,8 +50,6 @@
   tasks:
     - include_role:
         name: DCOS.agent
-      tags:
-        - linux_setup
 
 - name: Setup and configure AGENT nodes (Windows)
   hosts: win_agents
