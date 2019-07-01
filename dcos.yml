@@ -1,6 +1,6 @@
 ---
 - name: Wait for instances to become reachable
-  hosts: all!win_agents
+  hosts: all
   gather_facts: no
   tasks:
     - name: Wait for instances to become reachable
@@ -10,16 +10,13 @@
         timeout: 120
 
 - name: Collect DC/OS versions
-  hosts: all!win_agents
-  gather_facts: no
+  hosts: all!agents_windows
   tasks:
     - name: Collect DC/OS versions
       setup:
 
-
 - name: DC/OS Requirements
-  hosts: all!win_agents
-  gather_facts: no
+  hosts: all!agents_windows
   become: true
   tasks:
     - include_role:
@@ -27,14 +24,12 @@
     - include_role:
         name: DCOS.gpu
 
-
 - name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
   become: true
   tasks:
     - include_role:
         name: DCOS.bootstrap
-
 
 - name: Setup and configure MASTER nodes
   hosts: masters
@@ -44,7 +39,6 @@
     - include_role:
         name: DCOS.master
 
-
 - name: Setup and configure AGENT nodes (Linux)
   hosts: agents
   become: true
@@ -52,25 +46,8 @@
     - include_role:
         name: DCOS.agent
 
-
-- name: Wait for Windows instances to become reachable
-  hosts: win_agents
-  gather_facts: no
-  tasks:
-      - name: Windows | set password for WinRM connection
-        set_fact:
-          ansible_password: '{{ hostvars[inventory_hostname].pass }}'
-        no_log: True
-
-      - name: Windows | Wait for Windows instances to become reachable
-        wait_for_connection:
-          delay: 10
-          sleep: 10
-
-
 - name: Setup and configure AGENT nodes (Windows)
-  hosts: win_agents
-  gather_facts: no
+  hosts: agents_windows
   tasks:
     - include_role:
         name: DCOS.agent_windows

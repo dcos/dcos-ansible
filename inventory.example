@@ -42,7 +42,7 @@ dcos_legacy_node_type_name=slave_public
 agents_private
 agents_public
 
-[win_agents]
+[agents_windows]
 agent1-windows.example.com
 agent2-windows.example.com
 
