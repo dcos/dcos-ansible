@@ -33,8 +33,8 @@
   win_lineinfile:
     path: C:\dcos\start.ps1
     create: yes
-    line: C:\dcos\mesos-binaries\mesos-agent.exe --master="zk://{{zookeeper}}/mesos" --appc_store_dir=\\?\C:\dcos\images\ --work_dir=\\?\C:\dcos\work\ --runtime_dir=\\?\C:\dcos\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\dcos\mesos-binaries\ --log_dir=\\?\C:\dcos\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4)
-
+    line: C:\dcos\mesos-binaries\mesos-agent.exe --master="zk://{{zookeeper}}/mesos" --appc_store_dir=\\?\C:\dcos\images\ --work_dir=\\?\C:\dcos\work\ --runtime_dir=\\?\C:\dcos\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\dcos\mesos-binaries\ --log_dir=\\?\C:\dcos\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4) --resources='ports:[{{resources_ports}}]'
+    
 - name: Windows | Check job for mesos-agent exists
   win_scheduled_task_stat:
     name: mesos-agent
@@ -48,7 +48,7 @@
     logon_type: password
     actions:
     - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-      arguments:  -ExecutionPolicy Unrestricted -NonInteractive -File C:\dcos\start.ps1
+      arguments: -ExecutionPolicy Unrestricted -NonInteractive -File C:\dcos\start.ps1
     triggers:
     - type: boot
     restart_count: "{{ mesos_agent_restart_count }}"
