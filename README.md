@@ -10,7 +10,7 @@ To make best use of these roles, your nodes should resemble the Mesosphere recom
 * One bootstrap node ('bootstraps')
 * Zero or more agent nodes, used for public facing services ('agents_public')
 * One or more agent nodes, not used for public facing services ('agents_private')
-* Zero or more windows agent nodes ('win_agents')
+* Zero or more windows agent nodes ('agents_windows')
 ### An example inventory file is provided as shown here:
 
 ```ini
@@ -30,8 +30,9 @@ remoteagent1-dcos112s.example.com
 publicagent1-dcos112s.example.com
 
 [agents_windows]
-agent1-windows.example.com
-agent2-windows.example.com
+[agents_windows]
+agent1-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword1>
+agent2-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword2>
 
 [agents:children]
 agents_private
@@ -42,7 +43,6 @@ bootstraps
 masters
 agents
 agents_public
-
 ```
 
 ## Role Variables
@@ -69,6 +69,11 @@ dcos_legacy_node_type_name=slave
 [agents_public:vars]
 node_type=agent_public
 dcos_legacy_node_type_name=slave_public
+
+[agents_windows:vars]
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
 ```
 
 ### Global vars
