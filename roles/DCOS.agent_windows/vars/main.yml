@@ -1,7 +1,4 @@
 # DCOS params:
-dcos:
-  version: "1.13"
-
 dcos_version_specifier: "{{ dcos['version'] }}"
 zookeeper: "{{ groups['masters'] | join(':2181,') }}:2181"
 
@@ -12,4 +9,4 @@ system_user: "Administrator"
 
 # Packages location
 bucket_name: "dcos-win.s3.amazonaws.com"
-url_to_mesosbin: "http://{{ bucket_name }}/{{ dcos_version_specifier }}/mesos-binaries.zip"
+url_to_mesosbin: "http://{{ bucket_name }}/mesos-binaries.{{ dcos_version_specifier }}.zip"

@@ -29,7 +29,7 @@ remoteagent1-dcos112s.example.com
 [agents_public]
 publicagent1-dcos112s.example.com
 
-[win_agents]
+[agents_windows]
 agent1-windows.example.com
 agent2-windows.example.com
 
@@ -142,7 +142,7 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 ## Tested OS and Mesosphere DC/OS versions
 
-* CentOS 7, RHEL 7,  Windows Server 1809
+* CentOS 7, RHEL 7,  Windows Server ver. 1809 Datacenter Edition Server Core
 * DC/OS 1.13, both open as well as enterprise version
 
 ## License
