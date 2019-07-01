@@ -1,0 +1,7 @@
+- name: "Re-run setup to use custom facts"
+  setup: ~
+  listen: reload facts
+
+- name: Windows | Reboot the host
+  win_reboot:
+  listen: reboot the host

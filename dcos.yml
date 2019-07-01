@@ -10,13 +10,13 @@
         timeout: 120
 
 - name: Collect DC/OS versions
-  hosts: all
+  hosts: all!agents_windows
   tasks:
     - name: Collect DC/OS versions
       setup:
 
 - name: DC/OS Requirements
-  hosts: all
+  hosts: all!agents_windows
   become: true
   tasks:
     - include_role:
@@ -24,14 +24,14 @@
     - include_role:
         name: DCOS.gpu
 
-- name: "Setup and configure BOOTSTRAP nodes"
+- name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
   become: true
   tasks:
     - include_role:
         name: DCOS.bootstrap
 
-- name: "Setup and configure MASTER nodes"
+- name: Setup and configure MASTER nodes
   hosts: masters
   serial: 1
   become: true
@@ -39,9 +39,15 @@
     - include_role:
         name: DCOS.master
 
-- name: "Setup and configure AGENT nodes"
+- name: Setup and configure AGENT nodes (Linux)
   hosts: agents
   become: true
   tasks:
     - include_role:
         name: DCOS.agent
+
+- name: Setup and configure AGENT nodes (Windows)
+  hosts: agents_windows
+  tasks:
+    - include_role:
+        name: DCOS.agent_windows
