@@ -46,6 +46,11 @@ agents_public
 agent1-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword>
 agent2-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword>
 
+[agents_windows:vars]
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+
 [common:children]
 bootstraps
 masters
