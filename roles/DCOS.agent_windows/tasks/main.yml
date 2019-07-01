@@ -17,18 +17,11 @@
     - images
     - mesos-logs
 
-- name: Windows | Check mesos-binaries exist
-  win_stat:
-    path: C:\dcos\mesos-binaries.{{ dcos_version_specifier }}.zip
-  register:
-    zip_file_stat
-
 - name: Windows | Download mesos-binaries
   win_get_url:
     url: "{{ url_to_mesosbin }}"
     dest: C:\dcos\mesos-binaries.{{ dcos_version_specifier }}.zip
-  when:
-    zip_file_stat.stat.exists == False
+    force: no
 
 - name: Windows | Unzip the mesos-binaries
   win_unzip:
