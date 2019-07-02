@@ -3,6 +3,7 @@ dcos_version_specifier: "{{ dcos['version'] }}"
 zookeeper: "{{ groups['masters'] | join(':2181,') }}:2181"
 
 # mesos-agent specific
+resources_ports: "{{ over_resources_ports | default('10000-34000') }}"
 mesos_agent_restart_count: 100
 mesos_agent_restart_interval: "PT1M" # every 1min
 system_user: "Administrator"
