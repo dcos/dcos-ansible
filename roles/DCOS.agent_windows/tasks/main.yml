@@ -1,0 +1,69 @@
+- name: Windows | Install vcredist140
+  win_chocolatey:
+    name: vcredist140
+    state: present
+
+- name: Windows | Create folders and subfolder for DCOS binaries
+  win_file:
+    path: C:\dcos\{{ item }}
+    state: directory
+  with_items:
+    - work
+    - images
+    - mesos-logs
+
+- name: Windows | Download mesos-binaries
+  win_get_url:
+    url: "{{ url_to_mesosbin }}"
+    dest: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
+    force: no
+
+- name: Windows | Unzip the mesos-binaries
+  win_unzip:
+    src: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
+    dest: C:\dcos\mesos-binaries
+    creates: C:\dcos\mesos-binaries
+
+- name: Windows | Create a Start script
+  win_lineinfile:
+    path: C:\dcos\start.ps1
+    create: yes
+    line: C:\dcos\mesos-binaries\mesos-agent.exe --master="zk://{{zookeeper}}/mesos" --appc_store_dir=\\?\C:\dcos\images\ --work_dir=\\?\C:\dcos\work\ --runtime_dir=\\?\C:\dcos\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\dcos\mesos-binaries\ --log_dir=\\?\C:\dcos\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/local-ipv4) --resources='ports:[{{resources_ports}}]'
+
+- name: Windows | Check job for mesos-agent exists
+  win_scheduled_task_stat:
+    name: mesos-agent
+  register:
+    task_stat
+
+- name: Windows | Register job for mesos-agent
+  win_scheduled_task:
+    name: mesos-agent
+    description: mesos-agent
+    logon_type: password
+    actions:
+    - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      arguments: -ExecutionPolicy Unrestricted -NonInteractive -File C:\dcos\start.ps1
+    triggers:
+    - type: boot
+      enabled: yes
+    - type: event
+      enabled: yes
+      subscription: |
+        <QueryList>
+            <Query Id='1'>
+                <Select Path='System'>*[System[EventID=12]]</Select>
+            </Query>
+        </QueryList>
+    restart_count: "{{ mesos_agent_restart_count }}"
+    restart_interval: "{{ mesos_agent_restart_interval }}"
+    username: "{{ system_user }}"
+    password: "{{ ansible_password }}"
+    update_password: no
+    enabled: yes
+    run_level: highest
+    state: present
+  when:
+    task_stat.task_exists == False
+  notify:
+    - reboot the host
