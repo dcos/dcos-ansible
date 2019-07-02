@@ -1,8 +1,3 @@
-- name: Windows | Defining DC/OS by using 'version' or, more specifically, 'image_commit'
-  set_fact:
-     dcos_version_specifier: "{{ dcos['version'] }}"
-  no_log: True
-
 - name: Windows | Install vcredist140
   win_chocolatey:
     name: vcredist140
@@ -20,12 +15,12 @@
 - name: Windows | Download mesos-binaries
   win_get_url:
     url: "{{ url_to_mesosbin }}"
-    dest: C:\dcos\mesos-binaries.{{ dcos_version_specifier }}.zip
+    dest: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
     force: no
 
 - name: Windows | Unzip the mesos-binaries
   win_unzip:
-    src: C:\dcos\mesos-binaries.{{ dcos_version_specifier }}.zip
+    src: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
     dest: C:\dcos\mesos-binaries
     creates: C:\dcos\mesos-binaries
 
@@ -34,7 +29,7 @@
     path: C:\dcos\start.ps1
     create: yes
     line: C:\dcos\mesos-binaries\mesos-agent.exe --master="zk://{{zookeeper}}/mesos" --appc_store_dir=\\?\C:\dcos\images\ --work_dir=\\?\C:\dcos\work\ --runtime_dir=\\?\C:\dcos\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\dcos\mesos-binaries\ --log_dir=\\?\C:\dcos\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4) --resources='ports:[{{resources_ports}}]'
-    
+
 - name: Windows | Check job for mesos-agent exists
   win_scheduled_task_stat:
     name: mesos-agent

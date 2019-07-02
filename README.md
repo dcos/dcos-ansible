@@ -30,7 +30,6 @@ remoteagent1-dcos112s.example.com
 publicagent1-dcos112s.example.com
 
 [agents_windows]
-[agents_windows]
 agent1-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword1>
 agent2-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword2>
 
