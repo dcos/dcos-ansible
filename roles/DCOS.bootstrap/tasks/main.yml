@@ -38,7 +38,7 @@
 
 - name: Install pip to install python-docker
   yum:
-    name: python-pip
+    name: python2-pip
     state: present
   register: dcos_yum_pythonpip_install
   retries: 3
