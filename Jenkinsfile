@@ -115,11 +115,20 @@ pipeline {
                 // Calculate Docker image tag based on commit id.
                 env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).trim()
 
+<<<<<<< HEAD
                 // Tag and push the image we built earlier.
                 sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
                 sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
                 sh("docker push mesosphere/${IMAGE}:latest")
               }
+=======
+            // Tag and push the image we built earlier.
+            sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
+            sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
+            if (env.BRANCH_NAME == 'master') {
+              // Only overwrite latest if we're on master
+              sh("docker push mesosphere/${IMAGE}:latest")
+>>>>>>> fix Jenkinsfile
             }
           }
         }
