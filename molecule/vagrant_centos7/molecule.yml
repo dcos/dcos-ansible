@@ -47,8 +47,8 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    converge: same_version_config_update_1-12.yml
-    prepare: install_1-12_upgrade_1-12.yml
+    converge: same_version_config_update.yml
+    prepare: install_and_upgrade.yml
   config_options:
     defaults:
       hash_behaviour: merge
