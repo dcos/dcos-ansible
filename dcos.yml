@@ -10,13 +10,13 @@
         timeout: 120
 
 - name: Collect DC/OS versions
-  hosts: all!agents_windows
+  hosts: all:!agents_windows
   tasks:
     - name: Collect DC/OS versions
       setup:
 
 - name: DC/OS Requirements
-  hosts: all!agents_windows
+  hosts: all:!agents_windows
   become: true
   tasks:
     - include_role:
