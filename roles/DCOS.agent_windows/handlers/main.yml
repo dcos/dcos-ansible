@@ -1,3 +1,9 @@
 - name: Windows | Reboot the host
   win_reboot:
   listen: reboot the host
+
+- name: Windows | Restart {{ mesos_workers.windows.service_name }} service
+  win_service:
+    name: "{{ mesos_workers.windows.service_name }}"
+    state: restarted
+  listen: restart the service
