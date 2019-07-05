@@ -9,13 +9,15 @@ system_user: "Administrator"
 mesos_workers:
   windows:
     service_name: "mesos-agent"
+    attributes: "os:windows"
     homedir: "C:\\dcos"
     bindir: "C:\\dcos\\mesos-binaries"
     workdir: "C:\\dcos\\work"
     imagesdir: "C:\\dcos\\images"
     logdir: "C:\\dcos\\mesos-logs"
-    attributes: "os:windows"
     executor: "C:\\dcos\\mesos-binaries\\mesos-agent.exe"
+    executor_timeout: 10mins
+    fetcher_timeout: 10mins
 
 # Packages location
 bucket_name: "dcos-win.s3.amazonaws.com"
