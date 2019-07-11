@@ -64,9 +64,9 @@
 - name: "Upgrade: Check for CockroachDB replication status (Enterprise only)"
   shell: |
     set -o pipefail
-    /opt/mesosphere/bin/cockroach node status --ranges --certs-dir=/run/dcos/pki/cockroach --host=$(/opt/mesosphere/bin/detect_ip) --format tsv 2>/dev/null | tail -n+2 | head -n-1 | cut -f 10 | uniq
+    /opt/mesosphere/bin/dcos-check-runner check node-poststart cockroachdb_replication
   retries: 12
   delay: 10
   register: cockroachdb_result
-  until: cockroachdb_result.stdout  == '0'
+  until: cockroachdb_result.rc  == 0
   when: dcos['enterprise_dcos']
