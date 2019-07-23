@@ -36,7 +36,7 @@
   retries: 12
   delay: 15
   register: mesos_master_exhibitor_result
-  until: mesos_master_exhibitor_result.stdout  == 'serving'
+  until: mesos_master_exhibitor_result.stdout == 'serving'
   when: latest_dcos_config_setup_is_installed.rc != 0
 
 # (Almost) step 2 and 3 on upgrading procedure. Actually getting data from mesos-master requires
@@ -61,12 +61,27 @@
   changed_when: false
 
 # Step 5 on upgrading procedure
-- name: "Upgrade: Check for CockroachDB replication status (Enterprise only)"
+- name: "Upgrade: dcos-check-runner stat"
+  stat:
+    path: /opt/mesosphere/bin/dcos-check-runner
+  register: dcos_check_runner_stat
+
+- name: "Upgrade: Check for CockroachDB replication status with dcos-check-runner binary (Enterprise only)"
   shell: |
     set -o pipefail
     /opt/mesosphere/bin/dcos-check-runner check node-poststart cockroachdb_replication
   retries: 12
   delay: 10
   register: cockroachdb_result
-  until: cockroachdb_result.rc  == 0
-  when: dcos['enterprise_dcos']
+  until: cockroachdb_result.rc == 0
+  when: dcos['enterprise_dcos'] and dcos_check_runner_stat.stat.exists
+
+- name: "Upgrade: Check for CockroachDB replication status with cockroach binary (Enterprise only)"
+  shell: |
+    set -o pipefail
+    /opt/mesosphere/bin/cockroach node status --ranges --certs-dir=/run/dcos/pki/cockroach --host=$(/opt/mesosphere/bin/detect_ip) --format tsv 2>/dev/null | tail -n+2 | head -n-1 | cut -f 10 | uniq
+  retries: 12
+  delay: 10
+  register: cockroachdb_result
+  until: cockroachdb_result.stdout == '0'
+  when: dcos['enterprise_dcos'] and not dcos_check_runner_stat.stat.exists
