@@ -1,3 +1,4 @@
+dcos_timesync: True
 dcos_docker_pkg_name: docker-ce-18.09.2
 dcos_prereq_packages:
   - tar

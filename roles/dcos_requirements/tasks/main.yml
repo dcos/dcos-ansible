@@ -23,6 +23,67 @@
     enabled: false
   when: "'dnsmasq.service' in ansible_facts.services"
 
+- name: Check for time sync guard file
+  stat:
+    path: /run/time_sync_done
+    get_md5: no
+    get_checksum: no
+  register: time_sync_done_file
+
+- block:
+  - name: Check time sync
+    shell: |
+      chronyc tracking | awk '/Leap status/ {print $4}' | grep -qv "Not synchronised"
+    register: chronyc_time_sync
+    changed_when: false
+    when: "'chronyd.service' in ansible_facts.services"
+
+  - name: "Sync time with chronyc"
+    shell: "chronyc -a 'burst 4/4' && sleep 5 && chronyc -a makestep"
+    when: "'chronyd.service' in ansible_facts.services and (chronyc_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+    register: time_sync_done
+  rescue:
+    - name: Output
+      fail:
+        msg: >
+          ABORT! Could not timesync with chronyc'.
+          Please make sure that the setup of chronyd is correct!
+
+- block:
+  - name: Check time sync
+    shell: |
+      ntpstat | grep -qv 'unsynchronised'
+    register: ntp_time_sync
+    changed_when: false
+    when: "'ntpd.service' in ansible_facts.services"
+
+  - name: Stop service ntpd
+    service:
+      name: ntpd
+      state: stopped
+    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+
+  - name: "Sync time with ntpd"
+    shell: "ntpd -gq"
+    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+    register: time_sync_done
+
+  - name: Start service ntpd
+    service:
+      name: ntpd
+      state: started
+    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+  rescue:
+    - name: Output
+      fail:
+        msg: >
+          ABORT! Could not timesync with ntpd'.
+          Please make sure that the setup of ntpd is correct!
+
+- name: Time sync guard file
+  shell: touch /run/time_sync_done
+  when: not time_sync_done_file.stat.exists
+
 - name: Check if docker is already installed
   yum:
     list:

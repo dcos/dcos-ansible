@@ -1,3 +1,4 @@
+dcos_timesync: True
 dcos_docker_pkg_name: podman-docker
 dcos_docker_service_name: podman
 dcos_prereq_packages:
