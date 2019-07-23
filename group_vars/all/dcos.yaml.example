@@ -1,15 +1,14 @@
 ---
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/1.12.0/dcos_generate_config.sh"
-  version: "1.12.0"
-  # image_commit: "acc9fe548aea5b1b5b5858a4b9d2c96e07eeb9de"
+  download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
+  version: "1.13.2"
   enterprise_dcos: false
 
   selinux_mode: permissive
 
   config:
     # This is a direct yaml representation of the DC/OS config.yaml
-    # Please see https://docs.mesosphere.com/1.12/installing/production/advanced-configuration/configuration-reference/
+    # Please see https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/
     # for parameter reference.
     cluster_name: "examplecluster"
     security: strict
