@@ -74,6 +74,38 @@
 - name: Create install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
+- name: Create bootstrap CA directory
+  file: path={{ download_path }}/genconf/ca state=directory mode=0700
+
+- name: "Generate PSK for exhibitor bootstrap"
+  shell: cat /dev/urandom | tr -dc 'a-z' | fold -w 16 | head -n1
+  register: random_psk_result
+  when: dcos.enterprise_dcos
+
+- name: "PSK contents"
+  shell: cat "{{ download_path }}/genconf/ca/psk"
+  register: psk_contents_result
+  when: dcos.enterprise_dcos
+
+- name: Write CA service PSK
+  copy:
+    dest: "{{ download_path }}/genconf/ca/psk"
+    mode: 0600
+    content: "{{ random_psk_result.stdout }}"
+  when: dcos.enterprise_dcos and psk_contents_result.rc != 0
+
+- name: Register host variable from disk
+  add_host:
+    name: "psk_dummy_host"
+    dcoscertstrap_psk: "{{ psk_contents_result.stdout }}"
+  when: dcos.enterprise_dcos and psk_contents_result.rc == 0
+
+- name: Register variable from urandom
+  add_host:
+    name: "psk_dummy_host"
+    dcoscertstrap_psk: "{{ psk_result.stdout }}"
+  when: dcos.enterprise_dcos and psk_contents_result.rc != 0
+
 #  vvv DOWNLOAD vvv
 
 - name: Download installation file
