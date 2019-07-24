@@ -3,5 +3,6 @@ inventory
 roles/*/molecule/*/.molecule/
 roles/*/molecule/*/.pytest_cache/
 molecule/**/__pycache__/
+releases
 **.pyc
 .vscode/

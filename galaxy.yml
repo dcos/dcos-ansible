@@ -1,0 +1,16 @@
+---
+namespace: dcos
+name: dcos_ansible
+version: 0.54.0
+readme: README.md
+license:
+  - Apache-2.0
+tags:
+  - dcos
+  - mesosphere
+  - cloud
+  - cluster
+  - kubernetes
+repository: "https://github.com/dcos/dcos-ansible"
+homepage: "https://dcos.io"
+issues: "https://github.com/dcos/dcos-ansible/issues"
