@@ -2,7 +2,6 @@
 dependencies: []
 
 galaxy_info:
-  role_name: DCOS.gpu
   author: dcos
   description: Add GPU support for RedHat/CentOS agents. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
   company: "Mesosphere"

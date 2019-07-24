@@ -2,7 +2,6 @@
 dependencies: []
 
 galaxy_info:
-  role_name: DCOS.bootstrap
   author: dcos
   description: Life cycle management of a Mesosphere DC/OS bootstrap node. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
   company: "Mesosphere"

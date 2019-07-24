@@ -20,16 +20,16 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.requirements
+        name: dcos_requirements
     - include_role:
-        name: DCOS.gpu
+        name: dcos_gpu
 
 - name: "Setup and configure BOOTSTRAP nodes"
   hosts: bootstraps
   become: true
   tasks:
     - include_role:
-        name: DCOS.bootstrap
+        name: dcos_bootstrap
 
 - name: "Setup and configure MASTER nodes"
   hosts: masters
@@ -37,11 +37,11 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.master
+        name: dcos_master
 
 - name: "Setup and configure AGENT nodes"
   hosts: agents
   become: true
   tasks:
     - include_role:
-        name: DCOS.agent
+        name: dcos_agent
