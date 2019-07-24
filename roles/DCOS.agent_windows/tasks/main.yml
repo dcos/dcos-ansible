@@ -4,6 +4,11 @@
     state: present
   notify: reboot the host
 
+- name: Windows | Install jdk8
+  win_chocolatey:
+    name: jdk8
+    state: present
+
 - name: Windows | Install nssm
   win_chocolatey:
     name: nssm
