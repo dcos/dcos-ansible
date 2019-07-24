@@ -2,9 +2,9 @@
 dependencies: []
 
 galaxy_info:
-  role_name: DCOS.bootstrap
+  role_name: dcos_gpu
   author: dcos
-  description: Life cycle management of a Mesosphere DC/OS bootstrap node. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
+  description: Add GPU support for RedHat/CentOS agents. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
   company: "Mesosphere"
   license: "Apache 2.0"
   min_ansible_version: 2.5

@@ -8,7 +8,7 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.bootstrap
+        name: dcos_bootstrap
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
@@ -25,7 +25,7 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.master
+        name: dcos_master
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
@@ -41,7 +41,7 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.agent
+        name: dcos_agent
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"

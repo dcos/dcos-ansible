@@ -1,8 +1,26 @@
 ---
 namespace: dcos
-name: dcos_ansible
+name: dcos_ansible_test
 version: 0.54.0
 readme: README.md
+authors:
+  - jrx
+  - rimusz
+  - fatz
+  - sebbrandt87
+  - bernadinm
+  - geekbass
+  - yankcrime
+  - victhar
+  - sbaier1
+  - muconsulting
+  - matt2000
+  - linben
+  - keith-mcclellan
+  - driabich
+  - aayvazyan
+  - The-Loeki
+  - MrMarvin
 license:
   - Apache-2.0
 tags:

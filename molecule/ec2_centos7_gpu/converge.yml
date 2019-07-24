@@ -4,10 +4,10 @@
   become: true
   tasks:
     - include_role:
-        name: DCOS.requirements
+        name: dcos_requirements
 - name: DC/OS Requirements
   hosts: agents
   become: true
   tasks:
     - include_role:
-        name: DCOS.gpu
+        name: dcos_gpu
