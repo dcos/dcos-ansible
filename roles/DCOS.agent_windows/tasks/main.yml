@@ -2,6 +2,17 @@
   win_chocolatey:
     name: vcredist140
     state: present
+  notify: reboot the host
+
+- name: Windows | Install nssm
+  win_chocolatey:
+    name: nssm
+    state: present
+
+- name: Windows | configure the DNS client with Masters
+  win_dns_client:
+    adapter_names: '*'
+    ipv4_addresses: "{{ groups['masters'] }}"
 
 - name: Windows | Create folders and subfolder for DCOS binaries
   win_file:
@@ -24,35 +35,15 @@
     dest: C:\dcos\mesos-binaries
     creates: C:\dcos\mesos-binaries
 
-- name: Windows | Create a Start script
-  win_lineinfile:
-    path: C:\dcos\start.ps1
-    create: yes
-    line: C:\dcos\mesos-binaries\mesos-agent.exe --master="zk://{{zookeeper}}/mesos" --appc_store_dir=\\?\C:\dcos\images\ --work_dir=\\?\C:\dcos\work\ --runtime_dir=\\?\C:\dcos\work\ --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --launcher_dir=\\?\C:\dcos\mesos-binaries\ --log_dir=\\?\C:\dcos\mesos-logs\ --attributes="os:windows" --ip={{inventory_hostname}} --hostname=$(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/public-ipv4) --resources='ports:[{{resources_ports}}]'
+- name: Windows | Install Mesos Agent service
+  win_nssm:
+    name: "{{ mesos_workers.windows.service_name }}"
+    application: "{{ mesos_workers.windows.executor }}"
+    app_parameters_free_form: --master="zk://{{ zookeeper }}/mesos" --launcher_dir="{{ mesos_workers.windows.bindir }}" --log_dir="{{ mesos_workers.windows.logdir }}" --appc_store_dir="{{ mesos_workers.windows.imagesdir }}" --work_dir="{{ mesos_workers.windows.workdir }}" --runtime_dir="{{ mesos_workers.windows.workdir }}" --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --attributes="{{ mesos_workers.windows.attributes }}" --ip={{ inventory_hostname }} --hostname={{ inventory_hostname }} --resources="ports:[{{ resources_ports }}]" --executor_registration_timeout={{ mesos_workers.windows.executor_timeout }} --fetcher_stall_timeout={{ mesos_workers.windows.fetcher_timeout }}
 
-- name: Windows | Check job for mesos-agent exists
-  win_scheduled_task_stat:
-    name: mesos-agent
-  register:
-    task_stat
-
-- name: Windows | Register job for mesos-agent
-  win_scheduled_task:
-    name: mesos-agent
-    description: mesos-agent
-    logon_type: password
-    actions:
-    - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-      arguments: -ExecutionPolicy Unrestricted -NonInteractive -File C:\dcos\start.ps1
-    triggers:
-    - type: boot
-    restart_count: "{{ mesos_agent_restart_count }}"
-    restart_interval: "{{ mesos_agent_restart_interval }}"
-    username: "{{ system_user }}"
-    password: "{{ ansible_password }}"
-    run_level: highest
-    state: present
-  when:
-    task_stat.task_exists == False
-  notify:
-    - reboot the host
+- name: Windows | Set Mesos Agent dependency on Docker service
+  win_service:
+    name: "{{ mesos_workers.windows.service_name }}"
+    dependencies: [ 'docker' ]
+    start_mode: auto
+  notify: restart the service

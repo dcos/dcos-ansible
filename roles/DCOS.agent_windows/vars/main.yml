@@ -1,11 +1,23 @@
 # DCOS params:
 zookeeper: "{{ groups['masters'] | join(':2181,') }}:2181"
 
-# mesos-agent specific
+# mesos-agent
 resources_ports: "{{ over_resources_ports | default('10000-34000') }}"
-mesos_agent_restart_count: 100
-mesos_agent_restart_interval: "PT1M" # every 1min
 system_user: "Administrator"
+
+# specific for service run
+mesos_workers:
+  windows:
+    service_name: "mesos-agent"
+    attributes: "os:windows"
+    homedir: "C:\\dcos"
+    bindir: "C:\\dcos\\mesos-binaries"
+    workdir: "C:\\dcos\\work"
+    imagesdir: "C:\\dcos\\images"
+    logdir: "C:\\dcos\\mesos-logs"
+    executor: "C:\\dcos\\mesos-binaries\\mesos-agent.exe"
+    executor_timeout: 10mins
+    fetcher_timeout: 10mins
 
 # Packages location
 bucket_name: "dcos-win.s3.amazonaws.com"
