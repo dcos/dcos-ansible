@@ -13,10 +13,9 @@
         name: DCOS.bootstrap
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/testing/1.12/commit/3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623/dcos_generate_config.sh"
-      version: "1.12.0"
-      version_to_upgrade_from: "1.12.0"
-      image_commit: "3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623"
+      download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
+      version: "1.13.2"
+      version_to_upgrade_from: "1.13.2"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -31,10 +30,9 @@
         name: DCOS.master
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/testing/1.12/commit/3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623/dcos_generate_config.sh"
-      version: "1.12.0"
-      version_to_upgrade_from: "1.12.0"
-      image_commit: "3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623"
+      download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
+      version: "1.13.2"
+      version_to_upgrade_from: "1.13.2"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -48,10 +46,9 @@
         name: DCOS.agent
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/testing/1.12/commit/3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623/dcos_generate_config.sh"
-      version: "1.12.0"
-      version_to_upgrade_from: "1.12.0"
-      image_commit: "3b8b3837cd12bdbc0853e5cd9e0d635b8ba83623"
+      download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
+      version: "1.13.2"
+      version_to_upgrade_from: "1.13.2"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]

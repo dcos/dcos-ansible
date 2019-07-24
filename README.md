@@ -79,8 +79,8 @@ ansible_winrm_server_cert_validation=ignore
 
 ```yml
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/1.13.1/dcos_generate_config.sh"
-  version: "1.13.1"
+  download: "https://downloads.dcos.io/dcos/stable/1.13.2/dcos_generate_config.sh"
+  version: "1.13.2"
   enterprise_dcos: false
   selinux_mode: enforcing
 

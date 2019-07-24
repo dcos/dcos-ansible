@@ -27,7 +27,7 @@ CentOS current stable plus its EL variant (as per [Mesosphere version policy](ht
 
 ### iii. DC/OS version
 
-Following the [Mesosphere version policy](https://docs.mesosphere.com/version-policy/): 1.12, 1.11, 1.10 currently. Depending on release cycles, also the current beta version.
+Following the [Mesosphere version policy](https://docs.mesosphere.com/version-policy/): 1.13, 1.12, 1.11 currently. Depending on release cycles, also the current beta version.
 
 ### iv. DC/OS live cycle
 
