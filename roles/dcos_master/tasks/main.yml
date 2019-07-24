@@ -21,8 +21,9 @@
   copy:
     dest: "/root/.dcoscertstrap_psk"
     mode: 0600
-    content: "{{ hostvars['psk_dummy_host']['dcoscertstrap_psk'] }}"
-  when: dcos.enterprise_dcos and (hostvars['psk_dummy_host']['dcoscertstrap_psk'] is defined)
+    # content: "{{ hostvars['psk_dummy_host']['dcoscertstrap_psk'] }}"
+    content: "{{ delegated_psk }}"
+  when: dcos.enterprise_dcos and (delegated_psk is defined)
 
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
