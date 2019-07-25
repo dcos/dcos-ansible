@@ -3,7 +3,7 @@ dependencies: []
 
 galaxy_info:
   author: dcos
-  description: Life cycle management of a Mesosphere DC/OS agent node. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
+  description: Lifecycle management of a Mesosphere DC/OS agent node. Part of a set of Ansible roles that manage DC/OS on RedHat/CentOS Linux.
   company: "Mesosphere"
   license: "Apache 2.0"
   min_ansible_version: 2.5

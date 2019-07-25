@@ -10,6 +10,9 @@ pipeline {
     // Get credentials for publishing to Docker hub.
     DOCKER = credentials('docker-hub-credentials')
   }
+  options {
+    disableConcurrentBuilds()
+  }
 
   stages {
     stage("Verify author") {
@@ -40,63 +43,81 @@ pipeline {
           agent {
             label "py36"
           }
-            steps {
+          steps {
+            retry(3) {
+              sh("pip install -r test_requirements.txt")
+            }
+            sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+            // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+              ]) {
               retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
-              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                ]) {
-                retry(3) {
-                  timeout(time: 60, unit: 'MINUTES') {
-                    sh("molecule test --scenario-name ec2_centos7")
-                  }
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_centos7")
                 }
               }
             }
+          }
         }
         stage('molecule test (ec2_rhel7)') {
           agent {
             label "py36"
           }
-            steps {
+          steps {
+            retry(3) {
+              sh("pip install -r test_requirements.txt")
+            }
+            sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+            // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+              ]) {
               retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
-              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                ]) {
-                retry(3) {
-                  timeout(time: 60, unit: 'MINUTES') {
-                    sh("molecule test --scenario-name ec2_rhel7")
-                  }
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_rhel7")
                 }
               }
             }
+          }
         }
       }
     }
 
-    stage('docker bundle build and publish') {
-      when { branch 'master'; }
-      agent {
-        label "mesos"
-      }
-      steps {
-        // Login to the Docker registry.
-        retry(3) {
-          sh("docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}")
-          sh("docker build -t mesosphere/${IMAGE}:latest .")
-          script {
-            // Calculate Docker image tag based on commit id.
-            env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).trim()
+    stage('publish') {
+      parallel {
+        stage('galaxy.ansible.com') {
+          when {
+            branch 'master'
+          }
+          agent {
+            label "py36"
+          }
+          steps {
+            sh("mazer build")
+            // sh("mazer publish --api-key=${GALAXY_API_KEY} ./releases")
+          }
+        }
+        stage('hub.docker.com') {
+          when {
+            branch 'master'
+          }
+          agent {
+            label "mesos"
+          }
+          steps {
+            // Login to the Docker registry.
+            retry(3) {
+              sh("docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}")
+              sh("docker build -t mesosphere/${IMAGE}:latest .")
+              script {
+                // Calculate Docker image tag based on commit id.
+                env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).trim()
 
-            // Tag and push the image we built earlier.
-            sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
-            sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
-            sh("docker push mesosphere/${IMAGE}:latest")
+                // Tag and push the image we built earlier.
+                sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
+                sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
+                sh("docker push mesosphere/${IMAGE}:latest")
+              }
+            }
           }
         }
       }
