@@ -16,9 +16,16 @@
     mode: 0740
     force: yes
 
-- name: "Upgrade: Run DC/OS agent upgrade"
-  shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }} | systemd-cat -t dcos-upgrade"
-  args:
-    chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
-    executable: "/usr/bin/bash"
+- name: "DC/OS Upgrade"
   when: latest_dcos_config_setup_is_installed.rc != 0
+  block:
+    - name: "Upgrade: Run DC/OS agent upgrade"
+      shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }}"
+      args:
+        chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+        executable: "/usr/bin/bash"
+  always:
+    - name: "Upgrade: Output log into journald"
+      shell: "systemd-cat -t dcos-upgrade"
+      args:
+        stdin: upgrade_shell_result.stdout

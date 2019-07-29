@@ -10,8 +10,16 @@
     dest: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/"
     mode: 0740
 
-- name: "Installation: Run DC/OS master installation"
-  shell: "set -o pipefail; bash {{ path_base_tmp }}/{{ dcos_version_specifier }}/dcos_install.sh master | systemd-cat -t dcos-install"
-  args:
-    executable: "/usr/bin/bash"
+- name: "DC/OS Installation"
   when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  block:
+    - name: "Installation: Run DC/OS master installation"
+      shell: "set -o pipefail; bash {{ path_base_tmp }}/{{ dcos_version_specifier }}/dcos_install.sh master"
+      register: install_shell_result
+      args:
+        executable: "/usr/bin/bash"
+  always:
+    - name: "Installation: Output log into journald"
+      shell: "systemd-cat -t dcos-install"
+      args:
+        stdin: install_shell_result.stdout
