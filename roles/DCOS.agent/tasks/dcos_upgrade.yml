@@ -26,6 +26,6 @@
         executable: "/usr/bin/bash"
   always:
     - name: "Upgrade: Output log into journald"
-      shell: "systemd-cat -t dcos-upgrade"
+      command: "systemd-cat -t dcos-upgrade"
       args:
         stdin: upgrade_shell_result.stdout

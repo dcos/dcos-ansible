@@ -19,6 +19,6 @@
         executable: "/usr/bin/bash"
   always:
     - name: "Installation: Output log into journald"
-      shell: "systemd-cat -t dcos-install"
+      command: "systemd-cat -t dcos-install"
       args:
         stdin: install_shell_result.stdout
