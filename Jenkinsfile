@@ -91,9 +91,12 @@ pipeline {
           agent {
             label "py36"
           }
+          environment {
+            GALAXY_API_KEY = credentials('dcos-sre-robot-galaxy-ansible-api-token')
+          }
           steps {
-            sh("mazer build")
-            // sh("mazer publish --api-key=${GALAXY_API_KEY} ./releases")
+            sh("if [ -f ./galaxy.yml ]; then mazer build; fi")
+            // sh("for i in ./releases/*; do mazer publish --api-key=${GALAXY_API_KEY} \${i}; done")
           }
         }
         stage('hub.docker.com') {
