@@ -16,12 +16,20 @@
     mode: 0740
     force: yes
 
-- name: "Upgrade: Run DC/OS master upgrade"
-  shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }} | systemd-cat -t dcos-upgrade"
-  args:
-    chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
-    executable: "/usr/bin/bash"
+- name: "DC/OS Upgrade"
   when: latest_dcos_config_setup_is_installed.rc != 0
+  block:
+    - name: "Upgrade: Run DC/OS master upgrade"
+      shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }}"
+      register: upgrade_shell_result
+      args:
+        chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+        executable: "/usr/bin/bash"
+  always:
+    - name: "Upgrade: Output log into journald"
+      command: "systemd-cat -t dcos-upgrade"
+      args:
+        stdin: upgrade_shell_result.stdout
 
 # TODO: The below checks should be managed from within the DC/OS installer.
 # Check procedure: https://docs.mesosphere.com/1.11/installing/production/upgrading/#dcos-masters
