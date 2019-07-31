@@ -1,10 +1,41 @@
 # DC/OS System Requirements as of https://docs.mesosphere.com/1.11/installing/production/system-requirements/
+- name: "Finding the provider / environment running on (AWS, GCP, AzureRM or, if nothing detected, on premise)"
+  # AWS 4th gen or earlier, Xen based types:
+  #   looking at `product_version` or `bios_verion`.
+  # AWS 5th gen HVM based instance types:
+  #   looking at `system_vendor`.
+  set_fact:
+    dcos_environment: >-
+        {{
+          (
+            ('amazon' in ansible_product_version) or
+            ('amazon' in ansible_bios_version) or
+            ('EC2' in ansible_system_vendor)
+          ) | ternary('ec2', (('Google' in ansible_system_vendor) | ternary('gcp', (('Microsoft Corporation' in ansible_system_vendor) | ternary('azurerm', 'onprem')))))
+        }}
+  changed_when: false
+
 - name: "Gather OS specific variables"
   include_vars: "{{ item }}"
   with_first_found:
     - "vars/{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
     - "vars/generic.yml"
   tags: vars
+
+- name: "Choosing the time sync package which should be present"
+  set_fact:
+    time_sync_package: "{{ ('onprem' in dcos_environment) | ternary(onprem_time_sync_package, cloud_time_sync_package) }}"
+  changed_when: false
+
+- name: "{{ time_sync_package }} installed"
+  yum:
+    name: "{{ time_sync_package }}"
+    update_cache: true
+    state: present
+  register: time_sync_package_install
+  until: time_sync_package_install is success
+  retries: 3
+  delay: 60
 
 - name: "Populate service facts"
   service_facts: {}
@@ -23,25 +54,18 @@
     enabled: false
   when: "'dnsmasq.service' in ansible_facts.services"
 
-- name: Check for time sync guard file
-  stat:
-    path: /run/time_sync_done
-    get_md5: no
-    get_checksum: no
-  register: time_sync_done_file
-
 - block:
-  - name: Check time sync
+  - name: Check time sync (chrony)
     shell: |
       chronyc tracking | awk '/Leap status/ {print $4}' | grep -qv "Not synchronised"
     register: chronyc_time_sync
     changed_when: false
-    when: "'chronyd.service' in ansible_facts.services"
+    when: "'chronyd.service' in ansible_facts.services and ('dcos-mesos-master.service' not in ansible_facts.services or 'dcos-mesos-slave.service' not in ansible_facts.services) and time_sync_package == 'chrony' and dcos_timesync"
 
   - name: "Sync time with chronyc"
     shell: "chronyc -a 'burst 4/4' && sleep 5 && chronyc -a makestep"
-    when: "'chronyd.service' in ansible_facts.services and (chronyc_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
-    register: time_sync_done
+    when: "chronyc_time_sync is defined and chronyc_time_sync.rc is defined and chronyc_time_sync.rc == 1"
+    register: time_sync_done_chronyc
   rescue:
     - name: Output
       fail:
@@ -50,39 +74,35 @@
           Please make sure that the setup of chronyd is correct!
 
 - block:
-  - name: Check time sync
+  - name: Check time sync (ntp)
     shell: |
       ntpstat | grep -qv 'unsynchronised'
     register: ntp_time_sync
     changed_when: false
-    when: "'ntpd.service' in ansible_facts.services"
+    when: "'ntpd.service' in ansible_facts.services and ('dcos-mesos-master.service' not in ansible_facts.services or 'dcos-mesos-slave.service' not in ansible_facts.services) and time_sync_package == 'ntp' and dcos_timesync"
 
   - name: Stop service ntpd
     service:
       name: ntpd
       state: stopped
-    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+    when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
 
   - name: "Sync time with ntpd"
     shell: "ntpd -gq"
-    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
-    register: time_sync_done
+    when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
+    register: time_sync_done_ntpd
 
   - name: Start service ntpd
     service:
       name: ntpd
       state: started
-    when: "'ntpd.service' in ansible_facts.services and (ntp_time_sync.rc == 1 or not time_sync_done_file.stat.exists) and dcos_timesync"
+    when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
   rescue:
     - name: Output
       fail:
         msg: >
           ABORT! Could not timesync with ntpd'.
           Please make sure that the setup of ntpd is correct!
-
-- name: Time sync guard file
-  shell: touch /run/time_sync_done
-  when: not time_sync_done_file.stat.exists
 
 - name: Check if docker is already installed
   yum:

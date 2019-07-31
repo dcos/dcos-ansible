@@ -1,4 +1,6 @@
 dcos_timesync: True
+cloud_time_sync_package: chrony
+onprem_time_sync_package: ntp
 dcos_docker_pkg_name: docker
 dcos_prereq_packages:
   - tar

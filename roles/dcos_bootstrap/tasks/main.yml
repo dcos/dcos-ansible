@@ -4,21 +4,6 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
-- name: "Finding the provider / environment running on (AWS or, if nothing detected, on premise)"
-  # 4th gen or earlier, Xen based types:
-  #   looking at `product_version` or `bios_verion`.
-  # 5th gen HVM based instance types:
-  #   looking at `system_vendor`.
-  set_fact:
-    dcos_environment: >-
-        {{
-        (('amazon' in ansible_product_version) or
-        ('amazon' in ansible_bios_version) or
-        ('EC2' in ansible_system_vendor))
-        | ternary('ec2', 'onprem')
-        }}
-  changed_when: false
-
 - name: Double check the prefix/cluster name and version
   pause:
     prompt: |
@@ -70,7 +55,7 @@
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
-- name: Ceate install directory/genconf
+- name: Create install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
 #  vvv DOWNLOAD vvv
