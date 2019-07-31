@@ -13,6 +13,6 @@ def test_docker_running_and_enabled(host):
 def test_docker_serves_bootstrap_files(host):
     # TODO: get nodes config in here somehow and make uri dynamic
     cmd = host.run(
-        "curl -I http://localhost:8080/1.13.2/genconf/serve/bootstrap.latest")
+        "curl -I http://localhost:8080/1.13.3/genconf/serve/bootstrap.latest")
     assert cmd.rc == 0
     assert '200 OK' in cmd.stdout
