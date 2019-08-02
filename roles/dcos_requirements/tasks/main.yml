@@ -13,7 +13,6 @@
             ('EC2' in ansible_system_vendor)
           ) | ternary('ec2', (('Google' in ansible_system_vendor) | ternary('gcp', (('Microsoft Corporation' in ansible_system_vendor) | ternary('azurerm', 'onprem')))))
         }}
-    cacheable: yes
   changed_when: false
 
 - name: "Gather OS specific variables"
