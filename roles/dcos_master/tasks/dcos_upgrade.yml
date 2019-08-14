@@ -1,0 +1,95 @@
+- name: "Upgrade: Purge old directory"
+  file:
+    path: "{{ path_base_tmp }}/"
+    state: absent
+
+- name: "Upgrade: Create download directory"
+  file:
+    path: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+    state: directory
+    mode: 0755
+
+- name: "Upgrade: Download dcos_node_upgrade.sh"
+  get_url:
+    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/latest/dcos_node_upgrade.sh"
+    dest: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/dcos_node_upgrade.sh"
+    mode: 0740
+    force: yes
+
+- name: "DC/OS Upgrade"
+  when: latest_dcos_config_setup_is_installed.rc != 0
+  block:
+    - name: "Upgrade: Run DC/OS master upgrade"
+      shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }}"
+      register: upgrade_shell_result
+      args:
+        chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
+        executable: "/usr/bin/bash"
+  always:
+    - name: "Upgrade: Output log into journald"
+      command: "systemd-cat -t dcos-upgrade"
+      args:
+        stdin: upgrade_shell_result.stdout
+
+# TODO: The below checks should be managed from within the DC/OS installer.
+# Check procedure: https://docs.mesosphere.com/1.11/installing/production/upgrading/#dcos-masters
+
+# Step 1 on upgrading prcedure
+- name: "Upgrade: Check for all-green Exhibitor status"
+  shell: |
+    set -o pipefail
+    curl --silent http://localhost:8181/exhibitor/v1/cluster/status | jq -r '.[].description' | uniq
+  args:
+    warn: false # Curl inside shell is what we need, silence warning.
+  retries: 12
+  delay: 15
+  register: mesos_master_exhibitor_result
+  until: mesos_master_exhibitor_result.stdout == 'serving'
+  when: latest_dcos_config_setup_is_installed.rc != 0
+
+# (Almost) step 2 and 3 on upgrading procedure. Actually getting data from mesos-master requires
+# a valid JWT in strict mode, so for simplicity only checking the two conditions below.
+- name: "Upgrade: Wait for mesos-master - detect local IPv4 address"
+  command: /opt/mesosphere/bin/detect_ip
+  register: dcos_command_detect_ip
+  changed_when: false
+- name: "Upgrade: Wait for mesos-master tcp/5050 to be listening"
+  wait_for:
+    host: "{{ dcos_command_detect_ip.stdout }}"
+    port: 5050
+    delay: 10
+- name: "Upgrade: Check for mesos-master systemd unit to be 'running'"
+  shell: |
+    set -o pipefail
+    systemctl status dcos-mesos-master | grep '(running)'
+  args:
+    warn: false # We are not interested in changing the state itself, just if it's 'running'
+  retries: 12
+  delay: 10
+  changed_when: false
+
+# Step 5 on upgrading procedure
+- name: "Upgrade: dcos-check-runner stat"
+  stat:
+    path: /opt/mesosphere/bin/dcos-check-runner
+  register: dcos_check_runner_stat
+
+- name: "Upgrade: Check for CockroachDB replication status with dcos-check-runner binary (Enterprise only)"
+  shell: |
+    set -o pipefail
+    /opt/mesosphere/bin/dcos-check-runner check node-poststart cockroachdb_replication
+  retries: 12
+  delay: 10
+  register: cockroachdb_result
+  until: cockroachdb_result.rc == 0
+  when: dcos['enterprise_dcos'] and dcos_check_runner_stat.stat.exists
+
+- name: "Upgrade: Check for CockroachDB replication status with cockroach binary (Enterprise only)"
+  shell: |
+    set -o pipefail
+    /opt/mesosphere/bin/cockroach node status --ranges --certs-dir=/run/dcos/pki/cockroach --host=$(/opt/mesosphere/bin/detect_ip) --format tsv 2>/dev/null | tail -n+2 | head -n-1 | cut -f 10 | uniq
+  retries: 12
+  delay: 10
+  register: cockroachdb_result
+  until: cockroachdb_result.stdout == '0'
+  when: dcos['enterprise_dcos'] and not dcos_check_runner_stat.stat.exists

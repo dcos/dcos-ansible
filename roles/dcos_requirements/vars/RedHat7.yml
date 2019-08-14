@@ -1,0 +1,13 @@
+dcos_timesync: True
+cloud_time_sync_package: chrony
+onprem_time_sync_package: ntp
+dcos_docker_pkg_name: docker
+dcos_prereq_packages:
+  - tar
+  - xz
+  - unzip
+  - curl
+  - ipset
+  - net-tools # `ifconfig` has been a non documented requirement for 1.12.0,
+  #             fixed with https://github.com/dcos/dcos/pull/3734
+  - jq # not technically required by DC/OS but by this Ansible role for checks

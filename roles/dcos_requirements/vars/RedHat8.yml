@@ -1,0 +1,12 @@
+dcos_timesync: True
+cloud_time_sync_package: chrony
+onprem_time_sync_package: ntp
+dcos_docker_pkg_name: podman-docker
+dcos_docker_service_name: podman
+dcos_prereq_packages:
+  - tar
+  - xz
+  - unzip
+  - curl
+  - ipset
+  - jq # not technically required by DC/OS but by this Ansible role for checks
