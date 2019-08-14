@@ -47,3 +47,29 @@
     dependencies: [ 'docker' ]
     start_mode: auto
   notify: restart the service
+
+- name: Set an environment variable for all users
+  win_environment:
+    state: present
+    name: DCOS_VERSION
+    value: "{{ dcos['version'] }}"
+    level: machine
+
+- name: Windows | Download dcos-diagnostics
+  win_get_url:
+    url: "{{ url_to_diagnostics }}"
+    dest: C:\dcos\dcos-diagnostics.zip
+    force: no
+
+- name: Windows | Unzip the dcos-diagnostics
+  win_unzip:
+    src: C:\dcos\dcos-diagnostics.zip
+    dest: C:\dcos\
+
+- name: Windows | Install Diagnostic Service
+  win_nssm:
+    name: "{{ mesos_workers.windows.diagnostics_service_name }}"
+    application: "{{ mesos_workers.windows.diagnostics_executor }}"
+    app_parameters_free_form: --config "{{ mesos_workers.windows.diagnostics_config }}" --role agent daemon
+  notify: restart dcos-diagnostics service
+
