@@ -56,8 +56,8 @@
     level: machine
 
 
-- name: Check that the somefile.conf exists
-  stat:
+- name: Check that dcos-diagnostics.exe exists
+  win_stat:
     path: C:\dcos\dcos-diagnostics.exe
   register: stat_result
 
