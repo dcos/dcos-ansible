@@ -79,4 +79,3 @@
     application: "{{ mesos_workers.windows.diagnostics_executor }}"
     app_parameters_free_form: --config "{{ mesos_workers.windows.diagnostics_config }}" --role agent daemon
   notify: restart dcos-diagnostics service
-
