@@ -7,3 +7,9 @@
     name: "{{ mesos_workers.windows.service_name }}"
     state: restarted
   listen: restart the service
+
+- name: Windows | Restart {{ mesos_workers.windows.diagnostics_service_name }} service
+  win_service:
+    name: "{{ mesos_workers.windows.diagnostics_service_name }}"
+    state: restarted
+  listen: restart dcos-diagnostics service
