@@ -48,15 +48,14 @@
     start_mode: auto
   notify: restart the service
 
-- name: Set an environment variable for all users
+- name: Windows | Set an environment variable for all users
   win_environment:
     state: present
     name: DCOS_VERSION
     value: "{{ dcos['version'] }}"
     level: machine
 
-
-- name: Check that dcos-diagnostics.exe exists
+- name: Windows | Check that dcos-diagnostics.exe exists
   win_stat:
     path: C:\dcos\dcos-diagnostics.exe
   register: stat_result
@@ -66,13 +65,13 @@
     url: "{{ url_to_diagnostics }}"
     dest: C:\dcos\dcos-diagnostics.zip
     force: no
-  when: stat_result.stat.exists == False 
+  when: not stat_result.stat.exists
 
 - name: Windows | Unzip the dcos-diagnostics
   win_unzip:
     src: C:\dcos\dcos-diagnostics.zip
     dest: C:\dcos\
-  when: stat_result.stat.exists == False 
+  when: not stat_result.stat.exists
 
 - name: Windows | Install Diagnostic Service
   win_nssm:
