@@ -82,44 +82,31 @@ pipeline {
       }
     }
 
-    stage('publish') {
-      parallel {
-        stage('galaxy.ansible.com') {
-          when {
-            branch 'master'
-          }
-          agent {
-            label "py36"
-          }
-          environment {
-            GALAXY_API_KEY = credentials('dcos-sre-robot-galaxy-ansible-api-token')
-          }
-          steps {
-            sh("if [ -f ./galaxy.yml ]; then mazer build; fi")
-            // sh("for i in ./releases/*; do mazer publish --api-key=${GALAXY_API_KEY} \${i}; done")
-          }
+    stage('docker bundle build and publish') {
+      when {
+        anyOf {
+          branch 'master';
+          branch 'feature/*';
         }
-        stage('hub.docker.com') {
-          when {
-            branch 'master'
-          }
-          agent {
-            label "mesos"
-          }
-          steps {
-            // Login to the Docker registry.
-            retry(3) {
-              sh("docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}")
-              sh("docker build -t mesosphere/${IMAGE}:latest .")
-              script {
-                // Calculate Docker image tag based on commit id.
-                env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).trim()
+      }
+      agent {
+        label "mesos"
+      }
+      steps {
+        // Login to the Docker registry.
+        retry(3) {
+          sh("docker login -u ${DOCKER_USR} -p ${DOCKER_PSW}")
+          sh("docker build -t mesosphere/${IMAGE}:latest .")
+          script {
+            // Calculate Docker image tag based on commit id.
+            env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).replaceAll('/','-').trim()
 
-                // Tag and push the image we built earlier.
-                sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
-                sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
-                sh("docker push mesosphere/${IMAGE}:latest")
-              }
+            // Tag and push the image we built earlier.
+            sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
+            sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
+            if (env.BRANCH_NAME == 'master') {
+              // Only overwrite latest if we're on master
+              sh("docker push mesosphere/${IMAGE}:latest")
             }
           }
         }
