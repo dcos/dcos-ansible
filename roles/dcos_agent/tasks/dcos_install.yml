@@ -15,10 +15,11 @@
   block:
     - name: "Installation: Run DC/OS agent installation"
       shell: "set -o pipefail; bash {{ path_base_tmp }}/{{ dcos_version_specifier }}/dcos_install.sh {{ dcos_legacy_node_type_name }}"
+      register: install_shell_result
       args:
         executable: "/usr/bin/bash"
   always:
     - name: "Installation: Output log into journald"
       command: "systemd-cat -t dcos-install"
       args:
-        stdin: install_shell_result.stdout
+        stdin: "{{ install_shell_result.stdout }}"

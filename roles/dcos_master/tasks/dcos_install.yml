@@ -22,4 +22,4 @@
     - name: "Installation: Output log into journald"
       command: "systemd-cat -t dcos-install"
       args:
-        stdin: install_shell_result.stdout
+        stdin: "{{ install_shell_result.stdout }}"

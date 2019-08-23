@@ -21,6 +21,7 @@
   block:
     - name: "Upgrade: Run DC/OS agent upgrade"
       shell: "set -o pipefail; ./dcos_node_upgrade.sh {{ dcos['version'] is version_compare('1.11', '>=')|ternary('--verbose', '') }}"
+      register: upgrade_shell_result
       args:
         chdir: "{{ path_base_tmp }}/{{ dcos_version_specifier }}/upgrade_from_{{ ansible_local.dcos_installation['version'] }}/"
         executable: "/usr/bin/bash"
@@ -28,4 +29,4 @@
     - name: "Upgrade: Output log into journald"
       command: "systemd-cat -t dcos-upgrade"
       args:
-        stdin: upgrade_shell_result.stdout
+        stdin: "{{ upgrade_shell_result.stdout }}"
