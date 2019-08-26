@@ -19,9 +19,8 @@
 
 - name: Write CA service PSK
   copy:
-    dest: "/root/.dcoscertstrap_psk"
+    dest: "/var/lib/dcos/.dcos-bootstrap-ca-psk"
     mode: 0600
-    # content: "{{ hostvars['psk_dummy_host']['dcoscertstrap_psk'] }}"
     content: "{{ delegated_psk }}"
   when: dcos.enterprise_dcos and (delegated_psk is defined)
 
@@ -57,8 +56,3 @@
   when:
     - ansible_local is defined and ansible_local.dcos_installation is defined
     - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
-
-- name: Remove CA service PSK
-  file:
-    path: "/root/.dcoscertstrap_psk"
-    state: absent

@@ -77,11 +77,6 @@
 - name: Create bootstrap CA directory
   file: path={{ download_path }}/genconf/ca state=directory mode=0700
 
-- name: "Generate PSK for exhibitor bootstrap"
-  shell: cat /dev/urandom | tr -dc 'a-z' | fold -w 16 | head -n1
-  register: random_psk_result
-  when: dcos.enterprise_dcos
-
 - name: "Set PSK path"
   set_fact:
     psk_path: "{{ download_path }}/genconf/ca/psk"
@@ -94,9 +89,15 @@
   when: dcos.enterprise_dcos
 
 - name: "Read existing PSK contents"
-  shell: cat "{{ psk_path }}"
+  slurp:
+    src: "{{ psk_path }}"
   register: psk_contents
   when: dcos.enterprise_dcos and psk_stat.stat.exists
+
+- name: "Generate PSK for exhibitor bootstrap"
+  shell: cat /dev/urandom | tr -dc 'a-z' | fold -w 16 | head -n1
+  register: random_psk_result
+  when: dcos.enterprise_dcos and not psk_stat.stat.exists
 
 - name: Write CA service PSK
   copy:
@@ -107,7 +108,7 @@
 
 - name: Delegate psk variable from disk
   set_fact:
-    delegated_psk: "{{ psk_contents.stdout }}"
+    delegated_psk: "{{ psk_contents['content'] | b64decode }}"
   delegate_to: "{{ item }}"
   delegate_facts: true
   with_items: "{{ groups['masters'] }}"
