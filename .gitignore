@@ -6,4 +6,5 @@ molecule/**/__pycache__/
 releases
 **.pyc
 .vscode/
+venv/
 **/.idea/*

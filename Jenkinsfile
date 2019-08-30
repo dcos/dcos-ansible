@@ -29,11 +29,13 @@ pipeline {
         label "py36"
       }
       steps {
-        retry(3) {
-          sh("pip install -r test_requirements.txt")
+        ansiColor('xterm') {
+          retry(3) {
+            sh("pip install -r test_requirements.txt")
+          }
+          sh("yamllint -c .yamllint.yml .")
+          sh("ansible-lint roles/")
         }
-        sh("yamllint -c .yamllint.yml .")
-        sh("ansible-lint roles/")
       }
     }
 
@@ -44,16 +46,18 @@ pipeline {
             label "py36"
           }
           steps {
-            retry(3) {
-              sh("pip install -r test_requirements.txt")
-            }
-            sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-            // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
-            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-              ]) {
+            ansiColor('xterm') {
               retry(3) {
-                timeout(time: 60, unit: 'MINUTES') {
-                  sh("molecule test --scenario-name ec2_centos7")
+                sh("pip install -r test_requirements.txt")
+              }
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                retry(3) {
+                  timeout(time: 60, unit: 'MINUTES') {
+                    sh("molecule test --scenario-name ec2_centos7")
+                  }
                 }
               }
             }
@@ -64,16 +68,18 @@ pipeline {
             label "py36"
           }
           steps {
-            retry(3) {
-              sh("pip install -r test_requirements.txt")
-            }
-            sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-            // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
-            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-              ]) {
+            ansiColor('xterm') {
               retry(3) {
-                timeout(time: 60, unit: 'MINUTES') {
-                  sh("molecule test --scenario-name ec2_rhel7")
+                sh("pip install -r test_requirements.txt")
+              }
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                retry(3) {
+                  timeout(time: 60, unit: 'MINUTES') {
+                    sh("molecule test --scenario-name ec2_rhel7")
+                  }
                 }
               }
             }
