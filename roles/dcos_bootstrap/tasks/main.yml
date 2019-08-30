@@ -95,9 +95,7 @@
   when: dcos.enterprise_dcos and psk_stat.stat.exists
 
 - name: "Generate PSK for exhibitor bootstrap"
-  shell: |
-    set -o pipefail
-    cat /dev/urandom | tr -dc 'a-z' | fold -w 16 | head -n1
+  shell: cat /dev/urandom | tr -dc 'a-z' | fold -w 16 | head -n1
   register: random_psk_result
   when: dcos.enterprise_dcos and not psk_stat.stat.exists
 
