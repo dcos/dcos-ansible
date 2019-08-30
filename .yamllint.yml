@@ -1,5 +1,7 @@
 ---
-# Based on ansible-lint config
+ignore: |
+  venv/
+
 extends: default
 
 rules:

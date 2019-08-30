@@ -14,20 +14,20 @@
       - proto: tcp
         from_port: "{{ ssh_port }}"
         to_port: "{{ ssh_port }}"
-        cidr_ip: '0.0.0.0/0'
+        cidr_ip: "0.0.0.0/0"
       - proto: icmp
         from_port: 8
         to_port: -1
-        cidr_ip: '0.0.0.0/0'
+        cidr_ip: "0.0.0.0/0"
       - proto: tcp
         from_port: 0
         to_port: 65535
-        cidr_ip: '172.31.0.0/16'
+        cidr_ip: "172.31.0.0/16"
     security_group_rules_egress:
       - proto: -1
         from_port: 0
         to_port: 0
-        cidr_ip: '0.0.0.0/0'
+        cidr_ip: "0.0.0.0/0"
 
     keypair_name: molecule_key
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
@@ -111,14 +111,16 @@
 
     - name: Populate instance config dict
       set_fact:
-        instance_conf_dict: {
-          'instance': "{{ item.instances[0].tags.instance }}",
-          'region': "{{ item.instances[0].tags.molecule_region }}",
-          'address': "{{ item.instances[0].public_ip }}",
-          'user': "{{ item.instances[0].tags.molecule_ssh_user }}",
-          'port': "{{ ssh_port }}",
-          'identity_file': "{{ keypair_path }}",
-          'instance_ids': "{{ item.instance_ids }}", }
+        instance_conf_dict:
+          {
+            "instance": "{{ item.instances[0].tags.instance }}",
+            "region": "{{ item.instances[0].tags.molecule_region }}",
+            "address": "{{ item.instances[0].public_ip }}",
+            "user": "{{ item.instances[0].tags.molecule_ssh_user }}",
+            "port": "{{ ssh_port }}",
+            "identity_file": "{{ keypair_path }}",
+            "instance_ids": "{{ item.instance_ids }}",
+          }
       with_items: "{{ ec2_jobs.results | default(server.results) }}"
       register: instance_config_dict
       when: server.changed | bool
