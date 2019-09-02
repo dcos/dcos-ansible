@@ -17,13 +17,6 @@
   notify: reload facts
 - meta: flush_handlers
 
-- name: Write CA service PSK
-  copy:
-    dest: "/var/lib/dcos/.dcos-bootstrap-ca-psk"
-    mode: 0600
-    content: "{{ delegated_psk }}"
-  when: dcos.enterprise_dcos and (delegated_psk is defined)
-
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
   when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
