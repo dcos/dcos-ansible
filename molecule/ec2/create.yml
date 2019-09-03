@@ -86,7 +86,7 @@
             volume_type: gp2
             delete_on_termination: yes
         instance_tags:
-          Name: "molecule {{ item.name }} {{ lookup('env', 'USER') }}@{{ lookup('env', 'HOSTNAME') }}"
+          Name: "molecule {{ item.name }} {{ lookup('env', 'USER') | default('ci', true) }}@{{ lookup('env', 'HOSTNAME') | default((lookup('env', 'USER') + lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')) | to_uuid, true) }}"
           instance: "{{ item.name }}"
           molecule_region: "{{ item.region }}"
           molecule_ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
