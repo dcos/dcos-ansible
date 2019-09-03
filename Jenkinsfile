@@ -101,6 +101,9 @@ pipeline {
             GALAXY_API_KEY = credentials('dcos-sre-robot-galaxy-ansible-api-token')
           }
           steps {
+            retry(3) {
+              sh("pip install -r test_requirements.txt")
+            }
             sh("if [ -f ./galaxy.yml ]; then mazer build; fi")
             // sh("for i in ./releases/*; do mazer publish --api-key=${GALAXY_API_KEY} \${i}; done")
           }
