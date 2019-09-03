@@ -79,6 +79,7 @@
 - name: Download installation file
   get_url:
     url: "{{ dcos['download'] }}"
+    checksum: "{{ dcos['download_checksum'] | default(omit) }}"
     dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
 
