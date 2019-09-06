@@ -7,7 +7,7 @@ platforms:
   - name: bootstrap1-centos7
     image: ami-9887c6e7
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     ssh_user: centos
     groups:
       - bootstraps
@@ -15,7 +15,7 @@ platforms:
   - name: master1-centos7
     image: ami-9887c6e7
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     ssh_user: centos
     groups:
       - masters
@@ -23,7 +23,7 @@ platforms:
   - name: agent1-centos7
     image: ami-9887c6e7
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     ssh_user: centos
     groups:
       - agents_private

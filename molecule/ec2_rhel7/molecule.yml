@@ -7,21 +7,21 @@ platforms:
   - name: bootstrap1-rhel7
     image: ami-011b3ccf1bd6db744
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     groups:
       - bootstraps
       - dcos
   - name: master1-rhel7
     image: ami-011b3ccf1bd6db744
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     groups:
       - masters
       - dcos
   - name: agent1-rhel7
     image: ami-011b3ccf1bd6db744
     region: us-east-1
-    instance_type: m5.large
+    instance_type: m5.xlarge
     groups:
       - agents_private
       - agents

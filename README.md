@@ -70,9 +70,9 @@ dcos_legacy_node_type_name=slave_public
 
 ```yml
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/1.13.3/dcos_generate_config.sh"
+  download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
   download_checksum: "sha256:a3d295de33ad55b10f5dc66c9594d9175a40f5aaec7734d664493968a9f751fd"
-  version: "1.13.3"
+  version: "1.13.4"
   enterprise_dcos: false
   selinux_mode: enforcing
 

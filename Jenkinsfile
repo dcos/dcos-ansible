@@ -6,8 +6,6 @@ pipeline {
   agent none
   environment {
     IMAGE = "dcos-ansible-bundle"
-
-    // Get credentials for publishing to Docker hub.
     DOCKER = credentials('docker-hub-credentials')
   }
   options {
@@ -15,9 +13,12 @@ pipeline {
   }
 
   stages {
-    stage("Verify author") {
+    stage("Verify author for PR") {
       agent {
-        label "mesos"
+        label "py36"
+      }
+      when {
+        changeRequest()
       }
       steps {
         user_is_authorized(master_branches, '8b793652-f26a-422f-a9ba-0d1e47eb9d89', '#sre')
@@ -30,6 +31,11 @@ pipeline {
       }
       steps {
         ansiColor('xterm') {
+          script {
+            env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
+            env.RHEL_TRIPLE_LINUX_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
+            env.PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
+          }
           retry(3) {
             sh("pip install -r test_requirements.txt")
           }
@@ -39,46 +45,174 @@ pipeline {
       }
     }
 
-    stage('molecule test') {
+    stage('molecule test - Open') {
       parallel {
-        stage('molecule test (ec2_centos7)') {
+        stage('ec2_centos7') {
           agent {
             label "py36"
           }
           steps {
             ansiColor('xterm') {
+              script {
+                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-open"
+                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-open"
+                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-open"
+              }
+              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
               retry(3) {
                 sh("pip install -r test_requirements.txt")
               }
               sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.LINUX_DOUBLE_SPOT_PRICE}/' molecule/ec2/create.yml")
               // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                retry(3) {
-                  timeout(time: 60, unit: 'MINUTES') {
-                    sh("molecule test --scenario-name ec2_centos7")
+                timeout(time: 40, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_centos7")
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh("molecule destroy --scenario-name ec2_centos7")
                   }
                 }
               }
             }
           }
         }
-        stage('molecule test (ec2_rhel7)') {
+        stage('ec2_rhel7') {
           agent {
             label "py36"
           }
           steps {
             ansiColor('xterm') {
+              script {
+                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-open"
+                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-open"
+                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-open"
+              }
+              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
               retry(3) {
                 sh("pip install -r test_requirements.txt")
               }
               sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              // withAWS(credentials:'arn:aws:iam::850970822230:user/jenkins') {
+              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.RHEL_TRIPLE_LINUX_SPOT_PRICE}/' molecule/ec2/create.yml")
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                retry(3) {
-                  timeout(time: 60, unit: 'MINUTES') {
-                    sh("molecule test --scenario-name ec2_rhel7")
+                timeout(time: 40, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_rhel7")
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh("molecule destroy --scenario-name ec2_rhel7")
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('molecule test - Enterprise'){
+      parallel {
+        stage('ec2_centos7') {
+          agent {
+            label "py36"
+          }
+          environment {
+            LICENSE = credentials("DCOS_1_13_LICENSE")
+          }
+          steps {
+            ansiColor('xterm') {
+              script {
+                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-enterprise"
+                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-enterprise"
+                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-enterprise"
+              }
+              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
+              retry(3) {
+                sh("pip install -r test_requirements.txt")
+              }
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              sh("set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat ${env.LICENSE})\" group_vars/all/dcos.yaml")
+              sh("sed -i -e 's/bootstrap1-centos7/bootstrap1-centos7-enterprise/' -e 's/master1-centos7/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos7-enterprise/' molecule/ec2_centos7/molecule.yml")
+              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.LINUX_DOUBLE_SPOT_PRICE}/' molecule/ec2/create.yml")
+              sh("sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml")
+              sh("egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}")
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 40, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_centos7")
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh("molecule destroy --scenario-name ec2_centos7")
+                  }
+                }
+              }
+            }
+          }
+        }
+        stage('ec2_rhel7') {
+          agent {
+            label "py36"
+          }
+          environment {
+            LICENSE = credentials("DCOS_1_13_LICENSE")
+          }
+          steps {
+            ansiColor('xterm') {
+              script {
+                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
+                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-enterprise"
+                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-enterprise"
+              }
+              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
+              retry(3) {
+                sh("pip install -r test_requirements.txt")
+              }
+              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
+              sh("set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat ${env.LICENSE})\" group_vars/all/dcos.yaml")
+              sh("sed -i -e 's/bootstrap1-rhel7/bootstrap1-rhel7-enterprise/' -e 's/master1-rhel7/master1-rhel7-enterprise/' -e 's/agent1-rhel7/agent1-rhel7-enterprise/' molecule/ec2_rhel7/molecule.yml")
+              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.RHEL_TRIPLE_LINUX_SPOT_PRICE}/' molecule/ec2/create.yml")
+              sh("sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml")
+              sh("egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}")
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 40, unit: 'MINUTES') {
+                  sh("molecule test --scenario-name ec2_rhel7")
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh("molecule destroy --scenario-name ec2_rhel7")
                   }
                 }
               }
