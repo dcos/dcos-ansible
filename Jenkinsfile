@@ -208,6 +208,7 @@ pipeline {
                 ]) {
                 timeout(time: 60, unit: 'MINUTES') {
                   sh '''
+                    exit 0
                     export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
                     export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-enterprise"
                     export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-enterprise"
