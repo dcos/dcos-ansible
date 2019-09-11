@@ -83,6 +83,11 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
+                    script {
+                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-open"
+                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-open"
+                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-open"
+                    }
                     sh("molecule destroy --scenario-name ec2_centos7")
                   }
                 }
@@ -128,6 +133,11 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
+                    script {
+                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-enterprise"
+                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-enterprise"
+                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-enterprise"
+                    }
                     sh("molecule destroy --scenario-name ec2_centos7")
                   }
                 }
@@ -166,6 +176,11 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
+                    script {
+                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-open"
+                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-open"
+                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-open"
+                    }
                     sh("molecule destroy --scenario-name ec2_rhel7")
                   }
                 }
@@ -212,6 +227,11 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
+                    script {
+                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
+                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-enterprise"
+                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-enterprise"
+                    }
                     sh("molecule destroy --scenario-name ec2_rhel7")
                   }
                 }
