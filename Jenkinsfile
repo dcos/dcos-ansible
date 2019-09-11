@@ -59,21 +59,22 @@ pipeline {
           }
           steps {
             ansiColor('xterm') {
-              script {
-                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-open"
-                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-open"
-                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-open"
-              }
-              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
-              retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.LINUX_DOUBLE_SPOT_PRICE}/' molecule/ec2/create.yml")
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                timeout(time: 40, unit: 'MINUTES') {
-                  sh("molecule test --scenario-name ec2_centos7")
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos7-open"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos7-open"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos7-open"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    molecule test --scenario-name ec2_centos7
+                  '''
                 }
               }
             }
@@ -84,12 +85,13 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
-                    script {
-                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-open"
-                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-open"
-                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-open"
-                    }
-                    sh("molecule destroy --scenario-name ec2_centos7")
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos7-open"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos7-open"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos7-open"
+
+                      molecule destroy --scenario-name ec2_centos7
+                    '''
                   }
                 }
               }
@@ -105,25 +107,26 @@ pipeline {
           }
           steps {
             ansiColor('xterm') {
-              script {
-                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-enterprise"
-                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-enterprise"
-                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-enterprise"
-              }
-              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
-              retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              sh("set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat ${env.LICENSE})\" group_vars/all/dcos.yaml")
-              sh("sed -i -e 's/bootstrap1-centos7/bootstrap1-centos7-enterprise/' -e 's/master1-centos7/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos7-enterprise/' molecule/ec2_centos7/molecule.yml")
-              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.LINUX_DOUBLE_SPOT_PRICE}/' molecule/ec2/create.yml")
-              sh("sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml")
-              sh("egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}")
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                timeout(time: 40, unit: 'MINUTES') {
-                  sh("molecule test --scenario-name ec2_centos7")
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos7-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos7-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos7-enterprise"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat \${LICENSE})\" group_vars/all/dcos.yaml; set -x
+                    sed -i -e 's/bootstrap1-centos7/bootstrap1-centos7-enterprise/' -e 's/master1-centos7/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos7-enterprise/' molecule/ec2_centos7/molecule.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
+                    sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml
+                    egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}
+
+                    molecule test --scenario-name ec2_centos7
+                  '''
                 }
               }
             }
@@ -134,12 +137,13 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
-                    script {
-                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-centos7-enterprise"
-                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-centos7-enterprise"
-                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-centos7-enterprise"
-                    }
-                    sh("molecule destroy --scenario-name ec2_centos7")
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos7-enterprise"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos7-enterprise"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos7-enterprise"
+
+                      molecule destroy --scenario-name ec2_centos7
+                    '''
                   }
                 }
               }
@@ -152,21 +156,22 @@ pipeline {
           }
           steps {
             ansiColor('xterm') {
-              script {
-                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-open"
-                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-open"
-                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-open"
-              }
-              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
-              retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.RHEL_TRIPLE_LINUX_SPOT_PRICE}/' molecule/ec2/create.yml")
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                timeout(time: 40, unit: 'MINUTES') {
-                  sh("molecule test --scenario-name ec2_rhel7")
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-open"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-open"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-open"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    sed -i -e \"s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    molecule test --scenario-name ec2_rhel7
+                  '''
                 }
               }
             }
@@ -177,12 +182,13 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
-                    script {
-                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-open"
-                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-open"
-                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-open"
-                    }
-                    sh("molecule destroy --scenario-name ec2_rhel7")
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-open"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-open"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-open"
+
+                      molecule destroy --scenario-name ec2_rhel7
+                    '''
                   }
                 }
               }
@@ -198,26 +204,26 @@ pipeline {
           }
           steps {
             ansiColor('xterm') {
-              script {
-                env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
-                env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-enterprise"
-                env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-enterprise"
-              }
-              sh("rm -rf ${env.MOLECULE_EPHEMERAL_DIRECTORY} ${env.ANSIBLE_LOCAL_TEMP} ${env.ANSIBLE_ASYNC_DIR}")
-              retry(3) {
-                sh("pip install -r test_requirements.txt")
-              }
-              sh("cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml")
-              sh("set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat ${env.LICENSE})\" group_vars/all/dcos.yaml")
-              sh("sed -i -e 's/bootstrap1-rhel7/bootstrap1-rhel7-enterprise/' -e 's/master1-rhel7/master1-rhel7-enterprise/' -e 's/agent1-rhel7/agent1-rhel7-enterprise/' molecule/ec2_rhel7/molecule.yml")
-              sh("sed -i -e 's/spot_price_max_calc:.*/spot_price_max_calc: ${env.RHEL_TRIPLE_LINUX_SPOT_PRICE}/' molecule/ec2/create.yml")
-              sh("sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml")
-              sh("egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}")
               withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                 ]) {
-                timeout(time: 40, unit: 'MINUTES') {
-                  sh("set +x; echo 'ec2_rhel7 enterprise not running atm, seems to be an issue to run it!'")
-                  // sh("molecule test --scenario-name ec2_rhel7")
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-enterprise"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat \${LICENSE})\" group_vars/all/dcos.yaml; set -x
+                    sed -i -e 's/bootstrap1-rhel7/bootstrap1-rhel7-enterprise/' -e 's/master1-rhel7/master1-rhel7-enterprise/' -e 's/agent1-rhel7/agent1-rhel7-enterprise/' molecule/ec2_rhel7/molecule.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
+                    sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml
+                    egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}
+
+                    molecule test --scenario-name ec2_rhel7
+                  '''
                 }
               }
             }
@@ -228,12 +234,13 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
                   timeout(time: 20, unit: 'MINUTES') {
-                    script {
-                      env.ANSIBLE_LOCAL_TEMP = "${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
-                      env.ANSIBLE_ASYNC_DIR = "${WORKSPACE}/.ansible-async-rhel7-enterprise"
-                      env.MOLECULE_EPHEMERAL_DIRECTORY = "${WORKSPACE}/.molecule-rhel7-enterprise"
-                    }
-                    sh("molecule destroy --scenario-name ec2_rhel7")
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-enterprise"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-enterprise"
+
+                      molecule destroy --scenario-name ec2_rhel7
+                    '''
                   }
                 }
               }
