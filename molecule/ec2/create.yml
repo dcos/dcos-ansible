@@ -72,14 +72,14 @@
             volume_type: gp2
             delete_on_termination: yes
         instance_tags:
-          Name: "molecule {{ item.name }} {{ lookup('env', 'USER') | default('ci', true) }}@{{ lookup('env', 'HOSTNAME') | default((lookup('env', 'USER') | to_uuid, true) }}"
-          instance: "{{ item.name }}-{{ lookup('env', 'USER') | default('ci', true) }}-{{ lookup('env', 'HOSTNAME') | default((lookup('env', 'USER') | to_uuid, true) }}"
+          Name: "molecule {{ item.name }} {{ lookup('env', 'USER') | default('ci', true) }}@{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
+          instance: "{{ item.name }}-{{ lookup('env', 'USER') | default('ci', true) }}-{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
           molecule_region: "{{ item.region }}"
           molecule_ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
         wait: yes
         exact_count: 1
         count_tag:
-          instance: "{{ item.name }}-{{ lookup('env', 'USER') | default('ci', true) }}-{{ lookup('env', 'HOSTNAME') | default((lookup('env', 'USER') | to_uuid, true) }}"
+          instance: "{{ item.name }}-{{ lookup('env', 'USER') | default('ci', true) }}-{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
