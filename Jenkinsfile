@@ -18,6 +18,7 @@ pipeline {
         label "py36"
       }
       when {
+        beforeAgent true
         changeRequest()
       }
       steps {
@@ -35,6 +36,10 @@ pipeline {
             env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
             env.RHEL_TRIPLE_LINUX_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
             env.PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
+            env.ANSIBLE_TRANSPORT = "paramiko"
+            env.ANSIBLE_SSH_CONTROL_PATH = "/var/shm/control:%h:%p:%r"
+            env.ANSIBLE_SSH_CONTROL_PATH_DIR = "/var/shm/control"
+            env.ANSIBLE_SSH_ARGS = "-C -o PreferredAuthentications=publickey -o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"
           }
           retry(3) {
             sh("pip install -r test_requirements.txt")
@@ -221,6 +226,8 @@ pipeline {
       parallel {
         stage('galaxy.ansible.com') {
           when {
+            beforeAgent true
+            not { changeset "Jenkinsfile" }
             branch 'master'
           }
           agent {
@@ -239,6 +246,8 @@ pipeline {
         }
         stage('hub.docker.com') {
           when {
+            beforeAgent true
+            not { changeset "Jenkinsfile" }
             branch 'master'
           }
           agent {
