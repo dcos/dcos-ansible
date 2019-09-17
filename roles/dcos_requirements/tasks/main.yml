@@ -188,10 +188,13 @@
     policy: targeted
     state: "{{ dcos['selinux_mode'] | default('permissive') }}"
 
-- name: "Ensure groups 'nogroup' and 'docker' exist"
+- name: "Ensure 'docker' group exists"
   group:
-    name: "{{ item }}"
+    name: docker
     state: present
-  with_items:
-    - nogroup
-    - docker
+
+- name: "Ensure 'nogroup' group exists"
+  group:
+    name: nogroup
+    state: present
+  when: dcos['version'] is version_compare('2.0', '<')
