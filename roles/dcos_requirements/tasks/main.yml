@@ -193,7 +193,7 @@
     name: docker
     state: present
 
-- name: "Ensure 'nogroup' group exists"
+- name: "Ensure 'nogroup' group exists for DC/OS version < 2.0"
   group:
     name: nogroup
     state: present
