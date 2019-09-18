@@ -46,7 +46,7 @@ pipeline {
             sh("pip install -r test_requirements.txt")
           }
           sh("yamllint -c .yamllint.yml .")
-          sh("ansible-lint roles/")
+          sh("ansible-lint roles/* -v")
         }
       }
     }

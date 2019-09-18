@@ -88,7 +88,7 @@
     when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
 
   - name: "Sync time with ntpd"
-    shell: "ntpd -gq"
+    command: "ntpd -gq"
     when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
     register: time_sync_done_ntpd
 
