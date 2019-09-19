@@ -27,19 +27,21 @@ platforms:
   - name: gputestagent-centosM60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-02eac2c0129f6376b
     region: us-east-1
+    zone: us-east-1d # lets use a zone which contains all gpu types
     instance_type: g3.4xlarge
+    spot_price: false
     ssh_user: centos
   # RHEL 7.6 / current version
   - name: gputestagent-rhel7.6M60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-000db10762d0c4c05
     region: us-east-1
-    instance_type: g3.4xlarge
+    instance_type: p2.xlarge
     ssh_user: ec2-user
   # RHEL 7.5 / previous version
   - name: gputestagent-rhel7.5M60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-6871a115
     region: us-east-1
-    instance_type: g3.4xlarge
+    instance_type: p2.xlarge
     ssh_user: ec2-user
 
 provisioner:
