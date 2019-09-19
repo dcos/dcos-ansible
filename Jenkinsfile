@@ -247,49 +247,49 @@ pipeline {
               }
             }
           }
-          stage('molecule test (ec2_gpu) / GPU') {
-            when {
-              beforeAgent true
-              changeset "roles/dcos_gpu/*"
+        }
+        stage('molecule test (ec2_gpu) / GPU') {
+          when {
+            beforeAgent true
+            changeset "roles/dcos_gpu/*"
+          }
+          agent {
+            label "py36"
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-gpu"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-gpu"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-gpu"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+
+                    molecule test --scenario-name ec2_gpu
+                  '''
+                }
+              }
             }
-            agent {
-              label "py36"
-            }
-            steps {
+          }
+          post {
+            aborted {
               ansiColor('xterm') {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
                   ]) {
-                  timeout(time: 60, unit: 'MINUTES') {
+                  timeout(time: 20, unit: 'MINUTES') {
                     sh '''
                       export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-gpu"
                       export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-gpu"
                       export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-gpu"
 
-                      rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
-                      pip install -r test_requirements.txt
-
-                      cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
-
-                      molecule test --scenario-name ec2_gpu
+                      molecule destroy --scenario-name ec2_gpu
                     '''
-                  }
-                }
-              }
-            }
-            post {
-              aborted {
-                ansiColor('xterm') {
-                  withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-                    ]) {
-                    timeout(time: 20, unit: 'MINUTES') {
-                      sh '''
-                        export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-gpu"
-                        export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-gpu"
-                        export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-gpu"
-
-                        molecule destroy --scenario-name ec2_gpu
-                      '''
-                    }
                   }
                 }
               }
