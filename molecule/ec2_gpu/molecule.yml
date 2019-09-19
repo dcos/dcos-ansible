@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: ec2_centos7_gpu
+  name: ec2_gpu
 driver:
   name: ec2
 platforms:
