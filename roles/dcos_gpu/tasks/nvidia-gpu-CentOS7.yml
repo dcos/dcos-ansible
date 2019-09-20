@@ -16,31 +16,51 @@
         - "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel }}"
   when: pkgheaders.results|length > 0
 # CentOS VAULT - Kernel Headers not available in main OS repo anymore. Use Vault for this release
-- name: ThisVault
-  yum_repository:
-    name: ThisVault
-    description: This Vault
-    baseurl: "{{ vault_repo_baseurl }}"
-    enabled: false
+- name: CentOS VAULT - Kernel Headers not available in main OS repo anymore. Use Vault for this release
+  # 2019-09-18: CentOS created new version 7.7.1908 and rebased the /7 repo.
+  # But vault for 7.6.1810 is not available but mirror is
   when: pkgheaders.results|length == 0
-- name: Install Kernel Headers for Current Kernel
-  yum:
-      enablerepo: ThisVault
-      name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
-  when: pkgheaders|length == 0
-- name: Install Kernel Devel for Current Kernel
-  yum:
-      enablerepo: ThisVault
-      name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
-  when: pkgheaders.results|length == 0
-- name: Ensure to link against merged kernel headers
-  file:
-    dest: "/lib/modules/{{ hostvars[inventory_hostname].ansible_kernel }}/build"
-    src: "/usr/src/kernels/{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}.x86_64/"
-    force: yes
-    state: link
-    follow: false
-  when: pkgheaders.results|length == 0
+  block:
+    - name: ThisVault
+      yum_repository:
+        name: ThisVault
+        description: This Vault
+        baseurl: "{{ vault_repo_baseurl }}"
+        enabled: false
+    - name: ThisVault - Install Kernel Headers for Current Kernel
+      yum:
+          enablerepo: ThisVault
+          name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+    - name: ThisVault - Install Kernel Devel for Current Kernel
+      yum:
+          enablerepo: ThisVault
+          name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  rescue:
+    - name: Centos mirror this version
+      yum_repository:
+        name: CentosThisVersionMirror
+        description: Centos mirror this version
+        baseurl: "{{ mirror_repo_baseurl }}"
+        enabled: false
+    - name: CentosThisVersionMirror - register mirror as the repository to be used
+      set_fact:
+        old_package_repo: CentosThisVersionMirror
+    - name: CentosThisVersionMirror - Install Kernel Headers for Current Kernel
+      yum:
+          enablerepo: "{{ old_package_repo }}"
+          name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+    - name: CentosThisVersionMirror - Install Kernel Devel for Current Kernel
+      yum:
+          enablerepo: "{{ old_package_repo }}"
+          name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  always:
+    - name: Ensure to link against merged kernel headers
+      file:
+        dest: "/lib/modules/{{ hostvars[inventory_hostname].ansible_kernel }}/build"
+        src: "/usr/src/kernels/{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}.x86_64/"
+        force: yes
+        state: link
+        follow: false
 
 # ensure nouveau being unloaded
 - name: Ensure nouveau being unloaded
