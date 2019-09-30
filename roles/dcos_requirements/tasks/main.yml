@@ -134,7 +134,7 @@
     yum:
       name: "{{ dcos_docker_pkg_name }}"
       update_cache: true
-      enablerepo: "{{ rhel_exras_repo_name.stdout | default('') }}"
+      enablerepo: "{{ rhel_exras_repo_name.stdout | default(omit) }}"
       state: present
     register: dcos_yum_docker_install
     until: dcos_yum_docker_install is success
