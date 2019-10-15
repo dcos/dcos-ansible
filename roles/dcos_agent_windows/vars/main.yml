@@ -1,0 +1,29 @@
+# DCOS params:
+zookeeper: "{{ groups['masters'] | join(':2181,') }}:2181"
+
+# mesos-agent
+resources_ports: "{{ over_resources_ports | default('10000-34000') }}"
+system_user: "Administrator"
+
+# specific for service run
+mesos_workers:
+  windows:
+    service_name: "mesos-agent"
+    attributes: "os:windows"
+    homedir: "C:\\dcos"
+    bindir: "C:\\dcos\\mesos-binaries"
+    workdir: "C:\\dcos\\work"
+    imagesdir: "C:\\dcos\\images"
+    logdir: "C:\\dcos\\mesos-logs"
+    executor: "C:\\dcos\\mesos-binaries\\mesos-agent.exe"
+    executor_timeout: 10mins
+    fetcher_timeout: 10mins
+    diagnostics_service_name: "dcos-diagnostics"
+    diagnostics_executor: "C:\\dcos\\dcos-diagnostics.exe"
+    diagnostics_config: "C:\\dcos\\dcos-diagnostics-config.json"
+
+# Packages location
+bucket_name: "dcos-win.s3.amazonaws.com"
+url_to_mesosbin: "http://{{ bucket_name }}/mesos-binaries.{{ dcos['version'] }}.zip"
+url_to_diagnostics: "http://{{ bucket_name }}/dcos-diagnostics.zip"
+bootstrap_zip_url: "https://dcos-win.s3.amazonaws.com/bootstrap.zip"

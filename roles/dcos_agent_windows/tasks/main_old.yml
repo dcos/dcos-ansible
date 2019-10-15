@@ -1,0 +1,92 @@
+- name: Windows | Install vcredist140
+  win_chocolatey:
+    name: vcredist140
+    state: present
+  notify: reboot the host
+
+- name: Windows | Install nssm
+  win_chocolatey:
+    name: nssm
+    state: present
+
+- name: Windows | Detect network interface with default_gateway set
+  set_fact:
+    default_network_interface: "{{ item.connection_name }}"
+  when: item.default_gateway is defined and item.default_gateway
+  with_items: "{{ ansible_interfaces }}"
+  register: default_network_interface_detect
+  changed_when: false
+
+- name: Windows | Configures DNS lookup on Windows hosts
+  win_dns_client:
+    adapter_names: "{{ item.ansible_facts.default_network_interface }}"
+    ipv4_addresses: "{{ groups['masters'] }}"
+    log_path: C:\dns_log.txt
+  when: item.ansible_facts is defined
+  with_items: "{{ default_network_interface_detect.results }}"
+
+- name: Windows | Create folders and subfolder for DCOS binaries
+  win_file:
+    path: C:\dcos\{{ item }}
+    state: directory
+  with_items:
+    - work
+    - images
+    - mesos-logs
+
+- name: Windows | Download mesos-binaries
+  win_get_url:
+    url: "{{ url_to_mesosbin }}"
+    dest: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
+    force: no
+
+- name: Windows | Unzip the mesos-binaries
+  win_unzip:
+    src: C:\dcos\mesos-binaries.{{ dcos['version'] }}.zip
+    dest: C:\dcos\mesos-binaries
+    creates: C:\dcos\mesos-binaries
+
+- name: Windows | Install Mesos Agent service
+  win_nssm:
+    name: "{{ mesos_workers.windows.service_name }}"
+    application: "{{ mesos_workers.windows.executor }}"
+    app_parameters_free_form: --master="zk://{{ zookeeper }}/mesos" --launcher_dir="{{ mesos_workers.windows.bindir }}" --log_dir="{{ mesos_workers.windows.logdir }}" --appc_store_dir="{{ mesos_workers.windows.imagesdir }}" --work_dir="{{ mesos_workers.windows.workdir }}" --runtime_dir="{{ mesos_workers.windows.workdir }}" --isolation="windows/cpu,windows/mem,filesystem/windows" --containerizers="mesos,docker" --attributes="{{ mesos_workers.windows.attributes }}" --ip={{ inventory_hostname }} --hostname={{ inventory_hostname }} --resources="ports:[{{ resources_ports }}]" --executor_registration_timeout={{ mesos_workers.windows.executor_timeout }} --fetcher_stall_timeout={{ mesos_workers.windows.fetcher_timeout }}
+
+- name: Windows | Set Mesos Agent dependency on Docker service
+  win_service:
+    name: "{{ mesos_workers.windows.service_name }}"
+    dependencies: [ 'docker' ]
+    start_mode: auto
+  notify: restart the service
+
+- name: Windows | Set an environment variable for all users
+  win_environment:
+    state: present
+    name: DCOS_VERSION
+    value: "{{ dcos['version'] }}"
+    level: machine
+
+- name: Windows | Check that dcos-diagnostics.exe exists
+  win_stat:
+    path: C:\dcos\dcos-diagnostics.exe
+  register: stat_result
+
+- name: Windows | Download dcos-diagnostics
+  win_get_url:
+    url: "{{ url_to_diagnostics }}"
+    dest: C:\dcos\dcos-diagnostics.zip
+    force: no
+  when: not stat_result.stat.exists
+
+- name: Windows | Unzip the dcos-diagnostics
+  win_unzip:
+    src: C:\dcos\dcos-diagnostics.zip
+    dest: C:\dcos\
+  when: not stat_result.stat.exists
+
+- name: Windows | Install Diagnostic Service
+  win_nssm:
+    name: "{{ mesos_workers.windows.diagnostics_service_name }}"
+    application: "{{ mesos_workers.windows.diagnostics_executor }}"
+    app_parameters_free_form: --config "{{ mesos_workers.windows.diagnostics_config }}" --role agent daemon
+  notify: restart dcos-diagnostics service
