@@ -26,3 +26,4 @@ mesos_workers:
 bucket_name: "dcos-win.s3.amazonaws.com"
 url_to_mesosbin: "http://{{ bucket_name }}/mesos-binaries.{{ dcos['version'] }}.zip"
 url_to_diagnostics: "http://{{ bucket_name }}/dcos-diagnostics.zip"
+bootstrap_zip_url: "https://dcos-win.s3.amazonaws.com/bootstrap.zip"

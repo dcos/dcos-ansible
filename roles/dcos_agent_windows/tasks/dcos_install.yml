@@ -1,0 +1,23 @@
+- name: Windows Installation | Create installer download directory
+  win_file:
+    path: "{{ mesos_workers.windows.homedir }}"
+    state: directory
+
+- name: Windows Installation | Download dcos_install.ps1
+  win_get_url:
+    url: "http://{{ bucket_name }}/dcos_install.ps1"
+    dest: "{{ mesos_workers.windows.homedir }}\\dcos_install.ps1"
+
+- name: Windows Installation | DC/OS install
+  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  block:
+    - name: Windows Installation | Run DC/OS agent installation
+      win_shell: "{{ mesos_workers.windows.homedir }}\\dcos_install.ps1 {{ bootstrap_zip_url }} '{{ groups['masters'] | join(',') }}'"
+      register: install_shell_result
+      notify: reboot the host
+
+  always:
+    - name: Windows Installation | Output log into dcos-install.log
+      win_copy:
+        content: "{{ install_shell_result.stdout }}"
+        dest: "{{ mesos_workers.windows.homedir }}\\var\\log\\ansible_playbook_stdout.log"
