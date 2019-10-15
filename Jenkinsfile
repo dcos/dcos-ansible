@@ -325,6 +325,7 @@ pipeline {
           when {
             beforeAgent true
             not { changeset "Jenkinsfile" }
+            not { changeset "galaxy.yml" }
             branch 'master'
           }
           agent {
