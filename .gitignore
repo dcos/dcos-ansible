@@ -7,4 +7,3 @@ releases
 **.pyc
 .vscode/
 venv/
-**/.idea/*

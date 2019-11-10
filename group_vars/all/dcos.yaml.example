@@ -2,6 +2,8 @@
 dcos:
   download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
   download_checksum: "sha256:55b096236a6de1a40259e6d8a8a21861c5333cbe2b9ba3e274d5de1534b095dc"
+  download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
+  download_win_checksum: "sha256:a4e3b5f5a50704202c7b59beb0139c46fdfa8e3c7a059a2ff9107ef0947d482a"
   version: "1.13.4"
   enterprise_dcos: false
 

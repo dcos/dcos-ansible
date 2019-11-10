@@ -69,6 +69,11 @@
      download_path: "{{ download_base_dir }}/{{ dcos_version_specifier }}"
      install_file: "{{ dcos['download']|basename }}"
 
+- name: Setting windows install file
+  set_fact:
+     install_win_file: "{{ dcos['download_win']|basename }}"
+  when: dcos['download_win'] is defined
+
 - name: Purge old upgrade directory
   file:
     path: "{{ download_path }}/genconf/serve/*"
@@ -133,12 +138,20 @@
 
 #  vvv DOWNLOAD vvv
 
-- name: Download installation file
+- name: Download Linux installation file
   get_url:
     url: "{{ dcos['download'] }}"
     checksum: "{{ dcos['download_checksum'] | default(omit) }}"
     dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
+
+- name: Download Windows installation file
+  get_url:
+    url: "{{ dcos['download_win'] }}"
+    checksum: "{{ dcos['download_win_checksum'] | default(omit) }}"
+    dest: "{{ download_path }}/{{ install_win_file }}"
+    mode: 0440
+  when: dcos['download_win'] is defined
 
 # vvv POST DOWNLOAD / configuration vvv
 
@@ -217,6 +230,13 @@
   args:
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
+
+- name: Unpack Windows installer packages
+  command: "bash {{ install_win_file }}"
+  args:
+    chdir: "{{ download_path }}"
+    creates: "{{ download_path }}/genconf_win/serve/prerequisites/dcos_install.ps1"
+  when: dcos['download_win'] is defined
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 
