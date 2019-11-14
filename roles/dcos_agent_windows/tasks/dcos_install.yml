@@ -1,6 +1,6 @@
 - name: Windows Installation | Create installer download directory
   win_file:
-    path: "{{ mesos_workers.windows.homedir }}"
+    path: "{{ base_windows_dir }}"
     state: directory
 
 - name: Windows Installation | Download dcos_install.ps1
