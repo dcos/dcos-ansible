@@ -122,6 +122,13 @@
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
+- name: "Preinstall containerd.io for docker-ce on CentOS preventing kmem bug"
+  yum:
+    name: "{{ dcos_containerd_pkg_name }}"
+    update_cache: true
+    state: present
+  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
+
 - block:
   - name: "Finding RHEL extras repository name (Only EL systems)"
     shell: |
