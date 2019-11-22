@@ -14,6 +14,9 @@
         name: dcos_bootstrap
   vars:
     dcos:
+      download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
+      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -27,6 +30,9 @@
         name: dcos_master
   vars:
     dcos:
+      download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
+      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -39,6 +45,9 @@
         name: dcos_agent
   vars:
     dcos:
+      download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
+      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -59,8 +68,6 @@
         name: dcos_bootstrap
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -74,8 +81,6 @@
         name: dcos_master
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -88,8 +93,6 @@
         name: dcos_agent
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
