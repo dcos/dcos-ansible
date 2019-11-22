@@ -1,0 +1,2 @@
+# DCOS Windows params:
+base_windows_dir: "C:\\dcos"
