@@ -119,7 +119,7 @@ pipeline {
                     pip install -r test_requirements.txt
 
                     cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
-                    set +x; echo 'writing license_key_contents'; sed -i -e "s/license_key_contents: \\"<REPLACE WITH VALID LICENSE>\\"/license_key_contents: \\"\${LICENSE}\\"/" group_vars/all/dcos.yaml; set -x
+                    set +x; echo 'writing license_key_contents'; sed -i -e "s/license_key_contents:.*/license_key_contents: \${LICENSE}/" group_vars/all/dcos.yaml; set -x
                     sed -i -e 's/bootstrap1-centos7/bootstrap1-centos7-enterprise/' -e 's/master1-centos7/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos7-enterprise/' molecule/ec2_centos7/molecule.yml
                     sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
 
@@ -215,7 +215,7 @@ pipeline {
                     pip install -r test_requirements.txt
 
                     cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
-                    set +x; echo 'writing license_key_contents'; sed -i -e "s/license_key_contents: \\"<REPLACE WITH VALID LICENSE>\\"/license_key_contents: \\"\${LICENSE}\\"/" group_vars/all/dcos.yaml; set -x
+                    set +x; echo 'writing license_key_contents'; sed -i -e "s/license_key_contents:.*/license_key_contents: \${LICENSE}/" group_vars/all/dcos.yaml; set -x
                     sed -i -e 's/bootstrap1-rhel7/bootstrap1-rhel7-enterprise/' -e 's/master1-rhel7/master1-rhel7-enterprise/' -e 's/agent1-rhel7/agent1-rhel7-enterprise/' molecule/ec2_rhel7/molecule.yml
                     sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
 
