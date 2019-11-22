@@ -10,7 +10,7 @@ To make best use of these roles, your nodes should resemble the Mesosphere recom
 * One bootstrap node ('bootstraps')
 * Zero or more agent nodes, used for public facing services ('agents_public')
 * One or more agent nodes, not used for public facing services ('agents_private')
-
+* Zero or more windows agent nodes ('agents_windows')
 ### An example inventory file is provided as shown here:
 
 ```ini
@@ -28,6 +28,10 @@ remoteagent1-dcos112s.example.com
 
 [agents_public]
 publicagent1-dcos112s.example.com
+
+[agents_windows]
+agent1-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword1>
+agent2-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword2>
 
 [agents:children]
 agents_private
@@ -64,6 +68,11 @@ dcos_legacy_node_type_name=slave
 [agents_public:vars]
 node_type=agent_public
 dcos_legacy_node_type_name=slave_public
+
+[agents_windows:vars]
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
 ```
 
 ### Global vars
@@ -139,8 +148,8 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 ## Tested OS and Mesosphere DC/OS versions
 
-* CentOS 7, RHEL 7
-* DC/OS 1.12, both open as well as enterprise version
+* CentOS 7, RHEL 7,  Windows Server ver. 1809 Datacenter Edition Server Core
+* DC/OS 1.13, both open as well as enterprise version
 
 ## License
 

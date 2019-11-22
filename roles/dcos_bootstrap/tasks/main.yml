@@ -60,6 +60,11 @@
      download_path: "{{ download_base_dir }}/{{ dcos_version_specifier }}"
      install_file: "{{ dcos['download']|basename }}"
 
+- name: Setting windows install file
+  set_fact:
+     install_win_file: "{{ dcos['download_win']|basename }}"
+  when: dcos['download_win'] is defined
+
 - name: Purge old upgrade directory
   file:
     path: "{{ download_path }}/genconf/serve/*"
@@ -71,8 +76,12 @@
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
-- name: Create install directory/genconf
+- name: Create Linux install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
+
+- name: Create Windows install directory/genconf_win
+  file: path={{ download_path }}/genconf_win state=directory mode=0755
+  when: dcos['download_win'] is defined
 
 - name: Create bootstrap CA directory
   file: path={{ download_path }}/genconf/ca state=directory mode=0700
@@ -124,12 +133,20 @@
 
 #  vvv DOWNLOAD vvv
 
-- name: Download installation file
+- name: Download Linux installation file
   get_url:
     url: "{{ dcos['download'] }}"
     checksum: "{{ dcos['download_checksum'] | default(omit) }}"
     dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
+
+- name: Download Windows installation file
+  get_url:
+    url: "{{ dcos['download_win'] }}"
+    checksum: "{{ dcos['download_win_checksum'] | default(omit) }}"
+    dest: "{{ download_path }}/{{ install_win_file }}"
+    mode: 0440
+  when: dcos['download_win'] is defined
 
 # vvv POST DOWNLOAD / configuration vvv
 
@@ -157,6 +174,20 @@
   when: "dcos.config.fault_domain_detect_contents is not defined"
   notify: trigger_new_config
 
+- name: "Set default IP detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_win_contents`)"
+  template:
+    src: "{{ dcos_environment }}/ip-detect-win.j2"
+    dest: "{{ download_path }}/genconf_win/ip-detect.ps1"
+    mode: 0644
+  when: "(dcos.config.ip_detect_win_contents is not defined) and (dcos['download_win'] is defined)"
+
+- name: "Set default public IP detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_public_win_contents`)"
+  template:
+    src: "{{ dcos_environment }}/ip-detect-public-win.j2"
+    dest: "{{ download_path }}/genconf_win/ip-detect-public.ps1"
+    mode: 0644
+  when: "(dcos.config.ip_detect_public_win_contents is not defined) and (dcos['download_win'] is defined)"
+
 # vvv FIXME: workaround for bad multi-line handling in DC/OS config vvv
 
 - name: "Generate IP detection script from ip_detect_contents"
@@ -183,6 +214,20 @@
   when: "dcos.config.fault_domain_detect_contents is defined"
   notify: trigger_new_config
 
+- name: "Generate IP detection Powershell script from ip_detect_win_contents"
+  copy:
+    dest: "{{ download_path }}/genconf_win/ip-detect.ps1"
+    mode: 0644
+    content: "{{ dcos.config.ip_detect_win_contents }}"
+  when: "(dcos.config.ip_detect_win_contents is defined) and (dcos['download_win'] is defined)"
+
+- name: "Generate IP detection Powershell script from ip_detect_public_win_contents"
+  copy:
+    dest: "{{ download_path }}/genconf_win/ip-detect-public.ps1"
+    mode: 0644
+    content: "{{ dcos.config.ip_detect_public_win_contents }}"
+  when: "(dcos.config.ip_detect_public_win_contents is defined) and (dcos['download_win'] is defined)"
+
 # vvv filter and generate config vvv
 
 - name: Filter Config. Get rid of ip_detect_contents,ip_detect_contents and fault_domain_detect_contents
@@ -208,6 +253,13 @@
   args:
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/dcos_install.sh"
+
+- name: Unpack Windows installer packages
+  command: "bash {{ install_win_file }}"
+  args:
+    chdir: "{{ download_path }}"
+    creates: "{{ download_path }}/genconf_win/serve/prerequisites/dcos_install.ps1"
+  when: dcos['download_win'] is defined
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 
