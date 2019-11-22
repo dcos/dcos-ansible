@@ -15,7 +15,7 @@
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
-      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      download_checksum: "sha256:0b2aee11fcefc88c01dd60a3a6107db6d0caae2c6b9c0cf5f244e0c4b577f1e0"
       version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
@@ -31,7 +31,7 @@
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
-      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      download_checksum: "sha256:0b2aee11fcefc88c01dd60a3a6107db6d0caae2c6b9c0cf5f244e0c4b577f1e0"
       version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
@@ -46,7 +46,7 @@
   vars:
     dcos:
       download: "https://downloads.dcos.io/dcos/stable/1.13.6/dcos_generate_config.sh"
-      download_checksum: "sha256:b0f01f71130b391328e95e92c1bde9d3d5e8bf6f20e8b61dc8767d86a3bac033"
+      download_checksum: "sha256:0b2aee11fcefc88c01dd60a3a6107db6d0caae2c6b9c0cf5f244e0c4b577f1e0"
       version: "1.13.6"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
