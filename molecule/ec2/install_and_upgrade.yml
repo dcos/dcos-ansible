@@ -60,6 +60,12 @@
       pause:
         minutes: 1
 
+- name: Collect DC/OS versions
+  hosts: all
+  tasks:
+    - name: Collect DC/OS versions
+      setup:
+
 - name: "Upgrade and configure BOOTSTRAP nodes"
   hosts: bootstraps
   become: true
