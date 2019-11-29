@@ -79,8 +79,8 @@
 - name: Create Linux install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
-- name: Create Windows install directory/genconf_win
-  file: path={{ download_path }}/genconf_win state=directory mode=0755
+- name: Create Windows install directory/genconf/serve/windows
+  file: path={{ download_path }}/genconf/serve/windows state=directory mode=0755
   when: dcos['download_win'] is defined
 
 - name: Create bootstrap CA directory
@@ -177,14 +177,14 @@
 - name: "Set default IP detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_win_contents`)"
   template:
     src: "{{ dcos_environment }}/ip-detect-win.j2"
-    dest: "{{ download_path }}/genconf_win/ip-detect.ps1"
+    dest: "{{ download_path }}/genconf/serve/windows/ip-detect.ps1"
     mode: 0644
   when: "(dcos.config.ip_detect_win_contents is not defined) and (dcos['download_win'] is defined)"
 
 - name: "Set default public IP detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_public_win_contents`)"
   template:
     src: "{{ dcos_environment }}/ip-detect-public-win.j2"
-    dest: "{{ download_path }}/genconf_win/ip-detect-public.ps1"
+    dest: "{{ download_path }}/genconf/serve/windows/ip-detect-public.ps1"
     mode: 0644
   when: "(dcos.config.ip_detect_public_win_contents is not defined) and (dcos['download_win'] is defined)"
 
@@ -216,14 +216,14 @@
 
 - name: "Generate IP detection Powershell script from ip_detect_win_contents"
   copy:
-    dest: "{{ download_path }}/genconf_win/ip-detect.ps1"
+    dest: "{{ download_path }}/genconf/serve/windows/ip-detect.ps1"
     mode: 0644
     content: "{{ dcos.config.ip_detect_win_contents }}"
   when: "(dcos.config.ip_detect_win_contents is defined) and (dcos['download_win'] is defined)"
 
 - name: "Generate IP detection Powershell script from ip_detect_public_win_contents"
   copy:
-    dest: "{{ download_path }}/genconf_win/ip-detect-public.ps1"
+    dest: "{{ download_path }}/genconf/serve/windows/ip-detect-public.ps1"
     mode: 0644
     content: "{{ dcos.config.ip_detect_public_win_contents }}"
   when: "(dcos.config.ip_detect_public_win_contents is defined) and (dcos['download_win'] is defined)"
@@ -258,7 +258,7 @@
   command: "bash {{ install_win_file }}"
   args:
     chdir: "{{ download_path }}"
-    creates: "{{ download_path }}/genconf_win/serve/prerequisites/dcos_install.ps1"
+    creates: "{{ download_path }}/genconf/serve/windows/prerequisites/dcos_install.ps1"
   when: dcos['download_win'] is defined
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
