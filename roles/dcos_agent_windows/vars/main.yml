@@ -1,2 +1,2 @@
 # DCOS Windows params:
-base_windows_dir: "C:\\dcos"
+base_windows_dir: "C:\\d2iq\\dcos"

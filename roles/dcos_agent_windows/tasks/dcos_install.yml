@@ -5,7 +5,7 @@
 
 - name: Windows Installation | Download dcos_install.ps1
   win_get_url:
-    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos['version'] }}/genconf_win/serve/prerequisites/dcos_install.ps1"
+    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos['version'] }}/genconf/serve/windows/prerequisites/dcos_install.ps1"
     dest: "{{ base_windows_dir }}\\dcos_install.ps1"
 
 - name: Windows Installation | DC/OS install
@@ -14,7 +14,6 @@
     - name: Windows Installation | Run DC/OS agent installation
       win_shell: "{{ base_windows_dir }}\\dcos_install.ps1 '{{ dcos['config']['bootstrap_url'] }}' '{{ dcos['version'] }}' '{{ groups['masters'] | join(',') }}'"
       register: install_shell_result
-      notify: reboot the host
 
   always:
     - name: Windows Installation | Output log into dcos-install.log
