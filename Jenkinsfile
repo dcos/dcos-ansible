@@ -326,7 +326,10 @@ pipeline {
             beforeAgent true
             not { changeset "Jenkinsfile" }
             not { changeset "galaxy.yml" }
-            branch 'master'
+            anyOf {
+              branch 'master';
+              branch 'feature/*';
+            }
           }
           agent {
             label "mesos"
@@ -338,12 +341,14 @@ pipeline {
               sh("docker build -t mesosphere/${IMAGE}:latest .")
               script {
                 // Calculate Docker image tag based on commit id.
-                env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).trim()
-
+                env.dockerTag = sh(script: "echo \$(git rev-parse --abbrev-ref HEAD)-\$(git rev-parse --short HEAD)", returnStdout: true).replaceAll('/','-').trim()
                 // Tag and push the image we built earlier.
                 sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.dockerTag}")
                 sh("docker push mesosphere/${IMAGE}:${env.dockerTag}")
-                sh("docker push mesosphere/${IMAGE}:latest")
+                if (env.BRANCH_NAME == 'master') {
+                  // Only overwrite latest if we're on master
+                  sh("docker push mesosphere/${IMAGE}:latest")
+                }
               }
             }
           }
