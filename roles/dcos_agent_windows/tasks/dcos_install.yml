@@ -1,0 +1,22 @@
+- name: Windows Installation | Create installer download directory
+  win_file:
+    path: "{{ base_windows_dir }}"
+    state: directory
+
+- name: Windows Installation | Download dcos_install.ps1
+  win_get_url:
+    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos['version'] }}/genconf/serve/windows/prerequisites/dcos_install.ps1"
+    dest: "{{ base_windows_dir }}\\dcos_install.ps1"
+
+- name: Windows Installation | DC/OS install
+  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  block:
+    - name: Windows Installation | Run DC/OS agent installation
+      win_shell: "{{ base_windows_dir }}\\dcos_install.ps1 '{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve' '{{ groups['masters'] | join(',') }}'"
+      register: install_shell_result
+
+  always:
+    - name: Windows Installation | Output log into dcos-install.log
+      win_copy:
+        content: "{{ install_shell_result.stdout }}"
+        dest: "{{ base_windows_dir }}\\var\\log\\ansible_playbook_stdout.log"
