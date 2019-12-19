@@ -1,3 +1,7 @@
+- name: Windows | Defining DC/OS by using 'version' or, more specifically, 'image_commit'
+  set_fact:
+     dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
+
 # TO DO: remove when Winpanda is able to create Mesos-DNS by its own
 - name: Windows | Detect network interface with default_gateway set
   set_fact:
