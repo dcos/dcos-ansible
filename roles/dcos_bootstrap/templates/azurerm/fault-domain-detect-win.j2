@@ -1,0 +1,3 @@
+$metadata = Invoke-RestMethod -Method GET -Uri http://169.254.169.254/metadata/instance/compute?api-version=2017-04-02 -Headers @{"Metadata"="True"}
+$domain =  '{"fault_domain":{"region":{"name": "' + 'windows-azure/' + $metadata.location + '"},"zone":{"name": "' + 'windows-azure/' + $metadata.location + '-'+ $metadata.platformFaultDomain + '"}}}'
+Write-Host $domain
