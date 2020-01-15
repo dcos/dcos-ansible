@@ -174,6 +174,13 @@
   when: "dcos.config.fault_domain_detect_contents is not defined"
   notify: trigger_new_config
 
+- name: "Set default fault domain detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.fault_domain_detect_win_contents`)"
+  template:
+    src: "{{ dcos_environment }}/fault-domain-detect-win.j2"
+    dest: "{{ download_path }}/genconf/serve/windows/fault-domain-detect-win.ps1"
+    mode: 0644
+  when: "(dcos.config.fault_domain_detect_win_contents is not defined) and (dcos['download_win'] is defined)"
+
 - name: "Set default IP detection Powershell script for {{ dcos_environment }} (overwrite by setting `dcos.config.ip_detect_win_contents`)"
   template:
     src: "{{ dcos_environment }}/ip-detect-win.j2"
