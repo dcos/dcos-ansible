@@ -1,30 +1,33 @@
 ---
 scenario:
-  name: ec2_rhel7
+  name: ec2_windows
 driver:
   name: delegated
 platforms:
-  - name: bootstrap1-rhel7-${USER:-ci}-${HOSTNAME:-local}
-    image: ami-011b3ccf1bd6db744
+  - name: "bootstrap1-centos7-${USER:-ci}-${HOSTNAME:-local}"
+    image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
+    ssh_user: centos
     groups:
       - bootstraps
       - dcos
-  - name: master1-rhel7-${USER:-ci}-${HOSTNAME:-local}
-    image: ami-011b3ccf1bd6db744
+  - name: master1-centos7-${USER:-ci}-${HOSTNAME:-local}
+    image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
+    ssh_user: centos
     groups:
       - masters
       - dcos
-  - name: agent1-rhel7-${USER:-ci}-${HOSTNAME:-local}
-    image: ami-011b3ccf1bd6db744
+  - name: winagent1-windows-${USER:-ci}-${HOSTNAME:-local}
+    windows: true
+    image: ami-0105f663dc99752af
     region: us-east-1
     instance_type: m5.xlarge
+    ssh_user: Administrator
     groups:
-      - agents_private
-      - agents
+      - agents_windows
       - dcos
 
 provisioner:

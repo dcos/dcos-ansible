@@ -7,8 +7,18 @@
   vars:
     ssh_user: ec2-user
     ssh_port: 22
+    winrm_port: 5985
     spot_price_max_calc: 5
-
+    windows_userdata: |
+      <script>
+        winrm quickconfig -q & winrm set winrm/config @{MaxTimeoutms="1800000"} & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}
+      </script>
+      <powershell>
+      New-SelfSignedCertificate -DnsName $(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/local-hostname) -CertStoreLocation Cert:\LocalMachine\My
+      New-Item WSMan:\localhost\Listener -Address * -Transport HTTPS -HostName $(Invoke-RestMethod -uri http://169.254.169.254/latest/meta-data/local-hostname) -CertificateThumbPrint $(ls Cert:\LocalMachine\My).Thumbprint -Force
+      Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+      Set-MpPreference -DisableRealtimeMonitoring $true
+      </powershell>
     admin_ip: "{{ lookup('url', 'http://whatismyip.akamai.com') }}"
     security_group_name: "molecule_{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
     security_group_description: Security group for testing Molecule
@@ -16,6 +26,10 @@
       - proto: tcp
         from_port: "{{ ssh_port }}"
         to_port: "{{ ssh_port }}"
+        cidr_ip: "{{ admin_ip }}/32"
+      - proto: tcp
+        from_port: "{{ winrm_port }}"
+        to_port: "{{ winrm_port }}"
         cidr_ip: "{{ admin_ip }}/32"
       - proto: icmp
         from_port: 8
@@ -62,6 +76,7 @@
       ec2:
         key_name: "{{ keypair_name }}"
         image: "{{ item.image }}"
+        user_data: "{{  windows_userdata if item.windows is defined and item.windows else '' }}"
         region: "{{ item.region }}"
         zone: "{{ item.zone|default(omit) }}"
         instance_initiated_shutdown_behavior: terminate
@@ -70,12 +85,13 @@
         group: "{{ security_group_name }}"
         volumes:
           - device_name: /dev/sda1
-            volume_size: 20
+            volume_size: "{{ 50 if item.windows is defined and item.windows else 20 }}"
             volume_type: gp2
             delete_on_termination: yes
         instance_tags:
           Name: "molecule {{ item.name }}"
           instance: "{{ item.name }}"
+          molecule_windows: "{{ item.windows | bool if item.windows is defined else false }}"
           molecule_region: "{{ item.region }}"
           molecule_ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
         wait: yes
@@ -98,7 +114,20 @@
       with_items: "{{ server.results }}"
 
     # Mandatory configuration for Molecule to function.
+    - name: get the Administrator password
+      ec2_win_password:
+        instance_id: "{{ item.instance_ids[0] }}"
+        region: "{{ item.instances[0].tags.molecule_region }}"
+        key_file: "{{ keypair_path }}"
+        wait: yes
+        wait_timeout: 600
+      with_items: "{{ ec2_jobs.results }}"
+      register: win_passwords
+      when: server.changed | bool and item.instances[0].tags.molecule_windows | bool
 
+    - name: "Output passwords"
+      debug:
+        msg: Passwords {{ win_passwords }}
     - name: Populate instance config dict
       set_fact:
         instance_conf_dict:
@@ -107,11 +136,15 @@
             "region": "{{ item.instances[0].tags.molecule_region }}",
             "address": "{{ item.instances[0].public_ip }}",
             "user": "{{ item.instances[0].tags.molecule_ssh_user }}",
-            "port": "{{ ssh_port }}",
+            "password": "{{ win_passwords.results[index].win_password if item.instances[0].tags.molecule_windows | bool else omit }}",
+            "port": "{{ winrm_port if item.instances[0].tags.molecule_windows | bool else ssh_port }}",
             "identity_file": "{{ keypair_path }}",
+            "connection": "{{ 'winrm' if item.instances[0].tags.molecule_windows | bool else 'ssh' }}",
             "instance_ids": "{{ item.instance_ids }}",
           }
-      with_items: "{{ ec2_jobs.results }}"
+      loop: "{{ ec2_jobs.results }}"
+      loop_control:
+        index_var: index
       register: instance_config_dict
       when: server.changed | bool
 
@@ -126,12 +159,12 @@
         dest: "{{ molecule_instance_config }}"
       when: server.changed | bool
 
-    - name: Wait for SSH
+    - name: Wait for remote connection port
       wait_for:
         port: "{{ item.port }}"
         host: "{{ item.address }}"
-        search_regex: SSH
-        delay: 60
+        # search_regex: SSH
+        delay: 10
         timeout: 320
       with_items: "{{ lookup('file', molecule_instance_config) | molecule_from_yaml }}"
 

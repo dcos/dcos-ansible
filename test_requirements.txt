@@ -1,6 +1,7 @@
 molecule==2.22
 molecule[ec2]
 molecule[vagrant]
+molecule[delegated]
 boto
 boto3
 ansible-lint==v4.1.1a0
