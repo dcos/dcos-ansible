@@ -15,7 +15,7 @@
 
     - name: Populate instance config
       set_fact:
-        instance_conf: "{{ lookup('file', molecule_instance_config) | molecule_from_yaml }}"
+        instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
         skip_instances: false
       when: molecule_instance_config_stat.stat.exists
 
