@@ -14,7 +14,7 @@
 - name: Windows | Configures DNS lookup on Windows hosts
   win_dns_client:
     adapter_names: "{{ item.ansible_facts.default_network_interface }}"
-    ipv4_addresses: "{{ groups['masters'] }}"
+    ipv4_addresses: "{{ groups['masters'] | map('extract', hostvars, ['dcos_custom_facts', 'detect_ip']) | list }}"
     log_path: C:\dns_log.txt
   when: item.ansible_facts is defined
   with_items: "{{ default_network_interface_detect.results }}"

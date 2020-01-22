@@ -8,7 +8,7 @@
     path: "/etc/ansible/facts.d"
     state: "directory"
 
-- name: "Custom DC/OS facts"
+- name: "Custom DC/OS Version facts"
   file:
     src: "/opt/mesosphere/etc/dcos-version.json"
     dest: "/etc/ansible/facts.d/dcos_installation.fact"
@@ -61,3 +61,26 @@
   when:
     - ansible_local is defined and ansible_local.dcos_installation is defined
     - (ansible_local.dcos_installation['version'] != dcos['version']) or (dcos['image_commit'] is defined and ansible_local.dcos_installation['dcos-image-commit'] != dcos['image_commit']) or latest_dcos_config_setup_is_installed.rc != 0
+
+- name: "Custom DC/OS facts"
+  block:
+    - name: run detect_ip
+      command: /opt/mesosphere/bin/detect_ip
+      register: dcos_detect_ip
+    - name: run detect_ip_public
+      command: /opt/mesosphere/bin/detect_ip_public
+      register: dcos_detect_ip_public
+
+    - name: "Set Custom DC/OS facts"
+      set_fact:
+        dcos_custom_facts:
+          {
+            "detect_ip": "{{ dcos_detect_ip.stdout }}",
+            "detect_ip_public": "{{ dcos_detect_ip_public.stdout }}"
+          }
+    - name: "Store Custom DC/OS facts"
+      copy:
+         dest: /etc/ansible/facts.d/dcos_custom_facts.fact
+         content: "{{ dcos_custom_facts | to_json }}"
+      notify: reload facts
+    - meta: flush_handlers
