@@ -2,6 +2,25 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
+- name: Windows | Create custom fact directory
+  win_file:
+    path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d"
+    state: directory
+
+- name: Windows | Custom DC/OS facts if
+  win_file:
+    path: "{{ base_windows_dir }}\\etc\\dcos-version.json"
+    state: file
+  register: exists
+
+- name: Windows | Copy dcos-version.json to fact directory
+  win_copy:
+    src: "{{ base_windows_dir }}\\etc\\dcos-version.json"
+    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
+  when: exists is defined
+  notify: reload facts
+- meta: flush_handlers
+
 # TO DO: remove when Winpanda is able to create Mesos-DNS by its own
 - name: Windows | Detect network interface with default_gateway set
   set_fact:
