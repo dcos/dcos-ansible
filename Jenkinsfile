@@ -103,7 +103,7 @@ pipeline {
             label "py36"
           }
           environment {
-            LICENSE = credentials("DCOS_1_13_LICENSE")
+            LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
           }
           steps {
             ansiColor('xterm') {
@@ -118,12 +118,10 @@ pipeline {
                     rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
                     pip install -r test_requirements.txt
 
-                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
-                    set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat \${LICENSE})\" group_vars/all/dcos.yaml; set -x
+                    cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
+                    echo 'writing license_key_contents'; sed -i -e \\"s/license_key_contents:.*/license_key_contents: \${LICENSE} /\\" group_vars/all/dcos.yaml
                     sed -i -e 's/bootstrap1-centos7/bootstrap1-centos7-enterprise/' -e 's/master1-centos7/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos7-enterprise/' molecule/ec2_centos7/molecule.yml
                     sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
-                    sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml
-                    egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}
 
                     molecule test --scenario-name ec2_centos7
                   '''
@@ -200,7 +198,7 @@ pipeline {
             label "py36"
           }
           environment {
-            LICENSE = credentials("DCOS_1_13_LICENSE")
+            LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
           }
           steps {
             ansiColor('xterm') {
@@ -216,12 +214,10 @@ pipeline {
                     rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
                     pip install -r test_requirements.txt
 
-                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
-                    set +x; echo 'writing license_key_contents'; sed -i -e \"/config:/a\\    license_key_contents: \$(cat \${LICENSE})\" group_vars/all/dcos.yaml; set -x
+                    cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
+                    echo 'writing license_key_contents'; sed -i -e \\"s/license_key_contents:.*/license_key_contents: \${LICENSE}/\\" group_vars/all/dcos.yaml
                     sed -i -e 's/bootstrap1-rhel7/bootstrap1-rhel7-enterprise/' -e 's/master1-rhel7/master1-rhel7-enterprise/' -e 's/agent1-rhel7/agent1-rhel7-enterprise/' molecule/ec2_rhel7/molecule.yml
                     sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
-                    sed -i 's/download_checksum: .*/download_checksum: sha256:522e461ed1a0779d2b54c91a3904218c79c612da45f3fe8d1623f1925ff9e3da/' group_vars/all/dcos.yaml
-                    egrep -r 'downloads.dcos.io/dcos' -l --include='*.yml' --include='*.yaml' . | xargs -I {} sed -i -e 's/enterprise_dcos: .*/enterprise_dcos: true/' -e 's%downloads.dcos.io/dcos%downloads.mesosphere.com/dcos-enterprise%g' -e 's/dcos_generate_config.sh/dcos_generate_config.ee.sh/g' {}
 
                     molecule test --scenario-name ec2_rhel7
                   '''
