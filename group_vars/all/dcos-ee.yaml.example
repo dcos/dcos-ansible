@@ -2,7 +2,7 @@
 dcos:
   download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.0/dcos_generate_config.ee.sh"
   download_checksum: "sha256:933950a7ca856ac72150d68c614edc4d333c23cc24b594af8da3a9467c5e1a36"
-  download_win: https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh
+  download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh"
   version: "2.0.0"
   enterprise_dcos: true
 
