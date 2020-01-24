@@ -1,9 +1,9 @@
 ---
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/2.0.0/dcos_generate_config.sh"
-  download_checksum: "sha256:95a16dfae5bd4da83235f27f82caede4105a9e6b63fcbc9ca7f11e8f794eebbd"
-  download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.ee.sh"
-  version: "2.0.0"
+  download: "https://downloads.dcos.io/dcos/stable/2.0.1/dcos_generate_config.sh"
+  download_checksum: "sha256:4c23098d14ca7920062114def614f2d60d3f76ab5f59783ddfb713aa96718ed8"
+  download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
+  version: "2.0.1"
   enterprise_dcos: false
 
   selinux_mode: permissive
