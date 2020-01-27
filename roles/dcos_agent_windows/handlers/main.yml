@@ -1,4 +1,0 @@
-  - name: Windows | Re-run setup to use custom facts
-  setup: ~
-  fact_path: "{{ base_windows_dir }}\\etc\\dcos-version.json"
-  listen: reload facts
