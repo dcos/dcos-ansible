@@ -5,6 +5,20 @@
   tasks:
     - include_role:
         name: dcos_requirements
+- name: Set open checksum and url
+  hosts: localhost
+  tasks:
+  - set_fact:
+      test_initial_download: "https://downloads.dcos.io/dcos/stable/2.0.0/dcos_generate_config.sh"
+      test_initial_download_checksum: "sha256:95a16dfae5bd4da83235f27f82caede4105a9e6b63fcbc9ca7f11e8f794eebbd"
+      test_initial_version: "2.0.0"
+    when: not dcos['enterprise_dcos']
+  - set_fact:
+      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.0/dcos_generate_config.ee.sh"
+      test_initial_download_checksum: "sha256:933950a7ca856ac72150d68c614edc4d333c23cc24b594af8da3a9467c5e1a36"
+      test_initial_version: "2.0.0"
+    when: dcos['enterprise_dcos']
+
 
 - name: "Setup and configure BOOTSTRAP nodes"
   hosts: bootstraps
@@ -14,6 +28,9 @@
         name: dcos_bootstrap
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_initial_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_initial_download_checksum }}"
+      version: "{{ hostvars['localhost'].test_initial_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -27,6 +44,9 @@
         name: dcos_master
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_initial_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_initial_download_checksum }}"
+      version: "{{ hostvars['localhost'].test_initial_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -39,6 +59,9 @@
         name: dcos_agent
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_initial_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_initial_download_checksum }}"
+      version: "{{ hostvars['localhost'].test_initial_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -51,6 +74,12 @@
       pause:
         minutes: 1
 
+- name: Collect DC/OS versions
+  hosts: all
+  tasks:
+    - name: Collect DC/OS versions
+      setup:
+
 - name: "Upgrade and configure BOOTSTRAP nodes"
   hosts: bootstraps
   become: true
@@ -59,8 +88,6 @@
         name: dcos_bootstrap
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -74,8 +101,6 @@
         name: dcos_master
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
@@ -88,8 +113,6 @@
         name: dcos_agent
   vars:
     dcos:
-      download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
-      version: "1.13.4"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
