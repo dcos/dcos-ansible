@@ -49,4 +49,4 @@
 
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
-  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  when: ( hostvars[inventory_hostname]['ansible_dcos_installation'] is not defined ) or ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is not defined )
