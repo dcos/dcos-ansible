@@ -16,7 +16,16 @@
       register: install_shell_result
 
   always:
-    - name: Windows Installation | Output log into dcos-install.log
+    - name: Windows Installation | Output log into ansible_playbook.log
       win_copy:
-        content: "{{ install_shell_result.stdout }}"
-        dest: "{{ base_windows_dir }}\\var\\log\\ansible_playbook_stdout.log"
+        content: |
+          ================================================
+          Ansible STDOUT:
+          ------------------------------------------------
+          {{ install_shell_stdout.stdout }}
+          ================================================
+          Ansible STDERR:
+          ------------------------------------------------
+          {{ install_shell_stdout.stderr }}
+          ================================================
+        dest: "{{ base_windows_dir }}\\var\\log\\ansible_playbook.log"
