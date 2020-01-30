@@ -271,7 +271,6 @@
     name: nginx
     load_path: "{{ local_nginx_docker_image_tar }}"
     source: load
-    force_source: yes
   when: local_nginx_docker_image_tar is defined
 
 - name: Serve bootstrap files via dockerized httpd
