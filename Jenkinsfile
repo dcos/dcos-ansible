@@ -131,7 +131,7 @@ pipeline {
                     cat group_vars/all/dcos.yaml
                     echo '#####################################'
 
-                    molecule test --scenario-name ec2_centos7
+                    molecule --debug test --scenario-name ec2_centos7
                   '''
                 }
               }
