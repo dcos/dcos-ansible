@@ -269,7 +269,7 @@
 - name: load nginx docker image from a local source
   docker_image:
     name: nginx
-    load_path: {{ local_nginx_docker_image_tar }}
+    load_path: "{{ local_nginx_docker_image_tar }}"
     source: load
     force_source: yes
   when: local_nginx_docker_image_tar is defined
