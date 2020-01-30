@@ -1,10 +1,11 @@
 ---
 - name: DC/OS Requirements
-  hosts: all:!agents_windows
+  hosts: all
   become: true
   tasks:
     - include_role:
         name: dcos_requirements
+
 - name: Set open checksum and url
   hosts: localhost
   tasks:
@@ -65,18 +66,6 @@
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
-
-- name: "Setup and configure WINDOWS AGENT nodes"
-  hosts: agents_windows
-  tasks:
-    - include_role:
-        name: dcos_agent_windows
-  vars:
-    dcos:
-      config:
-        bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
-        master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
-
 
 - name: "WAIT for the cluster to stabilise before upgrade"
   hosts: localhost
