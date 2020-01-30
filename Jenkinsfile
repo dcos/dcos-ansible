@@ -136,7 +136,7 @@ pipeline {
                     molecule destroy --scenario-name ec2_centos7
                     molecule dependency --scenario-name ec2_centos7
                     molecule syntax --scenario-name ec2_centos7
-                    molecule create --scenario-name ec2_centos7
+                    molecule create --scenario-name ec2_centos7 || molecule --debug prepare --scenario-name ec2_centos7
                     molecule --debug prepare --scenario-name ec2_centos7
                     molecule converge --scenario-name ec2_centos7
                     molecule idempotence --scenario-name ec2_centos7
