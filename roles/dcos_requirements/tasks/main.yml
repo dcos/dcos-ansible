@@ -112,15 +112,17 @@
   # If not installed yum_list_docker.results[*].yumstate != installed
   register: yum_list_docker
 
-- name: "Docker CE (stable) repository (Only non-EL systems)"
-  yum_repository:
-    name: docker-ce
-    description: Docker CE Repository
-    baseurl: "https://download.docker.com/linux/centos/7/$basearch/stable"
-    enabled: yes
-    gpgcheck: yes
-    gpgkey: https://download.docker.com/linux/centos/gpg
-  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
+# TODO: sschlott: change the hard-coded Docker repo here (make it a variable)
+# TODO: sschlott: introduce switch variable AIRGAPPED here --> it is assumed that EPEL is configured with a local mirror --> do not even try to set it from the Internet
+#- name: "Docker CE (stable) repository (Only non-EL systems)"
+#  yum_repository:
+#    name: docker-ce
+#    description: Docker CE Repository
+#    baseurl: "https://download.docker.com/linux/centos/7/$basearch/stable"
+#    enabled: yes
+#    gpgcheck: yes
+#    gpgkey: https://download.docker.com/linux/centos/gpg
+#  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
 - name: "Preinstall containerd.io for docker-ce on CentOS preventing kmem bug"
   yum:
@@ -165,14 +167,16 @@
     enabled: true
   when: "'podman' not in (dcos_docker_service_name | default('docker'))"
 
-- name: "Install EPEL repositories for required packages"
-  yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-    state: present
-  register: dcos_yum_epel_install
-  until: dcos_yum_epel_install is success
-  retries: 3
-  delay: 60
+# TODO: sschlott: change the hard-coded EPEL repo here (make it a variable)
+# TODO: sschlott: introduce switch variable AIRGAPPED here --> it is assumed that EPEL is configured with a local mirror --> do not even try to set it from the Internet
+#- name: "Install EPEL repositories for required packages"
+#  yum:
+#    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#    state: present
+#  register: dcos_yum_epel_install
+#  until: dcos_yum_epel_install is success
+#  retries: 3
+#  delay: 60
 
 - block:
   - name: "Install required system packages"
