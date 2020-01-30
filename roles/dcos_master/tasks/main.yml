@@ -67,9 +67,11 @@
     - name: run detect_ip
       command: /opt/mesosphere/bin/detect_ip
       register: dcos_detect_ip
+      changed_when: false
     - name: run detect_ip_public
       command: /opt/mesosphere/bin/detect_ip_public
       register: dcos_detect_ip_public
+      changed_when: false
 
     - name: "Set Custom DC/OS facts"
       set_fact:
