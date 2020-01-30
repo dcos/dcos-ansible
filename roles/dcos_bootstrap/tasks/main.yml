@@ -266,13 +266,13 @@
 # TODO: sschlott - - $BASE_FOLDER_AIR_GAPPED/docker
 # TODO: sschlott - use Ansible module docker_image from file if air-gapped
 # likely:
- - name: load nginx docker image from a local source
-   docker_image:
-     name: nginx
-     load_path: {{ local_nginx_docker_image_tar }}
-     source: load
-     force_source: yes
-   when: local_nginx_docker_image_tar is defined
+- name: load nginx docker image from a local source
+  docker_image:
+    name: nginx
+    load_path: {{ local_nginx_docker_image_tar }}
+    source: load
+    force_source: yes
+  when: local_nginx_docker_image_tar is defined
 
 - name: Serve bootstrap files via dockerized httpd
   docker_container:
