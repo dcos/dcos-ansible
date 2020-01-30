@@ -13,7 +13,7 @@
   block:
     - name: Windows Installation | Run DC/OS agent installation
       win_shell: "{{ base_windows_dir }}\\dcos_install.ps1 '{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve' '{{ groups['masters'] | map('extract', hostvars, ['dcos_custom_facts', 'detect_ip']) | list | join(',') }}'"
-      register: install_shell_result
+      register: install_shell_stdout
 
   always:
     - name: Windows Installation | Output log into ansible_playbook.log
