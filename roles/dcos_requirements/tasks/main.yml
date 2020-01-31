@@ -59,8 +59,9 @@
   with_items:
     - "{{ repo_info }}"
 
-- name: "clear yum cache and show yum repolist"
-  command: "yum clean all"
+# TODO: sschlott, get rid of it completely if not needed
+#- name: "clear yum cache and show yum repolist"
+#  command: "yum clean all"
 
 - name: "{{ time_sync_package }} installed"
   yum:
