@@ -12,3 +12,15 @@ dcos_prereq_packages:
   - net-tools # `ifconfig` has been a non documented requirement for 1.12.0,
   #             fixed with https://github.com/dcos/dcos/pull/3734
   - jq # not technically required by DC/OS but by this Ansible role for checks
+
+# keep the repo defaults as the cloud image has configured it - and just add epel and docker-ce
+archive_configured_repos: false
+yum_mirror_name_prefix: "dcos-ansible-internet-centos7-"
+repo_info:
+  - name: epel
+    repo_url: "https://dl.fedoraproject.org/pub/epel/7/x86_64/"
+    mirrorlist: "https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=x86_64"
+    gpgkey: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7"
+  - name: docker-ce
+    repo_url: "https://download.docker.com/linux/centos/7/x86_64/stable"
+    gpgkey: "https://download.docker.com/linux/centos/gpg"
