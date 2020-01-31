@@ -61,7 +61,7 @@
 
 - name: "clear yum cache and show yum repolist"
   shell: "{{ item }}"
-  loop: ["yum clean all","yum repolist -v"]
+  loop: ["yum clean all", "yum repolist -v"]
 
 - name: "{{ time_sync_package }} installed"
   yum:
