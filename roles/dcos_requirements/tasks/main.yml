@@ -44,7 +44,7 @@
     - name: "move .repo files to old repos"
       shell: "mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/old_repos"
       when: (repos_configured.files is defined) and (repos_configured.files|length>0)
-  when: archive_configured_repos == true
+  when: archive_configured_repos
 
 - name: Configure YUM repos as input for reposync mirroring
   yum_repository:
@@ -52,9 +52,9 @@
     description: "{{ yum_mirror_name_prefix }}{{ item.name }}"
     file: "{{ yum_mirror_name_prefix }}repos"
     baseurl: "{{ item.repo_url }}"
-    mirrorlist: "{{ item.mirrorlist | default(omit)}}"
+    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
     gpgcheck: "{{ 'yes' if item.gpgkey is defined else 'no' | default(no) }}"
-    gpgkey: "{{ item.gpgkey | default(omit)}}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
     enabled: yes
   with_items:
     - "{{ repo_info }}"
