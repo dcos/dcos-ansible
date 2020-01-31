@@ -12,7 +12,7 @@ dcos_prereq_packages:
   #             fixed with https://github.com/dcos/dcos/pull/3734
   - jq # not technically required by DC/OS but by this Ansible role for checks
 
-# keep the repo defaults as the cloud image has configured it - and just add epel
+# keep the repo defaults as the cloud image has configured it - and just add epel and CentOS extras (needed for package python-docker-py)
 archive_configured_repos: false
 yum_mirror_name_prefix: "dcos-ansible-internet-rhel7-"
 repo_info:

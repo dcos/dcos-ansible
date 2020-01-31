@@ -28,7 +28,7 @@
   changed_when: false
 
 # explicit configuration of YUM repositories as provided by variables
-- name: move all other repo configs (e.g. to make sure only the local mirrors are used)
+- name: archive all other repo configs (e.g. to make sure only the local mirrors are used) - optional
   block:
     - name: "make sure old_repos sub-folder exists"
       file:
@@ -46,7 +46,7 @@
       when: (repos_configured.files is defined) and (repos_configured.files|length>0)
   when: archive_configured_repos
 
-- name: Configure YUM repos as input for reposync mirroring
+- name: Configure YUM repos explicitly as configured in variables
   yum_repository:
     name: "{{ yum_mirror_name_prefix }}{{ item.name }}"
     description: "{{ yum_mirror_name_prefix }}{{ item.name }}"
@@ -58,10 +58,6 @@
     enabled: yes
   with_items:
     - "{{ repo_info }}"
-
-# TODO: sschlott, get rid of it completely if not needed
-#- name: "clear yum cache and show yum repolist"
-#  command: "yum clean all"
 
 - name: "{{ time_sync_package }} installed"
   yum:
