@@ -27,7 +27,7 @@
     time_sync_package: "{{ ('onprem' in dcos_environment) | ternary(onprem_time_sync_package, cloud_time_sync_package) }}"
   changed_when: false
 
-# TODO: sschlott put the explicit configuration of YUM repos here
+# explicit configuration of YUM repositories as provided by variables 
 - name: move all other repo configs (e.g. to make sure only the local mirrors are used)
   block:
     - name: "make sure old_repos sub-folder exists"
@@ -148,18 +148,6 @@
   # If not installed yum_list_docker.results[*].yumstate != installed
   register: yum_list_docker
 
-# TODO: sschlott: change the hard-coded Docker repo here (make it a variable)
-# TODO: sschlott: introduce switch variable AIRGAPPED here --> it is assumed that EPEL is configured with a local mirror --> do not even try to set it from the Internet
-#- name: "Docker CE (stable) repository (Only non-EL systems)"
-#  yum_repository:
-#    name: docker-ce
-#    description: Docker CE Repository
-#    baseurl: "https://download.docker.com/linux/centos/7/$basearch/stable"
-#    enabled: yes
-#    gpgcheck: yes
-#    gpgkey: https://download.docker.com/linux/centos/gpg
-#  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
-
 - name: "Preinstall containerd.io for docker-ce on CentOS preventing kmem bug"
   yum:
     name: "{{ dcos_containerd_pkg_name }}"
@@ -203,17 +191,6 @@
     state: started
     enabled: true
   when: "'podman' not in (dcos_docker_service_name | default('docker'))"
-
-# TODO: sschlott: change the hard-coded EPEL repo here (make it a variable)
-# TODO: sschlott: introduce switch variable AIRGAPPED here --> it is assumed that EPEL is configured with a local mirror --> do not even try to set it from the Internet
-#- name: "Install EPEL repositories for required packages"
-#  yum:
-#    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-#    state: present
-#  register: dcos_yum_epel_install
-#  until: dcos_yum_epel_install is success
-#  retries: 3
-#  delay: 60
 
 - block:
   - name: "Install required system packages"
