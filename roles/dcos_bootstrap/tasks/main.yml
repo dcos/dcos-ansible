@@ -113,8 +113,6 @@
   when: dcos.enterprise_dcos and not psk_stat.stat.exists
 
 #  vvv DOWNLOAD vvv
-
-# TODO: sschlott just provide the install.sh locally on the bootstrap node (e.g. in a tmp folder) and then use a file:// URL
 - name: Download installation file
   get_url:
     url: "{{ dcos['download'] }}"
