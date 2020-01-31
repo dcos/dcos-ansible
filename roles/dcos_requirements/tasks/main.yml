@@ -53,7 +53,7 @@
     file: "{{ yum_mirror_name_prefix }}repos"
     baseurl: "{{ item.repo_url }}"
     mirrorlist: "{{ item.mirrorlist | default(omit)}}"
-    gpgcheck: "{{ yes if item.gpgkey is defined | default(no) }}"
+    gpgcheck: "{{ 'yes' if item.gpgkey is defined | default(no) }}"
     gpgkey: "{{ item.gpgkey | default(omit)}}"
     enabled: yes
   with_items:
