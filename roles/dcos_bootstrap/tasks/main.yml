@@ -45,28 +45,6 @@
   delay: 60
   until: dcos_yum_python_docker_py_install is success
 
-## TODO: can fully get rid of it - because the RPM package from CentOS Extras (python-docker-py) does the trick and contains the right package
-#- name: Install pip to install python-docker
-#  yum:
-#    name: python2-pip
-#    state: present
-#  register: dcos_yum_pythonpip_install
-#  retries: 3
-#  delay: 60
-#  until: dcos_yum_pythonpip_install is success
-#
-## TODO: sschlott: introduce switch variable AIRGAPPED here --> PYPI is likely not locally configured --> so the file would need to be pre-downloaded - https://stackoverflow.com/questions/36725843/installing-python-packages-without-internet-and-using-source-code-as-tar-gz-and
-## TODO: sschlott: ask if we have a great pre-built Docker image available on DockerHub (or for download) that contains all the necessary stuff already (Ansible, NGinx, ...) - $BASE_FOLDER_AIR_GAPPED/pypi
-#
-#- name: Install python docker bindings
-#  pip:
-#    name: docker
-#    state: present
-#  register: dcos_pip_docker_install
-#  retries: 3
-#  delay: 60
-#  until: dcos_pip_docker_install is success
-
 - name: Setting download dir
   set_fact:
      download_path: "{{ download_base_dir }}/{{ dcos_version_specifier }}"
@@ -263,9 +241,6 @@
   loop: "{{ upgrade_dir_hash.results }}"
 
 # vvv serve files via http vvv
-# TODO: sschlott - - $BASE_FOLDER_AIR_GAPPED/docker
-# TODO: sschlott - use Ansible module docker_image from file if air-gapped
-# likely:
 - name: load nginx docker image from a local source
   docker_image:
     name: nginx
