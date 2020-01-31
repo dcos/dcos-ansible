@@ -27,7 +27,7 @@
     time_sync_package: "{{ ('onprem' in dcos_environment) | ternary(onprem_time_sync_package, cloud_time_sync_package) }}"
   changed_when: false
 
-# explicit configuration of YUM repositories as provided by variables 
+# explicit configuration of YUM repositories as provided by variables
 - name: move all other repo configs (e.g. to make sure only the local mirrors are used)
   block:
     - name: "make sure old_repos sub-folder exists"
@@ -53,7 +53,7 @@
     file: "{{ yum_mirror_name_prefix }}repos"
     baseurl: "{{ item.repo_url }}"
     mirrorlist: "{{ item.mirrorlist | default(omit)}}"
-    gpgcheck: "{{ 'yes' if item.gpgkey is defined | default(no) }}"
+    gpgcheck: "{{ 'yes' if item.gpgkey is defined else 'no' | default(no) }}"
     gpgkey: "{{ item.gpgkey | default(omit)}}"
     enabled: yes
   with_items:
