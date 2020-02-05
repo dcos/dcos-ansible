@@ -35,6 +35,7 @@ pipeline {
           script {
             env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
             env.RHEL_TRIPLE_LINUX_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
+            env.WIN_TRIPLE_WINDOWS_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"mswin\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
             env.PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
             env.PYTHONUNBUFFERED = 1
             env.ANSIBLE_TRANSPORT = "paramiko"
@@ -274,7 +275,7 @@ pipeline {
                     pip install -r test_requirements.txt
 
                     cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
-                    sed -i -e \"s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
+                    sed -i -e \"s/spot_price_max_calc:.*/spot_price_max_calc: \${WIN_TRIPLE_WINDOWS_SPOT_PRICE}/" molecule/ec2/create.yml
 
                     molecule test --scenario-name ec2_windows
                   '''
@@ -314,7 +315,6 @@ pipeline {
                 ]) {
                 timeout(time: 60, unit: 'MINUTES') {
                   sh '''
-                    exit 0
                     export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-windows-enterprise"
                     export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-windows-enterprise"
                     export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-windows-enterprise"
@@ -325,7 +325,7 @@ pipeline {
                     cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
                     echo 'writing license_key_contents'; sed -i -e \"s/license_key_contents:.*/license_key_contents: \${LICENSE}/\" group_vars/all/dcos.yaml
                     sed -i -e 's/bootstrap1-windows/bootstrap1-windows-enterprise/' -e 's/master1-windows/master1-windows-enterprise/' -e 's/agent1-windows/agent1-windows-enterprise/' molecule/ec2_windows/molecule.yml
-                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${RHEL_TRIPLE_LINUX_SPOT_PRICE}/" molecule/ec2/create.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${WIN_TRIPLE_WINDOWS_SPOT_PRICE}/" molecule/ec2/create.yml
 
                     echo '###### group_vars/all/dcos.yaml #####'
                     cat group_vars/all/dcos.yaml
