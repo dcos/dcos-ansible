@@ -2,7 +2,7 @@
 scenario:
   name: ec2_gpu
 driver:
-  name: delegated
+  name: ec2
 platforms:
   # uses vault
   - name: gputestagent-centos7.5-${USER:-ci}-${HOSTNAME:-local}
@@ -48,7 +48,7 @@ provisioner:
   name: ansible
   log: true
   playbooks:
-    delegated:
+    ec2:
       create: ../ec2/create.yml
       destroy: ../ec2/destroy.yml
     converge: ../../dcos.yml

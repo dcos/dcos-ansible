@@ -2,7 +2,7 @@
 scenario:
   name: ec2_rhel7
 driver:
-  name: delegated
+  name: ec2
 platforms:
   - name: bootstrap1-rhel7-${USER:-ci}-${HOSTNAME:-local}
     image: ami-011b3ccf1bd6db744
@@ -31,7 +31,7 @@ provisioner:
   name: ansible
   log: true
   playbooks:
-    delegated:
+    ec2:
       create: ../ec2/create.yml
       destroy: ../ec2/destroy.yml
     converge: ../ec2/same_version_config_update.yml
