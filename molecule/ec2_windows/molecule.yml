@@ -4,7 +4,7 @@ scenario:
 driver:
   name: delegated
 platforms:
-  - name: "bootstrap1-centos7-${USER:-ci}-${HOSTNAME:-local}"
+  - name: "bootstrap1-windows-${USER:-ci}-${HOSTNAME:-local}"
     image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
@@ -12,7 +12,7 @@ platforms:
     groups:
       - bootstraps
       - dcos
-  - name: master1-centos7-${USER:-ci}-${HOSTNAME:-local}
+  - name: master1-windows-${USER:-ci}-${HOSTNAME:-local}
     image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
