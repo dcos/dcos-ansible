@@ -131,19 +131,7 @@ pipeline {
                     cat group_vars/all/dcos.yaml
                     echo '#####################################'
 
-                    molecule lint --scenario-name ec2_centos7
-                    molecule cleanup --scenario-name ec2_centos7
-                    molecule destroy --scenario-name ec2_centos7
-                    molecule dependency --scenario-name ec2_centos7
-                    molecule syntax --scenario-name ec2_centos7
-                    molecule create --scenario-name ec2_centos7
-                    molecule --debug prepare --scenario-name ec2_centos7
-                    molecule converge --scenario-name ec2_centos7
-                    molecule idempotence --scenario-name ec2_centos7
-                    molecule side_effect --scenario-name ec2_centos7
-                    molecule verify --scenario-name ec2_centos7
-                    molecule cleanup --scenario-name ec2_centos7
-                    molecule destroy --scenario-name ec2_centos7
+                    molecule --debug test --scenario-name ec2_centos7
                   '''
                 }
               }
