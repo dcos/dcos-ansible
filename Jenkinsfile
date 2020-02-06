@@ -39,7 +39,7 @@ pipeline {
             env.PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
             env.PYTHONUNBUFFERED = 1
             env.ANSIBLE_TRANSPORT = "paramiko"
-            env.ANSIBLE_SSH_CONTROL_PATH = "/var/shm/control-%h-%p-%r"
+            env.ANSIBLE_SSH_CONTROL_PATH = "/var/shm/control-%%h-%%p-%%r"
             env.ANSIBLE_SSH_CONTROL_PATH_DIR = "/var/shm/control"
             env.ANSIBLE_SSH_ARGS = "-C -o PreferredAuthentications=publickey -o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"
           }
