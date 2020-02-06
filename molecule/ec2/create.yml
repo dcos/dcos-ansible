@@ -136,7 +136,7 @@
             "region": "{{ item.instances[0].tags.molecule_region }}",
             "address": "{{ item.instances[0].public_ip }}",
             "user": "{{ item.instances[0].tags.molecule_ssh_user }}",
-            "password": "{{ win_passwords.results[index].win_password if item.instances[0].tags.molecule_windows | bool else omit }}",
+            "password": "{{ win_passwords.results[index].win_password if item.instances[0].tags.molecule_windows | bool else '' }}",
             "port": "{{ winrm_port if item.instances[0].tags.molecule_windows | bool else ssh_port }}",
             "identity_file": "{{ keypair_path }}",
             "connection": "{{ 'winrm' if item.instances[0].tags.molecule_windows | bool else 'ssh' }}",
