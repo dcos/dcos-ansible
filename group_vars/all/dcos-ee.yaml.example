@@ -5,7 +5,6 @@ dcos:
   download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh"
   version: "2.0.1"
   enterprise_dcos: true
-
   selinux_mode: permissive
 
   config:
@@ -18,6 +17,7 @@ dcos:
     bootstrap_url: http://int-bootstrap1-examplecluster.example.com:8080
     exhibitor_storage_backend: static
     master_discovery: static
+    enable_windows_agents: true
     master_list:
       - 172.31.2.95
     # This is an ip-detect script example which also stands for ip_detect_public_contents
