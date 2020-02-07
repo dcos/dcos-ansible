@@ -15,6 +15,7 @@
       test_upgrade_download: "https://downloads.dcos.io/dcos/testing/master/dcos_generate_config.sh"
       test_upgrade_download_checksum: ""
       test_upgrade_version: "2.1.0-dev"
+      test_upgrade_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh"
     when: not dcos['enterprise_dcos']
   - set_fact:
       test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.0/dcos_generate_config.ee.sh"
@@ -23,6 +24,7 @@
       test_upgrade_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/dcos_generate_config.ee.sh"
       test_upgrade_download_checksum: ""
       test_upgrade_version: "2.1.0-dev"
+      test_upgrade_download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
     when: dcos['enterprise_dcos']
 
 
@@ -107,6 +109,7 @@
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
       download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
       version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
@@ -124,6 +127,7 @@
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
       download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
       version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
@@ -140,6 +144,7 @@
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
       download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
       version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
@@ -155,6 +160,7 @@
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
       download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
       version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
