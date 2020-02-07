@@ -456,6 +456,9 @@ pipeline {
                 if (env.BRANCH_NAME == 'master') {
                   // Only overwrite latest if we're on master
                   sh("docker push mesosphere/${IMAGE}:latest")
+                } else if (env.BRANCH_NAME.startsWith("feature/")) {
+                  sh("docker tag mesosphere/${IMAGE}:latest mesosphere/${IMAGE}:${env.BRANCH_NAME}")
+                  sh("docker push mesosphere/${IMAGE}:${env.BRANCH_NAME.replace("feature/","")}")
                 }
               }
             }
