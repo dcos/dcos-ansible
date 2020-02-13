@@ -27,6 +27,38 @@
     time_sync_package: "{{ ('onprem' in dcos_environment) | ternary(onprem_time_sync_package, cloud_time_sync_package) }}"
   changed_when: false
 
+# explicit configuration of YUM repositories as provided by variables
+- name: archive all other repo configs (e.g. to make sure only the local mirrors are used) - optional
+  block:
+    - name: "make sure old_repos sub-folder exists"
+      file:
+        path: "/etc/yum.repos.d/old_repos"
+        state: directory
+
+    - name: "are repos configured"
+      find:
+        paths: "/etc/yum.repos.d/"
+        patterns: "*.repo"
+      register: repos_configured
+
+    - name: "move .repo files to old repos"
+      shell: "mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/old_repos"
+      when: (repos_configured.files is defined) and (repos_configured.files|length>0)
+  when: archive_configured_repos
+
+- name: Configure YUM repos explicitly as configured in variables
+  yum_repository:
+    name: "{{ yum_mirror_name_prefix }}{{ item.name }}"
+    description: "{{ yum_mirror_name_prefix }}{{ item.name }}"
+    file: "{{ yum_mirror_name_prefix }}repos"
+    baseurl: "{{ item.repo_url }}"
+    mirrorlist: "{{ item.mirrorlist | default(omit) }}"
+    gpgcheck: "{{ 'yes' if item.gpgkey is defined else 'no' | default(no) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    enabled: yes
+  with_items:
+    - "{{ repo_info }}"
+
 - name: "{{ time_sync_package }} installed"
   yum:
     name: "{{ time_sync_package }}"
@@ -112,16 +144,6 @@
   # If not installed yum_list_docker.results[*].yumstate != installed
   register: yum_list_docker
 
-- name: "Docker CE (stable) repository (Only non-EL systems)"
-  yum_repository:
-    name: docker-ce
-    description: Docker CE Repository
-    baseurl: "https://download.docker.com/linux/centos/7/$basearch/stable"
-    enabled: yes
-    gpgcheck: yes
-    gpgkey: https://download.docker.com/linux/centos/gpg
-  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
-
 - name: "Preinstall containerd.io for docker-ce on CentOS preventing kmem bug"
   yum:
     name: "{{ dcos_containerd_pkg_name }}"
@@ -129,6 +151,7 @@
     state: present
   when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
+# TOOD: sschlott move the repo config all to the initialization part of the playbook
 - block:
   - name: "Finding RHEL extras repository name (Only EL systems)"
     shell: |
@@ -164,15 +187,6 @@
     state: started
     enabled: true
   when: "'podman' not in (dcos_docker_service_name | default('docker'))"
-
-- name: "Install EPEL repositories for required packages"
-  yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-    state: present
-  register: dcos_yum_epel_install
-  until: dcos_yum_epel_install is success
-  retries: 3
-  delay: 60
 
 - block:
   - name: "Install required system packages"

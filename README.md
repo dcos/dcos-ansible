@@ -128,6 +128,32 @@ When invoking these roles interactively (for example from the operator's machine
 ansible-playbook -e 'dcos_cluster_name_confirmed=True' dcos.yml
 ```
 
+## Airgapped
+
+### Bootstrap node as YUM repo mirror(s)
+
+Using the bootstrap node as the yum mirror repo for all necessary:
+
+```bash
+ansible-playbook dcos.yml -e @./extra_vars/airgapped-bootstrap-as-repo-mirror.yml
+```
+
+### Making the bootstrap node work with pre-seeded files
+
+Using a preseed file for the necessary nginx Docker container image:
+
+Make the Docker image locally available on the bootstrap node as a .tar file which can be used by the `docker load` command. Then specifiy the absolute path to that file in `extra_vars` - e.g. you can use the file /extra_vars/airgapped-bootstrap-seed-files.yml` and execute the playbook like that:
+
+```bash
+ansible-playbook dcos.yml -e @./extra_vars/airgapped-bootstrap-seed-files.yml
+```
+
+If you are fully airgapped you can also make the DC/OS install file locally available on the bootstrap node. Then you just need to specify the variable `download` to use a local file URL with an absolute path to the location. One example would be:
+
+```bash
+download: "file:///home/centos/local-seed/dcos_generate_config.ee.sh"
+```
+
 ## Example playbook
 
 Mesosphere DC/OS is a complex system, spanning multiple nodes to form a full multi-node cluster. There are some constraints in making a playbook use the provided roles:

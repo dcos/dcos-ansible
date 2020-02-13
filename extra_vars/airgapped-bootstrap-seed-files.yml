@@ -1,0 +1,2 @@
+---
+local_nginx_docker_image_tar: /home/centos/local-seed/nginx.tar
