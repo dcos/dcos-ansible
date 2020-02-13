@@ -36,14 +36,24 @@
   no_log: true
 
 # PRE DOWNLOAD vvv
-- name: Install Python SDK library for Docker - used by Ansible
+
+- name: Install pip to install python-docker
   yum:
-    name: python-docker-py
+    name: python2-pip
     state: present
-  register: dcos_yum_python_docker_py_install
+  register: dcos_yum_pythonpip_install
   retries: 3
   delay: 60
-  until: dcos_yum_python_docker_py_install is success
+  until: dcos_yum_pythonpip_install is success
+
+- name: Install python docker bindings
+  pip:
+    name: docker
+    state: present
+  register: dcos_pip_docker_install
+  retries: 3
+  delay: 60
+  until: dcos_pip_docker_install is success
 
 - name: Setting download dir
   set_fact:
@@ -113,6 +123,7 @@
   when: dcos.enterprise_dcos and not psk_stat.stat.exists
 
 #  vvv DOWNLOAD vvv
+
 - name: Download installation file
   get_url:
     url: "{{ dcos['download'] }}"
@@ -239,12 +250,6 @@
   loop: "{{ upgrade_dir_hash.results }}"
 
 # vvv serve files via http vvv
-- name: load nginx docker image from a local source
-  docker_image:
-    name: nginx
-    load_path: "{{ local_nginx_docker_image_tar }}"
-    source: load
-  when: local_nginx_docker_image_tar is defined
 
 - name: Serve bootstrap files via dockerized httpd
   docker_container:
