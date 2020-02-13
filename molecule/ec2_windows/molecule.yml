@@ -1,0 +1,57 @@
+---
+scenario:
+  name: ec2_windows
+driver:
+  name: delegated
+platforms:
+  - name: "bootstrap1-windows-${USER:-ci}-${HOSTNAME:-local}"
+    image: ami-9887c6e7
+    region: us-east-1
+    instance_type: m5.xlarge
+    ssh_user: centos
+    groups:
+      - bootstraps
+      - dcos
+  - name: master1-windows-${USER:-ci}-${HOSTNAME:-local}
+    image: ami-9887c6e7
+    region: us-east-1
+    instance_type: m5.xlarge
+    ssh_user: centos
+    groups:
+      - masters
+      - dcos
+  - name: winagent1-windows-${USER:-ci}-${HOSTNAME:-local}
+    windows: true
+    image: ami-0105f663dc99752af
+    region: us-east-1
+    instance_type: m5.xlarge
+    ssh_user: Administrator
+    groups:
+      - agents_windows
+      - dcos
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    delegated:
+      create: ../ec2/create.yml
+      destroy: ../ec2/destroy.yml
+    converge: ../ec2/same_version_config_update.yml
+    # prepare: ../ec2/install_and_upgrade.yml
+    prepare: ../ec2/install_and_upgrade_windows_tmp.yml
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  env:
+    ANSIBLE_ROLES_PATH: "../../roles/"
+  inventory:
+    links:
+      group_vars: ../../group_vars/
+  lint:
+    name: ansible-lint
+    enabled: True
+lint:
+  name: yamllint
+  options:
+    config-file: .yamllint.yml

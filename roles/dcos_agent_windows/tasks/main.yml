@@ -2,6 +2,34 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
+- name: Windows | Create custom fact directory
+  win_file:
+    path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d"
+    state: directory
+
+- name: Windows | Check for previous intallations
+  win_stat:
+    path: '{{ base_windows_dir }}\etc\dcos-version.json'
+  register: previous_installation
+
+- name: Windows | Create dcos_installation.fact.ps1
+  win_copy:
+    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
+    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
+  when: previous_installation.stat.exists and previous_installation.stat.isreg
+
+- name: Windows | Copy dcos-version.json to fact directory
+  win_copy:
+    src: "{{ base_windows_dir }}\\etc\\dcos-version.json"
+    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
+    remote_src: yes
+  when: previous_installation.stat.exists and previous_installation.stat.isreg
+
+- name: Windows | Re-run setup to use custom facts
+  setup:
+    fact_path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
+  when: previous_installation.stat.exists and previous_installation.stat.isreg
+
 # TO DO: remove when Winpanda is able to create Mesos-DNS by its own
 - name: Windows | Detect network interface with default_gateway set
   set_fact:
@@ -14,11 +42,11 @@
 - name: Windows | Configures DNS lookup on Windows hosts
   win_dns_client:
     adapter_names: "{{ item.ansible_facts.default_network_interface }}"
-    ipv4_addresses: "{{ groups['masters'] }}"
+    ipv4_addresses: "{{ groups['masters'] | map('extract', hostvars, ['dcos_custom_facts', 'detect_ip']) | list }}"
     log_path: C:\dns_log.txt
   when: item.ansible_facts is defined
   with_items: "{{ default_network_interface_detect.results }}"
 
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
-  when: (ansible_local is not defined) or (ansible_local.dcos_installation is not defined) or (ansible_local.dcos_installation['dcos-image-commit'] is not defined)
+  when: ( hostvars[inventory_hostname]['ansible_dcos_installation'] is not defined ) or ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is not defined )
