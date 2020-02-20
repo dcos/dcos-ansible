@@ -1,5 +1,3 @@
-@Library('sec_ci_libs@v2-latest') _
-
 def master_branches = ["master", ] as String[]
 
 pipeline {
