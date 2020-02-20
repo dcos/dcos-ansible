@@ -13,22 +13,11 @@ pipeline {
   }
 
   stages {
-    stage("Verify author for PR") {
-      agent {
-        label "py36"
-      }
-      when {
-        beforeAgent true
-        changeRequest()
-      }
-      steps {
-        user_is_authorized(master_branches, '8b793652-f26a-422f-a9ba-0d1e47eb9d89', '#sre')
-      }
-    }
 
     stage('lint') {
       agent {
-        label "py36"
+        label "large"
+	docker { image: 'python:3.6-alpine' }
       }
       steps {
         ansiColor('xterm') {
@@ -55,7 +44,8 @@ pipeline {
       parallel {
         stage('molecule test (ec2_centos7) / Open') {
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           steps {
             ansiColor('xterm') {
@@ -104,7 +94,8 @@ pipeline {
         }
         stage('molecule test (ec2_centos7) / Enterprise') {
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           environment {
             LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
@@ -158,7 +149,8 @@ pipeline {
         }
         stage('molecule test (ec2_rhel7) / Open') {
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           steps {
             ansiColor('xterm') {
@@ -203,7 +195,8 @@ pipeline {
         }
         stage('molecule test (ec2_rhel7) / Enterprise') {
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           environment {
             LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
@@ -262,7 +255,8 @@ pipeline {
             changeset "roles/dcos_gpu/*"
           }
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           steps {
             ansiColor('xterm') {
@@ -316,7 +310,8 @@ pipeline {
             branch 'master'
           }
           agent {
-            label "py36"
+            label "large"
+	    docker { image: 'python:3.6-alpine' }
           }
           environment {
             GALAXY_API_KEY = credentials('dcos-sre-robot-galaxy-ansible-api-token')
@@ -340,7 +335,7 @@ pipeline {
             }
           }
           agent {
-            label "mesos"
+            label "medium"
           }
           steps {
             // Login to the Docker registry.
