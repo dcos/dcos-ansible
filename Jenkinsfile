@@ -1,5 +1,3 @@
-def master_branches = ["master", ] as String[]
-
 pipeline {
   agent none
   environment {
