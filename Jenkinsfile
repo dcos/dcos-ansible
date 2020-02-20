@@ -14,8 +14,10 @@ pipeline {
 
     stage('lint') {
       agent {
-        label "large"
-	docker { image: 'python:3.6-alpine' }
+	docker {
+	  image 'python:3.6-alpine'
+	  label 'large'
+        }
       }
       steps {
         ansiColor('xterm') {
@@ -42,8 +44,10 @@ pipeline {
       parallel {
         stage('molecule test (ec2_centos7) / Open') {
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           steps {
             ansiColor('xterm') {
@@ -92,8 +96,10 @@ pipeline {
         }
         stage('molecule test (ec2_centos7) / Enterprise') {
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           environment {
             LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
@@ -147,8 +153,10 @@ pipeline {
         }
         stage('molecule test (ec2_rhel7) / Open') {
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           steps {
             ansiColor('xterm') {
@@ -193,8 +201,10 @@ pipeline {
         }
         stage('molecule test (ec2_rhel7) / Enterprise') {
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           environment {
             LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
@@ -253,8 +263,10 @@ pipeline {
             changeset "roles/dcos_gpu/*"
           }
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           steps {
             ansiColor('xterm') {
@@ -308,8 +320,10 @@ pipeline {
             branch 'master'
           }
           agent {
-            label "large"
-	    docker { image: 'python:3.6-alpine' }
+	    docker {
+	      image 'python:3.6-alpine'
+	      label 'large'
+            }
           }
           environment {
             GALAXY_API_KEY = credentials('dcos-sre-robot-galaxy-ansible-api-token')
