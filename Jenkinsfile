@@ -2,7 +2,7 @@ pipeline {
   agent none
   environment {
     IMAGE = "dcos-ansible-bundle"
-    DOCKER = credentials('docker-hub-credentials')
+  //  DOCKER = credentials('docker-hub-credentials')
   }
   options {
     disableConcurrentBuilds()
