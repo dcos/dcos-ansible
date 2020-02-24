@@ -265,12 +265,12 @@
   command: "bash {{ install_win_file }}"
   args:
     chdir: "{{ download_path }}"
-    creates: "{{ download_path }}/genconf/serve/windows/prerequisites/dcos_install.ps1"
+    creates: "{{ download_path }}/genconf/serve/windows/prerequisites/prerequisites.zip"
   when: dcos['download_win'] is defined
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
 
-- name: Generate DC/OS upgrade files
+- name: Generate DC/OS windows upgrade files
   shell: >
     bash {{ install_file }} --generate-node-upgrade-win-script {{ item }};
     mv genconf/serve/windows/upgrade genconf/serve/windows/upgrade_from_{{ item }}
@@ -287,20 +287,20 @@
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
-- name: Generate DC/OS windows upgrade files
-    shell: >
-      bash {{ install_file }} --generate-node-upgrade-script {{ item }};
-      mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ item }}
-    args:
-      warn: false
-      chdir: "{{ download_path }}"
-      creates: "{{ download_path }}/genconf/serve/upgrade_from_{{ item }}/"
-    when: "dcos['version'] is version('1.9', '>=')"
-    loop: >
-      {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
-       select('defined') | selectattr('dcos_installation', 'defined') |
-       map(attribute='dcos_installation') | map(attribute='version') | list |
-       union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
+- name: Generate DC/OS upgrade files
+  shell: >
+    bash {{ install_file }} --generate-node-upgrade-script {{ item }};
+    mv genconf/serve/upgrade genconf/serve/upgrade_from_{{ item }}
+  args:
+    warn: false
+    chdir: "{{ download_path }}"
+    creates: "{{ download_path }}/genconf/serve/upgrade_from_{{ item }}/"
+  when: "dcos['version'] is version('1.9', '>=')"
+  loop: >
+    {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_installation', 'defined') |
+     map(attribute='dcos_installation') | map(attribute='version') | list |
+     union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
 - name: Get upgrade directory hash
   shell: |
