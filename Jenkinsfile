@@ -18,7 +18,7 @@ pipeline {
         }
       }
       steps {
-          sh("apk add curl gcc musl-dev libffi-dev")
+          sh("apk add curl gcc musl-dev libffi-dev make")
 //        ansiColor('xterm') {
           script {
             env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
