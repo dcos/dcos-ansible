@@ -19,7 +19,7 @@ pipeline {
         //}
       }
       steps {
-        ansiColor('xterm') {
+//        ansiColor('xterm') {
 	  sh("pwd")
 	  sh("ls -lah /")
 	  sh("ls -lah /jenkins")
@@ -39,7 +39,7 @@ pipeline {
           sh("yamllint -c .yamllint.yml .")
           sh("ansible-lint roles/* -v")
         }
-      }
+ //     }
     }
 
     stage('molecule test') {
