@@ -12,17 +12,14 @@ pipeline {
 
     stage('lint') {
       agent {
-        //label 'large'
 	docker {
 	  image 'python:3.6-alpine'
 	  label 'large'
         }
       }
       steps {
+          sh("apk add curl")
 //        ansiColor('xterm') {
-	  sh("pwd")
-	  sh("ls -lah /")
-	  sh("ls -lah /jenkins")
           script {
             env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
             env.RHEL_TRIPLE_LINUX_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
