@@ -12,11 +12,11 @@ pipeline {
 
     stage('lint') {
       agent {
-        label 'large'
-	//docker {
-	//  image 'python:3.6-alpine'
-	//  label 'large'
-        //}
+        //label 'large'
+	docker {
+	  image 'python:3.6-alpine'
+	  label 'large'
+        }
       }
       steps {
 //        ansiColor('xterm') {
