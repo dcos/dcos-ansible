@@ -278,7 +278,7 @@
     warn: false
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item }}/"
-  when: 
+  when:
     - "dcos['version'] is version('1.9', '>=')"
     - dcos['download_win'] is defined
   loop: >
