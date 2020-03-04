@@ -1,6 +1,6 @@
 ---
 - name: DC/OS Requirements
-  hosts: all
+  hosts: all:!agents_windows
   become: true
   tasks:
     - include_role:
@@ -12,26 +12,19 @@
       test_initial_download: "https://downloads.dcos.io/dcos/stable/2.0.0/dcos_generate_config.sh"
       test_initial_download_checksum: "sha256:95a16dfae5bd4da83235f27f82caede4105a9e6b63fcbc9ca7f11e8f794eebbd"
       test_initial_version: "2.0.0"
+      test_upgrade_download: "https://downloads.dcos.io/dcos/testing/master/dcos_generate_config.sh"
+      test_upgrade_download_checksum: ""
+      test_upgrade_version: "2.1.0-dev"
+      test_upgrade_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh"
     when: not dcos['enterprise_dcos']
   - set_fact:
       test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.0/dcos_generate_config.ee.sh"
       test_initial_download_checksum: "sha256:933950a7ca856ac72150d68c614edc4d333c23cc24b594af8da3a9467c5e1a36"
       test_initial_version: "2.0.0"
-    when: dcos['enterprise_dcos']
-
-
-- name: Set open checksum and url
-  hosts: localhost
-  tasks:
-  - set_fact:
-      test_initial_download: "https://downloads.dcos.io/dcos/stable/2.0.0/dcos_generate_config.sh"
-      test_initial_download_checksum: "sha256:95a16dfae5bd4da83235f27f82caede4105a9e6b63fcbc9ca7f11e8f794eebbd"
-      test_initial_version: "2.0.0"
-    when: not dcos['enterprise_dcos']
-  - set_fact:
-      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.0/dcos_generate_config.ee.sh"
-      test_initial_download_checksum: "sha256:933950a7ca856ac72150d68c614edc4d333c23cc24b594af8da3a9467c5e1a36"
-      test_initial_version: "2.0.0"
+      test_upgrade_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/dcos_generate_config.ee.sh"
+      test_upgrade_download_checksum: ""
+      test_upgrade_version: "2.1.0-dev"
+      test_upgrade_download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
     when: dcos['enterprise_dcos']
 
 
@@ -81,6 +74,18 @@
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
 
+# - name: "Setup and configure WINDOWS AGENT nodes"
+#   hosts: agents_windows
+#   tasks:
+#     - include_role:
+#         name: dcos_agent_windows
+#   vars:
+#     dcos:
+#       config:
+#         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
+#         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+
+
 - name: "WAIT for the cluster to stabilise before upgrade"
   hosts: localhost
   tasks:
@@ -102,9 +107,14 @@
         name: dcos_bootstrap
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_upgrade_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
+      version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+        enable_windows_agents: true
 
 - name: "Upgrade and configure MASTER nodes"
   hosts: masters
@@ -115,9 +125,14 @@
         name: dcos_master
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_upgrade_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
+      version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+        enable_windows_agents: true
 
 - name: "Upgrade and configure AGENT nodes"
   hosts: agents
@@ -127,6 +142,27 @@
         name: dcos_agent
   vars:
     dcos:
+      download: "{{ hostvars['localhost'].test_upgrade_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
+      version: "{{ hostvars['localhost'].test_upgrade_version }}"
       config:
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+        enable_windows_agents: true
+
+- name: "Upgrade and configure WINDOWS AGENT nodes"
+  hosts: agents_windows
+  tasks:
+    - include_role:
+        name: dcos_agent_windows
+  vars:
+    dcos:
+      download: "{{ hostvars['localhost'].test_upgrade_download }}"
+      download_checksum: "{{ hostvars['localhost'].test_upgrade_download_checksum }}"
+      download_win: "{{ hostvars['localhost'].test_upgrade_download_win }}"
+      version: "{{ hostvars['localhost'].test_upgrade_version }}"
+      config:
+        bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
+        master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+        enable_windows_agents: true

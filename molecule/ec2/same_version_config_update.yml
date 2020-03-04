@@ -44,3 +44,16 @@
         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
         resolvers: [1.1.1.1, 8.8.8.8]
+
+# - name: "Same-version-config update AGENT nodes"
+#   hosts: agents_windows
+#   become: true
+#   tasks:
+#     - include_role:
+#         name: dcos_agent
+#   vars:
+#     dcos:
+#       config:
+#         bootstrap_url: "http://{{ hostvars[groups['bootstraps'][0]].ansible_facts.default_ipv4.address }}:8080"
+#         master_list: ["{{ hostvars[groups['masters'][0]].ansible_facts.default_ipv4.address }}"]
+#         resolvers: [1.1.1.1, 8.8.8.8]

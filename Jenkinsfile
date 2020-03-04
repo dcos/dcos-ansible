@@ -35,10 +35,11 @@ pipeline {
           script {
             env.LINUX_DOUBLE_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 2)' 2>/dev/null || echo ''").trim()
             env.RHEL_TRIPLE_LINUX_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"linux\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
+            env.WIN_TRIPLE_WINDOWS_SPOT_PRICE = sh (returnStdout: true, script: "#!/usr/bin/env sh\nset +o errexit\ncurl --silent --location http://spot-price.s3.amazonaws.com/spot.js | sed -e 's/callback(//' -e 's/);//'| jq -r '.config.regions[] | select(.region == \"us-east\") | .instanceTypes[].sizes[] | select(.size == \"m5.xlarge\") | .valueColumns[] | select(.name == \"mswin\") | (.prices.USD | tonumber | . * 3)' 2>/dev/null || echo ''").trim()
             env.PIP_CACHE_DIR = "${WORKSPACE}/.pip-cache"
             env.PYTHONUNBUFFERED = 1
             env.ANSIBLE_TRANSPORT = "paramiko"
-            env.ANSIBLE_SSH_CONTROL_PATH = "/var/shm/control:%h:%p:%r"
+            env.ANSIBLE_SSH_CONTROL_PATH = "/var/shm/control-%%h-%%p-%%r"
             env.ANSIBLE_SSH_CONTROL_PATH_DIR = "/var/shm/control"
             env.ANSIBLE_SSH_ARGS = "-C -o PreferredAuthentications=publickey -o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s"
           }
@@ -256,6 +257,105 @@ pipeline {
             }
           }
         }
+        stage('molecule test (ec2_windows) / Open') {
+          agent {
+            label "py36"
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-windows-open"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-windows-open"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-windows-open"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    sed -i -e \"s/spot_price_max_calc:.*/spot_price_max_calc: \${WIN_TRIPLE_WINDOWS_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    molecule test --scenario-name ec2_windows
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-windows-open"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-windows-open"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-windows-open"
+
+                      molecule destroy --scenario-name ec2_windows
+                    '''
+                  }
+                }
+              }
+            }
+          }
+        }
+        stage('molecule test (ec2_windows) / Enterprise') {
+          agent {
+            label "py36"
+          }
+          environment {
+            LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-windows-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-windows-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-windows-enterprise"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
+                    echo 'writing license_key_contents'; sed -i -e \"s/license_key_contents:.*/license_key_contents: \${LICENSE}/\" group_vars/all/dcos.yaml
+                    sed -i -e 's/bootstrap1-windows/bootstrap1-windows-enterprise/' -e 's/master1-windows/master1-windows-enterprise/' -e 's/agent1-windows/agent1-windows-enterprise/' molecule/ec2_windows/molecule.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${WIN_TRIPLE_WINDOWS_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    echo '###### group_vars/all/dcos.yaml #####'
+                    cat group_vars/all/dcos.yaml
+                    echo '#####################################'
+
+                    molecule test --scenario-name ec2_windows
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-rhel7-enterprise"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-rhel7-enterprise"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-rhel7-enterprise"
+
+                      molecule destroy --scenario-name ec2_rhel7
+                    '''
+                  }
+                }
+              }
+            }
+          }
+        }
         stage('molecule test (ec2_gpu) / GPU') {
           when {
             beforeAgent true
@@ -356,6 +456,9 @@ pipeline {
                 if (env.BRANCH_NAME == 'master') {
                   // Only overwrite latest if we're on master
                   sh("docker push mesosphere/${IMAGE}:latest")
+                } else if (env.BRANCH_NAME.startsWith("feature/")) {
+                  sh("docker tag mesosphere/${IMAGE}:${env.dockerTag} mesosphere/${IMAGE}:${env.BRANCH_NAME.replace("feature/","")}")
+                  sh("docker push mesosphere/${IMAGE}:${env.BRANCH_NAME.replace("feature/","")}")
                 }
               }
             }
