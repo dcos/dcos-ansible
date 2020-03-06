@@ -279,8 +279,8 @@
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item }}/"
   when:
-    - "dcos['version'] is version('1.9', '>=')"
-    - dcos['download_win'] is defined
+    - "dcos['version'] is version('2.1', '>=')"
+    - "dcos['download_win'] is defined"
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
      select('defined') | selectattr('dcos_installation', 'defined') |
@@ -295,7 +295,9 @@
     chdir: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item }}"
   changed_when: false
   register: upgrade_win_dir_hash
-  when: "dcos['version'] is version('1.9', '>=')"
+  when:
+    - "dcos['version'] is version('2.1', '>=')"
+    - "dcos['download_win'] is defined"
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
      select('defined') | selectattr('dcos_installation', 'defined') |
@@ -307,7 +309,9 @@
     path: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item.item }}/latest"
     src:  "{{ item.stdout }}"
     state: link
-  when: "dcos['version'] is version('1.9', '>=')"
+    when:
+      - "dcos['version'] is version('2.1', '>=')"
+      - "dcos['download_win'] is defined"
   loop: "{{ upgrade_win_dir_hash.results }}"
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
