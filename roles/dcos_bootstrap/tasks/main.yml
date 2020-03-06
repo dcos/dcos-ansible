@@ -301,7 +301,7 @@
      select('defined') | selectattr('dcos_installation', 'defined') |
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
-   
+
 - name: Create latest/ symlink for upgrade_win.ps1
   file:
     path: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item.item }}/latest"
@@ -309,7 +309,7 @@
     state: link
   when: "dcos['version'] is version('1.9', '>=')"
   loop: "{{ upgrade_win_dir_hash.results }}"
-   
+
 # vvv GENERATE UPGRADE SCRIPTS vvv
 
 - name: Generate DC/OS upgrade files
