@@ -24,4 +24,3 @@
           {{ install_shell_stdout.stderr }}
           ================================================
         dest: "{{ base_windows_dir }}\\var\\log\\ansible_playbook.log"
-    
