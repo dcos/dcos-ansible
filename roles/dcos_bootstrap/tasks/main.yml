@@ -309,9 +309,9 @@
     path: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item.item }}/latest"
     src:  "{{ item.stdout }}"
     state: link
-    when:
-      - "dcos['version'] is version('2.1', '>=')"
-      - "dcos['download_win'] is defined"
+  when:
+    - "dcos['version'] is version('2.1', '>=')"
+    - "dcos['download_win'] is defined"
   loop: "{{ upgrade_win_dir_hash.results }}"
 
 # vvv GENERATE UPGRADE SCRIPTS vvv
