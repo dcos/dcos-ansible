@@ -268,7 +268,7 @@
     creates: "{{ download_path }}/genconf/serve/windows/prerequisites/prerequisites.zip"
   when: dcos['download_win'] is defined
 
-# vvv GENERATE UPGRADE SCRIPTS vvv
+# vvv GENERATE UPGRADE WINDOWS SCRIPTS vvv
 
 - name: Generate DC/OS windows upgrade files
   shell: >
@@ -279,13 +279,42 @@
     chdir: "{{ download_path }}"
     creates: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item }}/"
   when:
-    - "dcos['version'] is version('1.9', '>=')"
+    - "dcos['version'] is version('2.1', '>=')"
     - "dcos['download_win'] is defined"
   loop: >
     {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
      select('defined') | selectattr('dcos_installation', 'defined') |
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
+
+- name: Get upgrade directory hash
+  shell: |
+    set -o pipefail
+    ls -td -- */ | head -n 1 | cut -d'/' -f1
+  args:
+    chdir: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item }}"
+  changed_when: false
+  register: upgrade_win_dir_hash
+  when:
+    - "dcos['version'] is version('2.1', '>=')"
+    - "dcos['download_win'] is defined"
+  loop: >
+    {{ groups['dcos'] | default([]) | map('extract',hostvars,'ansible_local')| list |
+     select('defined') | selectattr('dcos_installation', 'defined') |
+     map(attribute='dcos_installation') | map(attribute='version') | list |
+     union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
+
+- name: Create latest/ symlink for upgrade_win.ps1
+  file:
+    path: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item.item }}/latest"
+    src:  "{{ item.stdout }}"
+    state: link
+  when:
+    - "dcos['version'] is version('2.1', '>=')"
+    - "dcos['download_win'] is defined"
+  loop: "{{ upgrade_win_dir_hash.results }}"
+
+# vvv GENERATE UPGRADE SCRIPTS vvv
 
 - name: Generate DC/OS upgrade files
   shell: >
