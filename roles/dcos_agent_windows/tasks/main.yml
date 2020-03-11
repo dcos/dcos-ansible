@@ -50,3 +50,9 @@
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
   when: ( hostvars[inventory_hostname]['ansible_dcos_installation'] is not defined ) or ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is not defined )
+  
+  #Upgrade nodes
+  - import_tasks: dcos_upgrade.yml
+  when:
+    - hostvars[inventory_hostname]['ansible_dcos_installation'] is defined
+    - ((hostvars[inventory_hostname]['ansible_dcos_installation']['version'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['version'] != dcos['version'])) or ( ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] != dcos['image_commit']))
