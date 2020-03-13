@@ -17,6 +17,7 @@
     content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
     dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
   when: previous_installation.stat.exists and previous_installation.stat.isreg
+  notify: reload facts
 
 - name: Windows | Copy dcos-version.json to fact directory
   win_copy:
@@ -24,11 +25,14 @@
     dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
     remote_src: yes
   when: previous_installation.stat.exists and previous_installation.stat.isreg
+  notify: reload facts
 
 - name: Windows | Re-run setup to use custom facts
   setup:
     fact_path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
   when: previous_installation.stat.exists and previous_installation.stat.isreg
+  notify: reload facts
+- meta: flush_handlers
 
 # TO DO: remove when Winpanda is able to create Mesos-DNS by its own
 - name: Windows | Detect network interface with default_gateway set
