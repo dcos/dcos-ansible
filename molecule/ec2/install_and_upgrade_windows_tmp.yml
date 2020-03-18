@@ -9,20 +9,20 @@
   hosts: localhost
   tasks:
   - set_fact:
-      test_initial_download: "https://downloads.dcos.io/dcos/testing/master/commit/8d77deb4e5523e49729940485c31ce2c56bf6c43/dcos_generate_config.sh"
+      test_initial_download: "https://downloads.dcos.io/dcos/testing/pull/7017/dcos_generate_config.sh"
       test_initial_download_checksum: ""
       test_initial_version: "2.1.0-dev"
-      test_initial_download_win: "https://downloads.dcos.io/dcos/testing/master/commit/8d77deb4e5523e49729940485c31ce2c56bf6c43/windows/dcos_generate_config_win.ee.sh"
+      test_initial_download_win: "https://downloads.dcos.io/dcos/testing/pull/7017/windows/dcos_generate_config_win.sh"
       test_upgrade_download: "https://downloads.dcos.io/dcos/testing/master/dcos_generate_config.sh"
       test_upgrade_download_checksum: ""
       test_upgrade_version: "2.1.0-master"
       test_upgrade_download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
     when: not dcos['enterprise_dcos']
   - set_fact:
-      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/commit/2e5060be4bf23e1dc66f6bf2108cb0c84cb258f7/dcos_generate_config.ee.sh"
+      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7548/dcos_generate_config.ee.sh"
       test_initial_download_checksum: ""
       test_initial_version: "2.1.0-dev"
-      test_initial_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/commit/2e5060be4bf23e1dc66f6bf2108cb0c84cb258f7/windows/dcos_generate_config_win.ee.sh"
+      test_initial_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7548/windows/dcos_generate_config_win.ee.sh"
       test_upgrade_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/dcos_generate_config.ee.sh"
       test_upgrade_download_checksum: ""
       test_upgrade_version: "2.1.0-master"
