@@ -12,27 +12,30 @@
     path: '{{ base_windows_dir }}\etc\dcos-version.json'
   register: previous_installation
 
-- name: Windows | Create dcos_installation.fact.ps1
-  win_copy:
-    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
-    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
-  when: previous_installation.stat.exists and previous_installation.stat.isreg
-  notify: reload facts
-
 - name: Windows | Copy dcos-version.json to fact directory
   win_copy:
     src: "{{ base_windows_dir }}\\etc\\dcos-version.json"
     dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
     remote_src: yes
   when: previous_installation.stat.exists and previous_installation.stat.isreg
-  notify: reload facts
+
+- name: Windows | Create dcos_installation.fact.ps1
+  win_copy:
+    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
+    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
+  when: previous_installation.stat.exists and previous_installation.stat.isreg
 
 - name: Windows | Re-run setup to use custom facts
   setup:
     fact_path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
   when: previous_installation.stat.exists and previous_installation.stat.isreg
-  notify: reload facts
-- meta: flush_handlers
+
+### Example of loaded facts:
+# PS C:\d2iq\dcos\etc\ansible\facts.d> get-content dcos_installation.fact -Raw | ConvertFrom-Json
+#
+#version         dcos-image-commit                        bootstrap-id                             dcos-variant
+#-------         -----------------                        ------------                             ------------
+#2.1.0-beta2-dev a0d781f397ebfe1cb442002d2140e68c496a4994 ab5c9fc90751eb10579b1a3388ba6fe027c40086 enterprise
 
 # TO DO: remove when Winpanda is able to create Mesos-DNS by its own
 - name: Windows | Detect network interface with default_gateway set
