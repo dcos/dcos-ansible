@@ -1,31 +1,31 @@
-- name: Windows Installation | Create installer download directory
+- name: Windows Upgrade | Create upgrade download directory
   win_file:
-    path: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}"
+    path: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}"
     state: directory
 
-- name: Upgrade | Download upgrade_win.ps1
+- name: Windows Upgrade | Download dcos_node_upgrade.ps1
   win_get_url:
-    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/windows/upgrade_from_{{ dcos['version_to_upgrade_from'] }}/latest/dcos_node_upgrade.ps1"
-    dest: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}\\upgrade_win.ps1"
+    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos['version'] }}/genconf/serve/windows/upgrade_from_{{ hostvars[inventory_hostname]['ansible_dcos_installation']['version'] }}/latest/dcos_node_upgrade.ps1"
+    dest: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}\\dcos_node_upgrade.ps1"
     force: yes
 
 - name: Windows Upgrade | DC/OS Upgrade
   block:
     - name: Windows Upgrade | Run DC/OS agent upgrade
-      win_shell: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}\\upgrade_win.ps1"
-      register: install_shell_stdout
+      win_shell: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}\\dcos_node_upgrade.ps1"
+      register: upgrade_shell_stdout
 
   always:
-    - name: Windows Installation | Output log into ansible_playbook.log
+    - name: Windows Upgrade | Output log into ansible_playbook.log
       win_copy:
         content: |
           ================================================
           Ansible STDOUT:
           ------------------------------------------------
-          {{ install_shell_stdout.stdout }}
+          {{ upgrade_shell_stdout.stdout }}
           ================================================
           Ansible STDERR:
           ------------------------------------------------
-          {{ install_shell_stdout.stderr }}
+          {{ upgrade_shell_stdout.stderr }}
           ================================================
         dest: "{{ base_windows_dir }}\\var\\log\\ansible_playbook.log"

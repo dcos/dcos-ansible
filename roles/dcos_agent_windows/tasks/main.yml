@@ -1,7 +1,3 @@
-- name: Windows | Defining DC/OS by using 'version' or, more specifically, 'image_commit'
-  set_fact:
-     dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
-
 - name: Windows | Create custom fact directory
   win_file:
     path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d"
@@ -12,17 +8,17 @@
     path: '{{ base_windows_dir }}\etc\dcos-version.json'
   register: previous_installation
 
-- name: Windows | Create dcos_installation.fact.ps1
-  win_copy:
-    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
-    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
-  when: previous_installation.stat.exists and previous_installation.stat.isreg
-
 - name: Windows | Copy dcos-version.json to fact directory
   win_copy:
     src: "{{ base_windows_dir }}\\etc\\dcos-version.json"
     dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
     remote_src: yes
+  when: previous_installation.stat.exists and previous_installation.stat.isreg
+
+- name: Windows | Create dcos_installation.fact.ps1
+  win_copy:
+    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
+    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
   when: previous_installation.stat.exists and previous_installation.stat.isreg
 
 - name: Windows | Re-run setup to use custom facts
@@ -50,3 +46,9 @@
 # Installation for fresh nodes
 - import_tasks: dcos_install.yml
   when: ( hostvars[inventory_hostname]['ansible_dcos_installation'] is not defined ) or ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is not defined )
+
+#Upgrade nodes
+- import_tasks: dcos_upgrade.yml
+  when:
+    - hostvars[inventory_hostname]['ansible_dcos_installation'] is defined
+    - ((hostvars[inventory_hostname]['ansible_dcos_installation']['version'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['version'] != dcos['version'])) or ( ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] != dcos['image_commit']))
