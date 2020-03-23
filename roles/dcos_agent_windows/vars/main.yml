@@ -1,2 +1,3 @@
 # DCOS Windows params:
 base_windows_dir: "C:\\d2iq\\dcos"
+dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
