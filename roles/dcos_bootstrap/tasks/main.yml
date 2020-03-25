@@ -304,7 +304,7 @@
      map(attribute='dcos_installation') | map(attribute='version') | list |
      union([dcos['version_to_upgrade_from'] | default(dcos['version']) ]) | unique }}
 
-- name: Create latest/ symlink for upgrade_win.ps1
+- name: Create latest/ symlink for dcos_node_upgrade.ps1
   file:
     path: "{{ download_path }}/genconf/serve/windows/upgrade_from_{{ item.item }}/latest"
     src:  "{{ item.stdout }}"
