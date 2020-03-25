@@ -5,6 +5,7 @@ driver:
   name: ec2
 platforms:
   - name: "bootstrap1-centos7-${USER:-ci}-${HOSTNAME:-local}"
+    spot_price: null
     image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
@@ -13,6 +14,7 @@ platforms:
       - bootstraps
       - dcos
   - name: master1-centos7-${USER:-ci}-${HOSTNAME:-local}
+    spot_price: null
     image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
@@ -21,6 +23,7 @@ platforms:
       - masters
       - dcos
   - name: agent1-centos7-${USER:-ci}-${HOSTNAME:-local}
+    spot_price: null
     image: ami-9887c6e7
     region: us-east-1
     instance_type: m5.xlarge
