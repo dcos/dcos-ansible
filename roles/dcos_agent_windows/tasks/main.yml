@@ -15,19 +15,10 @@
 
 - name: Windows | Create dcos_installation.fact.ps1
   win_copy:
-    content: get-content {{ base_windows_dir }}\etc\ansible\facts.d\dcos_installation.fact -Raw | ConvertFrom-Json
+    content: get-content {{ base_windows_dir }}\\etc\\dcos-version.json -Raw | ConvertFrom-Json
     dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
   when: previous_installation.stat.exists and previous_installation.stat.isreg
   notify: reload facts
-
-- name: Windows | Copy dcos-version.json to fact directory
-  win_copy:
-    src: "{{ base_windows_dir }}\\etc\\dcos-version.json"
-    dest: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact"
-    remote_src: yes
-  when: previous_installation.stat.exists and previous_installation.stat.isreg
-  notify: reload facts
-
 - name: Windows | Re-run setup to use custom facts
   setup:
     fact_path: "{{ base_windows_dir }}\\etc\\ansible\\facts.d\\dcos_installation.fact.ps1"
