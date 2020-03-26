@@ -1,18 +1,18 @@
 - name: Windows Upgrade | Create upgrade download directory
   win_file:
-    path: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}"
+    path: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}"
     state: directory
 
 - name: Windows Upgrade | Download dcos_node_upgrade.ps1
   win_get_url:
-    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos['version'] }}/genconf/serve/windows/upgrade_from_{{ hostvars[inventory_hostname]['ansible_dcos_installation']['version'] }}/latest/dcos_node_upgrade.ps1"
-    dest: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}\\dcos_node_upgrade.ps1"
+    url: "{{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/windows/upgrade_from_{{ hostvars[inventory_hostname]['ansible_dcos_installation']['version'] }}/latest/dcos_node_upgrade.ps1"
+    dest: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}\\dcos_node_upgrade.ps1"
     force: yes
 
 - name: Windows Upgrade | DC/OS Upgrade
   block:
     - name: Windows Upgrade | Run DC/OS agent upgrade
-      win_shell: "{{ base_windows_dir }}\\{{ hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] | default(dcos['version']) }}\\dcos_node_upgrade.ps1"
+      win_shell: "{{ base_windows_dir }}\\{{ dcos_version_specifier }}\\dcos_node_upgrade.ps1"
       register: upgrade_shell_stdout
 
   always:
