@@ -30,7 +30,7 @@ platforms:
     instance_type: m5.xlarge
     ssh_user: Administrator
     groups:
-      - agents_windows
+      - agents
       - dcos
 
 provisioner:
