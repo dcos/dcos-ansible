@@ -4,6 +4,7 @@
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
 - import_tasks: main-Linux.yml
+  become: true
   when:
     - not ansible_os_family == "Windows"
 - import_tasks: main-Windows.yml
