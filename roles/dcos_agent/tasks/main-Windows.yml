@@ -47,4 +47,5 @@
 - import_tasks: dcos_upgrade-Windows.yml
   when:
     - hostvars[inventory_hostname]['ansible_dcos_installation'] is defined
-    - ((hostvars[inventory_hostname]['ansible_dcos_installation']['version'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['version'] != dcos['version'])) or ( ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] != dcos['image_commit']))
+    - (dcos['image_commit'] is defined and hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] != dcos['image_commit']) or (dcos['image_commit'] is not defined and hostvars[inventory_hostname]['ansible_dcos_installation']['version'] != dcos['version']) # or latest_dcos_config_setup_is_installed.rc != 0
+    #- ((hostvars[inventory_hostname]['ansible_dcos_installation']['version'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['version'] != dcos['version'])) or ( ( hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] is defined) and (hostvars[inventory_hostname]['ansible_dcos_installation']['dcos-image-commit'] != dcos['image_commit']))
