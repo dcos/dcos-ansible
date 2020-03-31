@@ -31,6 +31,10 @@
         from_port: "{{ winrm_port }}"
         to_port: "{{ winrm_port }}"
         cidr_ip: "{{ admin_ip }}/32"
+      - proto: tcp
+        from_port: "3389"
+        to_port: "3389"
+        cidr_ip: "{{ admin_ip }}/32"
       - proto: icmp
         from_port: 8
         to_port: -1
