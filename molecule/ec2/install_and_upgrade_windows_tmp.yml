@@ -22,11 +22,11 @@
     when: not dcos['enterprise_dcos']
   - name: EE DC/OS
     set_fact:
-      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7548/commit/e47ca1ced9cb29705abfe8ac1f28f6d72514a4c1/dcos_generate_config.ee.sh"
+      test_initial_download: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7555/commit/f5366468627b9ca79c02b746d481b101f30a876d/dcos_generate_config.ee.sh"
       test_initial_download_checksum: ""
-      test_initial_commit: "e47ca1ced9cb29705abfe8ac1f28f6d72514a4c1"
+      test_initial_commit: "f5366468627b9ca79c02b746d481b101f30a876d"
       test_initial_version: "2.1.0-dev"
-      test_initial_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7548/commit/e47ca1ced9cb29705abfe8ac1f28f6d72514a4c1/windows/dcos_generate_config_win.ee.sh"
+      test_initial_download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/pull/7555/commit/f5366468627b9ca79c02b746d481b101f30a876d/windows/dcos_generate_config_win.ee.sh"
       test_upgrade_download: "https://downloads.mesosphere.io/dcos-enterprise/testing/pull/7643/commit/6118b9d3dff21dfd15b71893061f86b34a62d157/dcos_generate_config.ee.sh"
       test_upgrade_download_checksum: ""
       test_upgrade_commit: "6118b9d3dff21dfd15b71893061f86b34a62d157"
