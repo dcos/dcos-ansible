@@ -17,7 +17,6 @@
 
 - name: DC/OS Requirements
   hosts: all
-  become: true
   tasks:
     - include_role:
         name: dcos_requirements
@@ -26,7 +25,6 @@
 
 - name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
-  become: true
   tasks:
     - include_role:
         name: dcos_bootstrap
@@ -34,14 +32,12 @@
 - name: Setup and configure MASTER nodes
   hosts: masters
   serial: 1
-  become: true
   tasks:
     - include_role:
         name: dcos_master
 
 - name: Setup and configure AGENT nodes (Linux)
   hosts: agents
-  become: true
   tasks:
     - include_role:
         name: dcos_agent
