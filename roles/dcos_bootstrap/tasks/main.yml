@@ -1,9 +1,11 @@
 ---
-- import_tasks: main-Linux.yml
+- name: Linux Bootstrap
+  import_tasks: main-Linux.yml
   become: true
   when:
     - not ansible_os_family == "Windows"
 
-- fail:
+- name: Windows Bootstrap
+  fail:
     msg: Only Linux nodes are allowed as Bootstrap nodes
   when: ansible_os_family == "Windows"

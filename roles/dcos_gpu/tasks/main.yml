@@ -1,5 +1,6 @@
 ---
-- import_tasks: main-Linux.yml
+- name: Linux GPU
+  import_tasks: main-Linux.yml
   become: true
   when:
     - not ansible_os_family == "Windows"

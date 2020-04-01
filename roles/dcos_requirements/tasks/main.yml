@@ -1,5 +1,6 @@
 ---
-- import_tasks: main-Linux.yml
+- name: Linux Requirements
+  import_tasks: main-Linux.yml
   become: true
   when:
     - not ansible_os_family == "Windows"
