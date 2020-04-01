@@ -32,6 +32,7 @@ platforms:
     groups:
       - agents
       - dcos
+      - agents_windows
 
 provisioner:
   name: ansible

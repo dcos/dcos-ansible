@@ -141,7 +141,7 @@
   hosts: agents
   tasks:
     - include_role:
-        name: dcos_agent
+        name: dcos_agent:!agents_windows
   vars:
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
