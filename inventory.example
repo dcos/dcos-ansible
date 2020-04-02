@@ -41,6 +41,7 @@ dcos_legacy_node_type_name=slave_public
 [agents:children]
 agents_private
 agents_public
+agents_windows
 
 [agents_windows]
 agent1-windows.example.com  ansible_user=Administrator  ansible_password=<mysecurepassword>
@@ -56,3 +57,4 @@ bootstraps
 masters
 agents
 agents_public
+agents_windows

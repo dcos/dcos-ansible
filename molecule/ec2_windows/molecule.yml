@@ -30,8 +30,9 @@ platforms:
     instance_type: m5.xlarge
     ssh_user: Administrator
     groups:
-      - agents_windows
+      - agents
       - dcos
+      - agents_windows
 
 provisioner:
   name: ansible
@@ -40,7 +41,7 @@ provisioner:
     delegated:
       create: ../ec2/create.yml
       destroy: ../ec2/destroy.yml
-    converge: ../ec2/same_version_config_update.yml
+    converge: ../ec2/same_version_config_update_windows_tmp.yml
     # prepare: ../ec2/install_and_upgrade.yml
     prepare: ../ec2/install_and_upgrade_windows_tmp.yml
   config_options:

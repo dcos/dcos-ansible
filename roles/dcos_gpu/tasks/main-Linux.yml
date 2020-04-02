@@ -1,0 +1,15 @@
+---
+- name: Ensure pciutils installed
+  yum:
+    name: pciutils
+    state: present
+# only NVIDIA for now
+- name: Detect NVIDIA devices
+  command: "lspci -d {{ item.vendor|default('') }}:{{ item.device|default('') }}:{{ item.class|default('') }} -nn -mm"
+  register: lspci_nvidia
+  with_items: "{{ nvidia_device_query }}"
+  changed_when: false
+
+- name: "NVIDIA GPU detected"
+  include_tasks: nvidia-gpu.yml
+  when: lspci_nvidia|json_query('results[*].stdout_lines')|flatten|length > 0
