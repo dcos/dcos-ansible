@@ -138,10 +138,10 @@
         enable_windows_agents: true
 
 - name: "Upgrade and configure AGENT nodes"
-  hosts: agents
+  hosts: agents:!agents_windows
   tasks:
     - include_role:
-        name: dcos_agent:!agents_windows
+        name: dcos_agent
   vars:
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"

@@ -74,10 +74,10 @@
         resolvers: [1.1.1.1, 8.8.8.8]
 
 - name: "Same-version-config update AGENT nodes"
-  hosts: agents
+  hosts: agents:!agents_windows
   tasks:
     - include_role:
-        name: dcos_agent:!agents_windows
+        name: dcos_agent
   vars:
     dcos:
       download: "{{ hostvars['localhost'].test_upgrade_download }}"
