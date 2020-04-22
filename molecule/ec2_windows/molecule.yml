@@ -25,7 +25,6 @@ platforms:
   - name: winagent1-windows-${USER:-ci}-${HOSTNAME:-local}
     spot_price: null
     windows: true
-    image: ami-0105f663dc99752af
     region: us-east-1
     instance_type: m5.xlarge
     ssh_user: Administrator
