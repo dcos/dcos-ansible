@@ -57,6 +57,7 @@
 
     - name: "Get Windows AMIs"
       ec2_ami_info:
+        region: "{{ molecule_yml.platforms[0].region }}"
         owners: amazon
         filters:
           name: "Windows_Server-1809-English-Core-ContainersLatest-*"
