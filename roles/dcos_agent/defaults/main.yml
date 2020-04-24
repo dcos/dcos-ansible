@@ -1,2 +1,4 @@
 ---
 path_base_tmp: /tmp/dcos
+# DCOS Windows params:
+base_windows_dir: "C:\\d2iq\\dcos"

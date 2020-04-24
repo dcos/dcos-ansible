@@ -31,6 +31,10 @@
         from_port: "{{ winrm_port }}"
         to_port: "{{ winrm_port }}"
         cidr_ip: "{{ admin_ip }}/32"
+      - proto: tcp
+        from_port: "3389"
+        to_port: "3389"
+        cidr_ip: "{{ admin_ip }}/32"
       - proto: icmp
         from_port: 8
         to_port: -1
@@ -50,6 +54,19 @@
   tasks:
     - debug:
         var: molecule_yml.platforms
+
+    - name: "Get Windows AMIs"
+      ec2_ami_info:
+        region: "{{ molecule_yml.platforms[0].region }}"
+        owners: amazon
+        filters:
+          name: "Windows_Server-1809-English-Core-ContainersLatest-*"
+      register: ec2_windows_amis
+
+    - name: "get latest windows AMI"
+      set_fact:
+        ec2_windows_ami: "{{ ec2_windows_amis.images | sort(attribute='creation_date') | last }}"
+
     - name: Create security group
       ec2_group:
         name: "{{ security_group_name }}"
@@ -75,7 +92,7 @@
     - name: Create molecule instance(s)
       ec2:
         key_name: "{{ keypair_name }}"
-        image: "{{ item.image }}"
+        image: "{{ item.image if item.image is defined else ec2_windows_ami.image_id if item.windows is defined and item.windows }}"
         user_data: "{{  windows_userdata if item.windows is defined and item.windows else '' }}"
         region: "{{ item.region }}"
         zone: "{{ item.zone|default(omit) }}"

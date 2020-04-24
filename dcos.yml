@@ -10,14 +10,13 @@
         timeout: "{{ connection_timeout | default(120) }}"
 
 - name: Collect DC/OS versions
-  hosts: all:!agents_windows
+  hosts: all
   tasks:
     - name: Collect DC/OS versions
       setup:
 
 - name: DC/OS Requirements
-  hosts: all:!agents_windows
-  become: true
+  hosts: all
   tasks:
     - include_role:
         name: dcos_requirements
@@ -26,7 +25,6 @@
 
 - name: Setup and configure BOOTSTRAP nodes
   hosts: bootstraps
-  become: true
   tasks:
     - include_role:
         name: dcos_bootstrap
@@ -34,20 +32,12 @@
 - name: Setup and configure MASTER nodes
   hosts: masters
   serial: 1
-  become: true
   tasks:
     - include_role:
         name: dcos_master
 
 - name: Setup and configure AGENT nodes (Linux)
   hosts: agents
-  become: true
   tasks:
     - include_role:
         name: dcos_agent
-
-- name: Setup and configure AGENT nodes (Windows)
-  hosts: agents_windows
-  tasks:
-    - include_role:
-        name: dcos_agent_windows
