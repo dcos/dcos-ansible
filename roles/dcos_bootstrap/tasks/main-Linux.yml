@@ -224,7 +224,7 @@
   when: "dcos.config.fault_domain_detect_contents is defined"
   notify: trigger_new_config
 
-- name: "Generate Powershell scripts from contant settings"
+- name: "Generate Powershell scripts from content settings"
   copy:
     dest: "{{ download_path }}/{{ item.value[0] }}"
     mode: 0644
@@ -237,13 +237,13 @@
 - name: Filter Config. Get rid of ip_detect_contents,ip_detect_contents and fault_domain_detect_contents
   set_fact:
     dcos_config: "{{ dcos_config | combine({item.key: item.value}) }}"
-  when: "item.key not in ['ip_detect_contents','ip_detect_public_contents','fault_domain_detect_contents']"
+  when: "item.key not in ['ip_detect_contents','ip_detect_public_contents','fault_domain_detect_contents','fault_domain_detect_windows_contents','ip_detect_public_windows', 'ip_detect_windows_contents']"
   with_dict: "{{ dcos['config'] }}"
 
 - name: Set explicit path for scripts ( windows )
   set_fact:
     dcos_config: "{{ dcos_config | combine({item.key: item.value[0]}) }}"
-  when: "(dcos['download_win'] is defined) and dcos.config[item.value[1]] is defined"
+  when: "(dcos['download_win'] is defined)"
   with_dict: "{{ win_scripts }}"
 
 - name: Generate DC/OS configuration
