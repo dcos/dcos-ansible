@@ -139,7 +139,7 @@
 
   - name: "Docker installed"
     yum:
-      name: "{{ dcos_docker_pkg_name }}"
+      name: "{{ dcos_docker_pkgs }}"
       update_cache: true
       enablerepo: "{{ rhel_exras_repo_name.stdout | default(omit) }}"
       state: present
