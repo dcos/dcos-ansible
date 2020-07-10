@@ -1,8 +1,15 @@
 ---
+
+- name: "Determine if system is CoreOS/Flatcar Linux"
+  set_fact:
+    is_flatcar: "{{ ansible_distribution == 'Coreos' or ansible_distribution == 'Flatcar Container Linux by Kinvolk' or ansible_distribution == 'Flatcar Linux by Kinvolk' }}"
+  changed_when: false
+
 - name: Ensure pciutils installed
   yum:
     name: pciutils
     state: present
+  when: not is_flatcar
 # only NVIDIA for now
 - name: Detect NVIDIA devices
   command: "lspci -d {{ item.vendor|default('') }}:{{ item.device|default('') }}:{{ item.class|default('') }} -nn -mm"

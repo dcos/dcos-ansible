@@ -101,6 +101,7 @@ dcos:
 | config                  | yes          | Yaml structure that represents a valid Mesosphere DC/OS config.yml, see below.                                                                                                                                                                     |
 
 #### DC/OS config.yml parameters
+
 Please see [the official Mesosphere DC/OS configuration reference](https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/) for a full list of possible parameters.
 There are a few parameters that are used by these roles outside the DC/OS config.yml, specifically:
 
@@ -141,6 +142,36 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 * CentOS 7, RHEL 7
 * DC/OS 1.12, both open as well as enterprise version
+
+### Using Flatcar Linux
+
+[Flatcar Container Linux](https://www.flatcar-linux.org/) is a minimal linux distribution designed to run containers. Due to its immutable design some additional work is needed to run the DC/OS ansible installer.
+
+As flatcar does not have python preinstalled you need to install it some other way. We recommend [ansible-flatcar-python-bootstrap](https://github.com/swoehrl-mw/ansible-flatcar-python-bootstrap). To use it add the role to your project (e.g. by running `ansible-galaxy install git+https://github.com/swoehrl-mw/ansible-flatcar-python-bootstrap`) and add the following snippet to the `dcos.yml` playbook before the `Collect DC/OS versions` play:
+
+```yaml
+- name: Setup python
+  hosts: all
+  gather_facts: False
+  tasks:
+    - include_role:
+        name: ansible-flatcar-python-bootstrap
+```
+
+Additionally you need to set the following variables in your group vars:
+
+```yaml
+ansible_python_interpreter: /home/core/bin/python
+ansible_user: core
+pip_executable: /home/core/bin/pip
+```
+
+You should also disable the automatic update mechanism (stop and disable the services `locksmithd` and `update-engine` to avoid unwanted updates and reboots). If you launch machines with a cloud provider you can use [ignition files](https://docs.flatcar-linux.org/ignition/what-is-ignition/) for that. Otherwise you could add a small ansible role to stop and disable those two services.
+
+The following DC/OS features are currently not available with flatcar:
+
+* SELinux support (as the portable python installation is not tightly integrated with the system it can not interface with selinux correctly)
+* GPU support (no official NVIDIA package are available for Flatcar)
 
 ## License
 

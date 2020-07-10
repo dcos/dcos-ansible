@@ -3,11 +3,18 @@
   hosts: all
   gather_facts: no
   tasks:
+    - name: Save target host IP
+      set_fact:
+        target_host: "{{ ansible_host }}"
+        target_port: "{{ansible_port | default (22)}}"
     - name: Wait for instances to become reachable
-      wait_for_connection:
-        delay: 10
+      wait_for:
+        port: "{{target_port}}"
+        host: "{{target_host}}"
         sleep: 10
         timeout: 120
+        state: started
+      delegate_to: localhost
 
 - name: Collect DC/OS versions
   hosts: all

@@ -15,11 +15,22 @@
         }}
   changed_when: false
 
+- name: "Determine if system is CoreOS/Flatcar Linux"
+  set_fact:
+    is_flatcar: "{{ ansible_distribution == 'Coreos' or ansible_distribution == 'Flatcar Container Linux by Kinvolk' or ansible_distribution == 'Flatcar Linux by Kinvolk' }}"
+  changed_when: false
+
 - name: "Gather OS specific variables"
   include_vars: "{{ item }}"
   with_first_found:
     - "vars/{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
     - "vars/generic.yml"
+  when: not is_flatcar
+  tags: vars
+
+- name: "Gather OS specific variables"
+  include_vars: "vars/Flatcar.yml"
+  when: is_flatcar
   tags: vars
 
 - name: "Choosing the time sync package which should be present"
@@ -36,6 +47,7 @@
   until: time_sync_package_install is success
   retries: 3
   delay: 60
+  when: not is_flatcar
 
 - name: "Populate service facts"
   service_facts: {}
@@ -76,7 +88,7 @@
 - block:
   - name: Check time sync (ntp)
     shell: |
-      ntpstat | grep -qv 'unsynchronised'
+      timedatectl | grep 'System clock synchronized: yes'
     register: ntp_time_sync
     changed_when: false
     when: "'ntpd.service' in ansible_facts.services and ('dcos-mesos-master.service' not in ansible_facts.services or 'dcos-mesos-slave.service' not in ansible_facts.services) and time_sync_package == 'ntp' and dcos_timesync"
@@ -111,6 +123,7 @@
       - docker-ce
   # If not installed yum_list_docker.results[*].yumstate != installed
   register: yum_list_docker
+  when: not is_flatcar
 
 - name: "Docker CE (stable) repository (Only non-EL systems)"
   yum_repository:
@@ -143,6 +156,7 @@
       update_cache: true
       enablerepo: "{{ rhel_exras_repo_name.stdout | default(omit) }}"
       state: present
+    when: not is_flatcar
     register: dcos_yum_docker_install
     until: dcos_yum_docker_install is success
     retries: 3
@@ -173,6 +187,7 @@
   until: dcos_yum_epel_install is success
   retries: 3
   delay: 60
+  when: not is_flatcar
 
 - block:
   - name: "Install required system packages"
@@ -183,6 +198,7 @@
     until: dcos_yum_system_packages_install is success
     retries: 3
     delay: 60
+    when: not is_flatcar
   rescue:
     - name: Output
       fail:
@@ -194,6 +210,7 @@
   selinux:
     policy: targeted
     state: "{{ dcos['selinux_mode'] | default('permissive') }}"
+  when: not is_flatcar
 
 - name: "Ensure 'docker' group exists"
   group:

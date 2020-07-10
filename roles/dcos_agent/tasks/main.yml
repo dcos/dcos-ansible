@@ -26,7 +26,7 @@
   shell: |
     set -o pipefail
     curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/package_lists/$(curl {{ dcos['config']['bootstrap_url'] }}/{{ dcos_version_specifier }}/genconf/serve/cluster-package-list.latest).package_list.json | \
-    jq -r '.[] | select(.|test("dcos-config--setup"))' | sed s/dcos-config--//
+    jq '.' | grep dcos-config--setup | sed s/\"// | sed s/\",// | sed s/dcos-config--// | sed s/\ \ //
   args:
     warn: false
   register: latest_dcos_config_setup
