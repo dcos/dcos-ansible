@@ -1,0 +1,42 @@
+
+- name: "Populate service facts"
+  service_facts: {}
+
+- block:
+  - name: Check time sync (ntp)
+    shell: |
+      ntpq -c rv
+    register: ntp_time_sync
+    ignore_errors: True
+    changed_when: false
+    when: "('dcos-mesos-master.service' not in ansible_facts.services or 'dcos-mesos-slave.service' not in ansible_facts.services)"
+
+  - name: Stop service ntpd
+    service:
+      name: ntpd
+      state: stopped
+    when: "ntp_time_sync is defined and ((ntp_time_sync.rc is defined and ntp_time_sync.rc != 0) or (ntp_time_sync.stdout is defined and 'sync_unspec' not in ntp_time_sync.stdout))"
+
+  - name: "Sync time with ntpd"
+    command: "ntpd -gq"
+    when: "ntp_time_sync is defined and ((ntp_time_sync.rc is defined and ntp_time_sync.rc != 0) or (ntp_time_sync.stdout is defined and 'sync_unspec' not in ntp_time_sync.stdout))"
+    register: time_sync_done_ntpd
+
+  - name: Start service ntpd
+    service:
+      name: ntpd
+      state: started
+    when: "ntp_time_sync is defined and ((ntp_time_sync.rc is defined and ntp_time_sync.rc != 0) or (ntp_time_sync.stdout is defined and 'sync_unspec' not in ntp_time_sync.stdout))"
+  rescue:
+    - name: Output
+      fail:
+        msg: >
+          ABORT! Could not timesync with ntpd'.
+          Please make sure that the setup of ntpd is correct!
+
+
+- name: "Ensure 'nogroup' group exists for DC/OS version < 2.0"
+  group:
+    name: nogroup
+    state: present
+  when: dcos['version'] is version_compare('2.0', '<')

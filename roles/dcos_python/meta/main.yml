@@ -1,0 +1,18 @@
+---
+dependencies: []
+
+# Adapted and changed from https://github.com/defunctzombie/ansible-coreos-bootstrap and https://github.com/swoehrl-mw/ansible-flatcar-python-bootstrap
+
+galaxy_info:
+  author: dcos
+  description: >
+    Installs portable python on flatcar linux. Part of a set of Ansible Roles that manage nstall DC/OS on RedHat/CentOS Linux and Flatcar Container Linux.
+  company: "Mesosphere"
+  license: "Apache 2.0"
+  min_ansible_version: 2.5
+  galaxy_tags:
+    - dcos
+    - mesosphere
+    - cloud
+    - cluster
+    - kubernetes

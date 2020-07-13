@@ -1,0 +1,5 @@
+---
+python_bootstrap:
+  get_pip_url: https://bootstrap.pypa.io/get-pip.py
+  pypy_url: https://github.com/squeaky-pl/portable-pypy/releases/download/pypy3.6-7.2.0/pypy3.6-7.2.0-linux_x86_64-portable.tar.bz2
+  bundle_url:

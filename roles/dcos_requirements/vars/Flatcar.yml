@@ -1,3 +1,0 @@
-dcos_timesync: True
-cloud_time_sync_package: ntp
-onprem_time_sync_package: ntp

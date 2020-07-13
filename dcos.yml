@@ -16,6 +16,15 @@
         state: started
       delegate_to: localhost
 
+
+- name: "Setup portable python if needed"
+  hosts: all
+  gather_facts: False
+  tasks:
+    - include_role:
+        name: dcos_python
+      when: needs_portable_python is defined and needs_portable_python == 'yes'
+
 - name: Collect DC/OS versions
   hosts: all
   tasks:

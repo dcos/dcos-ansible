@@ -147,28 +147,15 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 [Flatcar Container Linux](https://www.flatcar-linux.org/) is a minimal linux distribution designed to run containers. Due to its immutable design some additional work is needed to run the DC/OS ansible installer.
 
-As flatcar does not have python preinstalled you need to install it some other way. We recommend [ansible-flatcar-python-bootstrap](https://github.com/swoehrl-mw/ansible-flatcar-python-bootstrap). To use it add the role to your project (e.g. by running `ansible-galaxy install git+https://github.com/swoehrl-mw/ansible-flatcar-python-bootstrap`) and add the following snippet to the `dcos.yml` playbook before the `Collect DC/OS versions` play:
+The installer contains a role to bootstrap a portable python installation on the hosts. To configure the installer for Flatcar set the following extra variables in the inventory for each host/group that runs Flatcar:
 
-```yaml
-- name: Setup python
-  hosts: all
-  gather_facts: False
-  tasks:
-    - include_role:
-        name: ansible-flatcar-python-bootstrap
 ```
-
-Additionally you need to set the following variables in your group vars:
-
-```yaml
-ansible_python_interpreter: /home/core/bin/python
-ansible_user: core
-pip_executable: /home/core/bin/pip
+ansible_python_interpreter=/home/core/bin/python ansible_user=core pip_executable=/home/core/bin/pip needs_portable_python=yes
 ```
 
 You should also disable the automatic update mechanism (stop and disable the services `locksmithd` and `update-engine` to avoid unwanted updates and reboots). If you launch machines with a cloud provider you can use [ignition files](https://docs.flatcar-linux.org/ignition/what-is-ignition/) for that. Otherwise you could add a small ansible role to stop and disable those two services.
 
-The following DC/OS features are currently not available with flatcar:
+The following DC/OS features are currently not available with Flatcar:
 
 * SELinux support (as the portable python installation is not tightly integrated with the system it can not interface with selinux correctly)
 * GPU support (no official NVIDIA package are available for Flatcar)

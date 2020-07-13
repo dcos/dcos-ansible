@@ -42,25 +42,13 @@
 
 # PRE DOWNLOAD vvv
 
-- name: Install pip to install python-docker
-  yum:
-    name: python2-pip
-    state: present
+# vvv OS specific preparation steps vvv
+- include_tasks: EL.yml
   when: not is_flatcar
-  register: dcos_yum_pythonpip_install
-  retries: 3
-  delay: 60
-  until: dcos_yum_pythonpip_install is success
 
-- name: Install python docker bindings
-  pip:
-    name: docker
-    state: present
-    executable: "{% if pip_executable %}{{ pip_executable }}{% endif %}"
-  register: dcos_pip_docker_install
-  retries: 3
-  delay: 60
-  until: dcos_pip_docker_install is success
+- include_tasks: Flatcar.yml
+  when: is_flatcar
+
 
 - name: Setting download dir
   set_fact:
