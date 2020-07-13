@@ -6,11 +6,11 @@
     - name: Save target host IP
       set_fact:
         target_host: "{{ ansible_host }}"
-        target_port: "{{ansible_port | default (22)}}"
+        target_port: "{{ ansible_port | default (22) }}"
     - name: Wait for instances to become reachable
       wait_for:
-        port: "{{target_port}}"
-        host: "{{target_host}}"
+        port: "{{ target_port }}"
+        host: "{{ target_host }}"
         sleep: 10
         timeout: 120
         state: started

@@ -1,5 +1,4 @@
 ---
-
 - name: "Determine if system is CoreOS/Flatcar Linux"
   set_fact:
     is_flatcar: "{{ ansible_distribution == 'Coreos' or ansible_distribution == 'Flatcar Container Linux by Kinvolk' or ansible_distribution == 'Flatcar Linux by Kinvolk' }}"
