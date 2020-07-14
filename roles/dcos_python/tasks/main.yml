@@ -13,7 +13,7 @@
   when: need_bootstrap is failed
 
 - name: Check if we need to install pip
-  shell: "{{ ansible_python_interpreter }} -m pip --version"
+  shell: "{{ ansible_python_interpreter }} -m pip --version"  # noqa 305  shell needed as python is still being installed
   register: need_pip
   ignore_errors: True
   changed_when: false
@@ -26,7 +26,7 @@
   when: need_pip is failed and not python_bootstrap.bundle_url
 
 - name: Install pip
-  shell: "{{ ansible_python_interpreter }} ~/get-pip.py"
+  shell: "{{ ansible_python_interpreter }} ~/get-pip.py"  # noqa 305  shell needed as python is still being installed
   when: need_pip is failed and not python_bootstrap.bundle_url
 
 
@@ -46,5 +46,5 @@
   when: need_pip is failed and python_bootstrap.bundle_url
 
 - name: Install python packages
-  shell: "{{ ansible_python_interpreter }} ~/python_bundle/pip-*.whl/pip install --no-index --find-links=~/python_bundle/ ~/python_bundle/*"
+  shell: "{{ ansible_python_interpreter }} ~/python_bundle/pip-*.whl/pip install --no-index --find-links=~/python_bundle/ ~/python_bundle/*"  # noqa 305  shell needed as python is still being installed
   when: need_pip is failed and python_bootstrap.bundle_url
