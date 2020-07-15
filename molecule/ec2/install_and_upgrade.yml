@@ -1,4 +1,15 @@
 ---
+- name: "Setup portable python if needed"
+  hosts: needs_portable_python
+  gather_facts: False
+  tasks:
+    - set_fact:
+        ansible_python_interpreter: /home/core/bin/python
+        pip_executable: /home/core/bin/pip
+        needs_portable_python: yes
+    - include_role:
+        name: dcos_python
+
 - name: DC/OS Requirements
   hosts: all
   become: true

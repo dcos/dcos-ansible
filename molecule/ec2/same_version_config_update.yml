@@ -1,4 +1,17 @@
 ---
+- name: "Setup portable python if needed"
+  hosts: needs_portable_python
+  gather_facts: False
+  tasks:
+    - name: set inventory variables
+      set_fact:
+        ansible_python_interpreter: /home/core/bin/python
+        pip_executable: /home/core/bin/pip
+        needs_portable_python: yes
+    - name: include python role
+      include_role:
+        name: dcos_python
+
 - name: Collect facts for hostvars for autoamtic master IP detection in this playbook
   hosts: all
   tasks:
