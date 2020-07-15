@@ -144,6 +144,7 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 * DC/OS 1.12, both open as well as enterprise version
 
 ### Using Flatcar Linux
+**WARNING:** Flatcar/CoreOS is not fully supported and doesn't provide some features DC/OS uses. For production environments you should use Enterprise Linux like CentOS or RHEL.
 
 [Flatcar Container Linux](https://www.flatcar-linux.org/) is a minimal linux distribution designed to run containers. Due to its immutable design some additional work is needed to run the DC/OS ansible installer.
 
