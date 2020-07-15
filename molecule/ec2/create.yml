@@ -69,7 +69,7 @@
         spot_price: "{{ item.spot_price | ternary(item.spot_price, omit) if item.spot_price is defined else spot_price_max_calc }}"
         group: "{{ security_group_name }}"
         volumes:
-          - device_name: /dev/xvda
+          - device_name: "{{ item.root_device_name | default('/dev/sda1') }}"
             volume_size: 20
             volume_type: gp2
             delete_on_termination: yes

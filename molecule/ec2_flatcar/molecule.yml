@@ -9,6 +9,7 @@ platforms:
     region: us-east-1
     instance_type: m5.xlarge
     spot_price: false
+    root_device_name: /dev/xvda
     ssh_user: core
     groups:
       - needs_portable_python
@@ -19,6 +20,7 @@ platforms:
     region: us-east-1
     instance_type: m5.xlarge
     spot_price: false
+    root_device_name: /dev/xvda
     ssh_user: core
     groups:
       - needs_portable_python
@@ -29,6 +31,7 @@ platforms:
     region: us-east-1
     instance_type: m5.xlarge
     spot_price: false
+    root_device_name: /dev/xvda
     ssh_user: core
     groups:
       - needs_portable_python
