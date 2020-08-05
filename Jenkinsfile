@@ -214,16 +214,16 @@ pipeline {
                 ]) {
                 timeout(time: 60, unit: 'MINUTES') {
                   sh '''
-                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos7-enterprise"
-                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos7-enterprise"
-                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos7-enterprise"
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos8-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos8-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos8-enterprise"
 
                     rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
                     pip install -r test_requirements.txt
 
                     cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
                     echo 'writing license_key_contents'; sed -i -e \"s/license_key_contents:.*/license_key_contents: '\${LICENSE}'/\" group_vars/all/dcos.yaml
-                    sed -i -e 's/bootstrap1-centos8/bootstrap1-centos7-enterprise/' -e 's/master1-centos8/master1-centos7-enterprise/' -e 's/agent1-centos7/agent1-centos8-enterprise/' molecule/ec2_centos8/molecule.yml
+                    sed -i -e 's/bootstrap1-centos8/bootstrap1-centos8-enterprise/' -e 's/master1-centos8/master1-centos8-enterprise/' -e 's/agent1-centos8/agent1-centos8-enterprise/' molecule/ec2_centos8/molecule.yml
                     sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
 
                     echo '###### group_vars/all/dcos.yaml #####'

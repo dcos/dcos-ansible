@@ -1,4 +1,5 @@
 group_vars/all/dcos.yaml
+group_vars/all/dcos-ee.yaml
 inventory
 roles/*/molecule/*/.molecule/
 roles/*/molecule/*/.pytest_cache/
