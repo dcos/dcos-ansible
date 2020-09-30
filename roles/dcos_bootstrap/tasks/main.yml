@@ -4,6 +4,13 @@
   set_fact:
      dcos_version_specifier: "{{ dcos['image_commit'] | default(dcos['version']) }}"
 
+- name: "Gather OS specific variables"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "vars/{{ ansible_distribution }}{{ ansible_distribution_major_version }}.yml"
+    - "vars/generic.yml"
+  tags: vars
+
 - name: "Finding the provider / environment running on (AWS, GCP, AzureRM or, if nothing detected, on premise)"
   # AWS 4th gen or earlier, Xen based types:
   #   looking at `product_version` or `bios_verion`.
@@ -39,7 +46,7 @@
 
 - name: Install pip to install python-docker
   yum:
-    name: python2-pip
+    name: "{{ system_pip_package }}"
     state: present
   register: dcos_yum_pythonpip_install
   retries: 3

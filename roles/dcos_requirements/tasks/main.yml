@@ -104,6 +104,31 @@
           ABORT! Could not timesync with ntpd'.
           Please make sure that the setup of ntpd is correct!
 
+- name: "Install EPEL repositories for required packages"
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+  register: dcos_yum_epel_install
+  until: dcos_yum_epel_install is success
+  retries: 3
+  delay: 60
+
+- block:
+  - name: "Install required system packages"
+    yum:
+      name: "{{ dcos_prereq_packages }}"
+      state: present
+    register: dcos_yum_system_packages_install
+    until: dcos_yum_system_packages_install is success
+    retries: 3
+    delay: 60
+  rescue:
+    - name: Output
+      fail:
+        msg: >
+          ABORT! Could not install '{{ dcos_prereq_packages }}'.
+          Please make sure the systems repositories are enabled and reachable!
+
 - name: Check if docker is already installed
   yum:
     list:
@@ -116,7 +141,7 @@
   yum_repository:
     name: docker-ce
     description: Docker CE Repository
-    baseurl: "https://download.docker.com/linux/centos/7/$basearch/stable"
+    baseurl: "https://download.docker.com/linux/centos/$releasever/$basearch/stable"
     enabled: yes
     gpgcheck: yes
     gpgkey: https://download.docker.com/linux/centos/gpg
@@ -164,31 +189,6 @@
     state: started
     enabled: true
   when: "'podman' not in (dcos_docker_service_name | default('docker'))"
-
-- name: "Install EPEL repositories for required packages"
-  yum:
-    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-    state: present
-  register: dcos_yum_epel_install
-  until: dcos_yum_epel_install is success
-  retries: 3
-  delay: 60
-
-- block:
-  - name: "Install required system packages"
-    yum:
-      name: "{{ dcos_prereq_packages }}"
-      state: present
-    register: dcos_yum_system_packages_install
-    until: dcos_yum_system_packages_install is success
-    retries: 3
-    delay: 60
-  rescue:
-    - name: Output
-      fail:
-        msg: >
-          ABORT! Could not install '{{ dcos_prereq_packages }}'.
-          Please make sure the systems repositories are enabled and reachable!
 
 - name: "SELinux '{{ dcos['selinux_mode'] | default('permissive') }}'"
   selinux:
