@@ -39,5 +39,5 @@
   yum:
     enablerepo: epel
     name:
-      - cuda
+      - "{{ nvidia_cuda_package }}"
     state: present

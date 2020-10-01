@@ -81,5 +81,5 @@
 - name: Install cuda drivers and tools
   yum:
     name:
-      - cuda
+      - "{{ nvidia_cuda_package }}"
     state: present
