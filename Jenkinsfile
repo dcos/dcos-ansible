@@ -201,6 +201,60 @@ pipeline {
             }
           }
         }
+        stage('molecule test (ec2_centos8) / Enterprise') {
+          agent {
+            label "py36"
+          }
+          environment {
+            LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos8-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos8-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos8-enterprise"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
+                    echo 'writing license_key_contents'; sed -i -e \"s/license_key_contents:.*/license_key_contents: '\${LICENSE}'/\" group_vars/all/dcos.yaml
+                    sed -i -e 's/bootstrap1-centos8/bootstrap1-centos8-enterprise/' -e 's/master1-centos8/master1-centos8-enterprise/' -e 's/agent1-centos8/agent1-centos8-enterprise/' molecule/ec2_centos8/molecule.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    echo '###### group_vars/all/dcos.yaml #####'
+                    cat group_vars/all/dcos.yaml
+                    echo '#####################################'
+
+                    molecule test --scenario-name ec2_centos8
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-centos8-enterprise"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-centos8-enterprise"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-centos8-enterprise"
+
+                      molecule destroy --scenario-name ec2_centos8
+                    '''
+                  }
+                }
+              }
+            }
+          }
+        }
         stage('molecule test (ec2_rhel7) / Enterprise') {
           agent {
             label "py36"
