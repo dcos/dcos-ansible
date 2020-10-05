@@ -16,6 +16,11 @@ platforms:
     region: us-east-1
     instance_type: p2.xlarge
     ssh_user: centos
+  - name: gputestagent-centos8.2-${USER:-ci}-${HOSTNAME:-local}
+    image: ami-01ca03df4a6012157
+    region: us-east-1
+    instance_type: p2.xlarge
+    ssh_user: centos
   # Tesla V100
   - name: gputestagent-centosV100-${USER:-ci}-${HOSTNAME:-local}
     # centos7.6 ami-02eac2c0129f6376b freezes on boot on p3 instances

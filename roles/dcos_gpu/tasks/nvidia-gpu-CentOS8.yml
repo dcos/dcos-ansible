@@ -1,0 +1,88 @@
+---
+- name: find this kernel headers
+  yum:
+    list: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+  register: pkgheaders
+- name: output package name
+  debug:
+    var: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+- name: get CentOS specific release version
+  slurp:
+    src: /etc/centos-release
+  register: os_release_file
+
+# If possible we use headers from main OS repo for this kernel.
+- name: Install Kernel Header and Devel from OS repo for Current Kernel
+  yum:
+      name:
+        - "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel }}"
+        - "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel }}"
+  when: pkgheaders.results|length > 0
+# CentOS VAULT - Kernel Headers not available in main OS repo anymore. Use Vault for this release
+- name: CentOS VAULT - Kernel Headers not available in main OS repo anymore. Use Vault for this release
+  # 2019-09-18: CentOS created new version 7.7.1908 and rebased the /7 repo.
+  # But vault for 7.6.1810 is not available but mirror is
+  when: pkgheaders.results|length == 0
+  block:
+    - name: ThisVault
+      yum_repository:
+        name: ThisVault
+        description: This Vault
+        baseurl: "{{ vault_repo_baseurl_el8 }}"
+        enabled: false
+    - name: ThisVault - Install Kernel Headers for Current Kernel
+      yum:
+          enablerepo: ThisVault
+          name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+    - name: ThisVault - Install Kernel Devel for Current Kernel
+      yum:
+          enablerepo: ThisVault
+          name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  rescue:
+    - name: Centos mirror this version
+      yum_repository:
+        name: CentosThisVersionMirror
+        description: Centos mirror this version
+        baseurl: "{{ mirror_repo_baseurl_el8 }}"
+        enabled: false
+    - name: CentosThisVersionMirror - register mirror as the repository to be used
+      set_fact:
+        old_package_repo: CentosThisVersionMirror
+    - name: CentosThisVersionMirror - Install Kernel Headers for Current Kernel
+      yum:
+          enablerepo: "{{ old_package_repo }}"
+          name: "kernel-headers-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+    - name: CentosThisVersionMirror - Install Kernel Devel for Current Kernel
+      yum:
+          enablerepo: "{{ old_package_repo }}"
+          name: "kernel-devel-{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+  always:
+    - name: Ensure to link against merged kernel headers
+      file:
+        dest: "/lib/modules/{{ hostvars[inventory_hostname].ansible_kernel }}/build"
+        src: "/usr/src/kernels/{{ hostvars[inventory_hostname].ansible_kernel | regex_search('\\d+\\.\\d+\\.\\d+-\\d+') }}.el{{ hostvars[inventory_hostname].ansible_distribution_major_version }}.x86_64/"
+        force: yes
+        state: link
+        follow: false
+
+# ensure nouveau being unloaded
+- name: Ensure nouveau being unloaded
+  modprobe:
+    name: nouveau
+    state: absent
+  changed_when: False
+
+# Install NVIDIA repository, driver and tools
+- name: Add NVIDIA repository for CUDA drivers and tools
+  yum_repository:
+    name: cuda
+    description: NVIDIA cuda repository
+    enabled: true
+    baseurl: "{{ nvidia_repo_baseurl_el8 }}"
+    gpgkey: "{{ nvidia_repo_gpgkey_el8 }}"
+    gpgcheck: true
+- name: Install cuda drivers and tools
+  yum:
+    name:
+      - cuda
+    state: present
