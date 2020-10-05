@@ -10,8 +10,16 @@ def test_nvidia_smi(host):
     cmd = host.run("sudo nvidia-smi -L")
     assert 'GPU 0' in cmd.stdout
 
-def test_cuda10_caps(host):
+
+def test_cuda11_caps(host):
     nvidia_caps = host.file("/dev/nvidia-caps")
 
-    assert True == nvidia_caps.exists
-    assert False == nvidia_caps.is_directory
+    # only cuda 11 has those files.
+    if nvidia_caps.exists:
+        assert True is nvidia_caps.is_directory
+
+
+def test_cuda10_devices(host):
+    nvidia_dev = host.file("/dev/nvidia0")
+
+    assert True is nvidia_dev.exists

@@ -78,7 +78,12 @@
     baseurl: "{{ nvidia_repo_baseurl }}"
     gpgkey: "{{ nvidia_repo_gpgkey }}"
     gpgcheck: true
-- name: Install cuda drivers and tools
+- name: Install nvidia driver
+  yum:
+    name:
+      - "{{ nvidia_driver_package }}"
+    state: present
+- name: Install cuda package and tools
   yum:
     name:
       - "{{ nvidia_cuda_package }}"
