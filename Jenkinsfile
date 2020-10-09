@@ -156,6 +156,109 @@ pipeline {
             }
           }
         }
+        stage('molecule test (ec2_flatcar) / Open') {
+          agent {
+            label "py36"
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-flatcar-open"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-flatcar-open"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-flatcar-open"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos.yaml.example group_vars/all/dcos.yaml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    echo '###### group_vars/all/dcos.yaml #####'
+                    cat group_vars/all/dcos.yaml
+                    echo '#####################################'
+
+                    molecule test --scenario-name ec2_flatcar
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-flatcar-open"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-flatcar-open"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-flatcar-open"
+
+                      molecule destroy --scenario-name ec2_flatcar
+                    '''
+                  }
+                }
+              }
+            }
+          }
+        }
+        stage('molecule test (ec2_flatcar) / Enterprise') {
+          agent {
+            label "py36"
+          }
+          environment {
+            LICENSE = credentials("DCOS_ANSIBLE_LICENSE")
+          }
+          steps {
+            ansiColor('xterm') {
+              withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                ]) {
+                timeout(time: 60, unit: 'MINUTES') {
+                  sh '''
+                    export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-flatcar-enterprise"
+                    export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-flatcar-enterprise"
+                    export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-flatcar-enterprise"
+
+                    rm -rf \${MOLECULE_EPHEMERAL_DIRECTORY} \${ANSIBLE_LOCAL_TEMP} \${ANSIBLE_ASYNC_DIR}
+                    pip install -r test_requirements.txt
+
+                    cp group_vars/all/dcos-ee.yaml.example group_vars/all/dcos.yaml
+                    echo 'writing license_key_contents'; sed -i -e \"s/license_key_contents:.*/license_key_contents: '\${LICENSE}'/\" group_vars/all/dcos.yaml
+                    sed -i -e 's/bootstrap1-flatcar/bootstrap1-flatcar-enterprise/' -e 's/master1-flatcar/master1-flatcar-enterprise/' -e 's/agent1-flatcar/agent1-flatcar-enterprise/' molecule/ec2_flatcar/molecule.yml
+                    sed -i -e "s/spot_price_max_calc:.*/spot_price_max_calc: \${LINUX_DOUBLE_SPOT_PRICE}/" molecule/ec2/create.yml
+
+                    echo '###### group_vars/all/dcos.yaml #####'
+                    cat group_vars/all/dcos.yaml
+                    echo '#####################################'
+
+                    molecule test --scenario-name ec2_flatcar
+                  '''
+                }
+              }
+            }
+          }
+          post {
+            aborted {
+              ansiColor('xterm') {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'arn:aws:iam::850970822230:user/jenkins', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
+                  ]) {
+                  timeout(time: 20, unit: 'MINUTES') {
+                    sh '''
+                      export ANSIBLE_LOCAL_TEMP="${WORKSPACE}/.ansible-tmp-flatcar-enterprise"
+                      export ANSIBLE_ASYNC_DIR="${WORKSPACE}/.ansible-async-flatcar-enterprise"
+                      export MOLECULE_EPHEMERAL_DIRECTORY="${WORKSPACE}/.molecule-flatcar-enterprise"
+
+                      molecule destroy --scenario-name ec2_flatcar
+                    '''
+                  }
+                }
+              }
+            }
+          }
+        }
         stage('molecule test (ec2_rhel7) / Open') {
           agent {
             label "py36"

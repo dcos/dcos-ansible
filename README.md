@@ -101,6 +101,7 @@ dcos:
 | config                  | yes          | Yaml structure that represents a valid Mesosphere DC/OS config.yml, see below.                                                                                                                                                                     |
 
 #### DC/OS config.yml parameters
+
 Please see [the official Mesosphere DC/OS configuration reference](https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/) for a full list of possible parameters.
 There are a few parameters that are used by these roles outside the DC/OS config.yml, specifically:
 
@@ -141,6 +142,24 @@ The provided `dcos.yml` playbook can be used as-is for installing and upgrading 
 
 * CentOS 7, RHEL 7
 * DC/OS 1.12, both open as well as enterprise version
+
+### Using Flatcar Linux
+**WARNING:** Flatcar/CoreOS is not fully supported and doesn't provide some features DC/OS uses. For production environments you should use Enterprise Linux like CentOS or RHEL.
+
+[Flatcar Container Linux](https://www.flatcar-linux.org/) is a minimal linux distribution designed to run containers. Due to its immutable design some additional work is needed to run the DC/OS ansible installer.
+
+The installer contains a role to bootstrap a portable python installation on the hosts. To configure the installer for Flatcar set the following extra variables in the inventory for each host/group that runs Flatcar:
+
+```
+ansible_python_interpreter=/home/core/bin/python ansible_user=core pip_executable=/home/core/bin/pip needs_portable_python=yes
+```
+
+You should also disable the automatic update mechanism (stop and disable the services `locksmithd` and `update-engine` to avoid unwanted updates and reboots). If you launch machines with a cloud provider you can use [ignition files](https://docs.flatcar-linux.org/ignition/what-is-ignition/) for that. Otherwise you could add a small ansible role to stop and disable those two services.
+
+The following DC/OS features are currently not available with Flatcar:
+
+* SELinux support (as the portable python installation is not tightly integrated with the system it can not interface with selinux correctly)
+* GPU support (no official NVIDIA package are available for Flatcar)
 
 ## License
 

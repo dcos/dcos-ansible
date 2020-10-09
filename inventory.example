@@ -17,6 +17,7 @@ remoteagent1-dcos112s.example.com
 remoteagent2-dcos112s.example.com
 remoteagent3-dcos112s.example.com
 gpuagent1-dcos112s.example.com
+flatcaragent1-dcos112s.example.com ansible_python_interpreter=/home/core/bin/python ansible_user=core pip_executable=/home/core/bin/pip needs_portable_python=yes
 
 [agents_public]
 publicagent1-dcos112s.example.com

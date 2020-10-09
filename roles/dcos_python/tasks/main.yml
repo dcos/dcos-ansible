@@ -1,0 +1,50 @@
+- name: Check if bootstrap is needed
+  raw: stat $HOME/.bootstrapped
+  register: need_bootstrap
+  ignore_errors: True
+  changed_when: false
+
+- name: Download pypy-portable
+  raw: "curl -fkL {{ python_bootstrap.pypy_url }} -o /home/core/pypy.tar.bz2"
+  when: need_bootstrap is failed
+
+- name: Run bootstrap.sh
+  script: bootstrap.sh
+  when: need_bootstrap is failed
+
+- name: Check if we need to install pip
+  shell: "{{ ansible_python_interpreter }} -m pip --version"  # noqa 305  shell needed as python is still being installed
+  register: need_pip
+  ignore_errors: True
+  changed_when: false
+
+
+- name: Download get-pip.py
+  get_url:
+    url: "{{ python_bootstrap.get_pip_url }}"
+    dest: "~/get-pip.py"
+  when: need_pip is failed and not python_bootstrap.bundle_url
+
+- name: Install pip
+  shell: "{{ ansible_python_interpreter }} ~/get-pip.py"  # noqa 305  shell needed as python is still being installed
+  when: need_pip is failed and not python_bootstrap.bundle_url
+
+
+- name: Download python_bundle
+  get_url:
+    url: "{{ python_bootstrap.bundle_url }}"
+    dest: "~/python_bundle.tar.gz"
+    validate_certs: false
+  register: download_python_bundle
+  when: need_pip is failed and python_bootstrap.bundle_url
+
+- name: Extract python_bundle
+  unarchive:
+    src: ~/python_bundle.tar.gz
+    dest: ~/
+    remote_src: yes
+  when: need_pip is failed and python_bootstrap.bundle_url
+
+- name: Install python packages
+  shell: "{{ ansible_python_interpreter }} ~/python_bundle/pip-*.whl/pip install --no-index --find-links=~/python_bundle/ ~/python_bundle/*"  # noqa 305  shell needed as python is still being installed
+  when: need_pip is failed and python_bootstrap.bundle_url

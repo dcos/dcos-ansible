@@ -1,0 +1,65 @@
+---
+scenario:
+  name: ec2_flatcar
+driver:
+  name: ec2
+platforms:
+  - name: "bootstrap1-flatcar-${USER:-ci}-${HOSTNAME:-local}"
+    image: ami-01a83a3acf30b4638
+    region: us-east-1
+    instance_type: m5.xlarge
+    spot_price: false
+    root_device_name: /dev/xvda
+    ssh_user: core
+    groups:
+      - needs_portable_python
+      - bootstraps
+      - dcos
+  - name: master1-flatcar-${USER:-ci}-${HOSTNAME:-local}
+    image: ami-01a83a3acf30b4638
+    region: us-east-1
+    instance_type: m5.xlarge
+    spot_price: false
+    root_device_name: /dev/xvda
+    ssh_user: core
+    groups:
+      - needs_portable_python
+      - masters
+      - dcos
+  - name: agent1-flatcar-${USER:-ci}-${HOSTNAME:-local}
+    image: ami-01a83a3acf30b4638
+    region: us-east-1
+    instance_type: m5.xlarge
+    spot_price: false
+    root_device_name: /dev/xvda
+    ssh_user: core
+    groups:
+      - needs_portable_python
+      - agents_private
+      - agents
+      - dcos
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    ec2:
+      create: ../ec2/create.yml
+      destroy: ../ec2/destroy.yml
+    converge: ../ec2/same_version_config_update.yml
+    prepare: ../ec2/install_and_upgrade.yml
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  env:
+    ANSIBLE_ROLES_PATH: "../../roles/"
+  inventory:
+    links:
+      group_vars: ../../group_vars/
+  lint:
+    name: ansible-lint
+    enabled: True
+lint:
+  name: yamllint
+  options:
+    config-file: .yamllint.yml

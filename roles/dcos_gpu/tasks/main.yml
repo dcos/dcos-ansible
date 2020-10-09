@@ -1,15 +1,9 @@
 ---
-- name: Ensure pciutils installed
-  yum:
-    name: pciutils
-    state: present
-# only NVIDIA for now
-- name: Detect NVIDIA devices
-  command: "lspci -d {{ item.vendor|default('') }}:{{ item.device|default('') }}:{{ item.class|default('') }} -nn -mm"
-  register: lspci_nvidia
-  with_items: "{{ nvidia_device_query }}"
+- name: "Determine if system is CoreOS/Flatcar Linux"
+  set_fact:
+    is_flatcar: "{{ ansible_distribution == 'Coreos' or ansible_distribution == 'Flatcar Container Linux by Kinvolk' or ansible_distribution == 'Flatcar Linux by Kinvolk' }}"
   changed_when: false
 
-- name: "NVIDIA GPU detected"
-  include_tasks: nvidia-gpu.yml
-  when: lspci_nvidia|json_query('results[*].stdout_lines')|flatten|length > 0
+
+- include_tasks: EL.yml
+  when: not is_flatcar
