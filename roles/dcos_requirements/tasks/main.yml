@@ -74,6 +74,11 @@
           Please make sure that the setup of chronyd is correct!
 
 - block:
+  - name: Start service ntpd, if not started
+    ansible.builtin.service:
+      name: ntpd
+      state: started
+
   - name: Check time sync (ntp)
     shell: |
       ntpstat | grep -qv 'unsynchronised'
