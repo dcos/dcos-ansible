@@ -4,6 +4,6 @@ molecule[vagrant]
 boto
 boto3
 ansible-lint==v4.1.1a0
-ansible==2.8.8
+ansible==2.10.0
 yamllint==1.17.0
 mazer==1.0.0
