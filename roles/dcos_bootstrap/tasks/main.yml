@@ -49,6 +49,7 @@
 - name: Install python docker bindings
   pip:
     name: docker
+    version: 4.4.4
     state: present
   register: dcos_pip_docker_install
   retries: 3
