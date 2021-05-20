@@ -48,8 +48,9 @@
 
 - name: Install python docker bindings
   pip:
-    name: docker
-    version: 4.4.4
+    name:
+      - docker==4.4.4
+      - websocket-client<1.0.0
     state: present
   register: dcos_pip_docker_install
   retries: 3
