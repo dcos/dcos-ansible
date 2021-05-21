@@ -1,45 +1,47 @@
 ---
 scenario:
-  name: ec2_centos7_gpu
+  name: ec2_gpu
 driver:
   name: ec2
 platforms:
   # uses vault
-  - name: gputestagent-centos7.5
+  - name: gputestagent-centos7.5-${USER:-ci}-${HOSTNAME:-local}
     image: ami-9887c6e7
     region: us-east-1
     instance_type: p2.xlarge
     ssh_user: centos
   # current version
-  - name: gputestagent-centos7.6
+  - name: gputestagent-centos7.6-${USER:-ci}-${HOSTNAME:-local}
     image: ami-02eac2c0129f6376b
     region: us-east-1
     instance_type: p2.xlarge
     ssh_user: centos
   # Tesla V100
-  - name: gputestagent-centosV100
+  - name: gputestagent-centosV100-${USER:-ci}-${HOSTNAME:-local}
     # centos7.6 ami-02eac2c0129f6376b freezes on boot on p3 instances
     image: ami-9887c6e7
     region: us-east-1
     instance_type: p3.2xlarge
     ssh_user: centos
   # Tesla M60
-  - name: gputestagent-centosM60
+  - name: gputestagent-centosM60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-02eac2c0129f6376b
     region: us-east-1
+    zone: us-east-1d # lets use a zone which contains all gpu types
     instance_type: g3.4xlarge
+    spot_price: false
     ssh_user: centos
   # RHEL 7.6 / current version
-  - name: gputestagent-rhel7.6M60
+  - name: gputestagent-rhel7.6M60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-000db10762d0c4c05
     region: us-east-1
-    instance_type: g3.4xlarge
+    instance_type: p2.xlarge
     ssh_user: ec2-user
   # RHEL 7.5 / previous version
-  - name: gputestagent-rhel7.5M60
+  - name: gputestagent-rhel7.5M60-${USER:-ci}-${HOSTNAME:-local}
     image: ami-6871a115
     region: us-east-1
-    instance_type: g3.4xlarge
+    instance_type: p2.xlarge
     ssh_user: ec2-user
 
 provisioner:

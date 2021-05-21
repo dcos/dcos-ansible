@@ -1,10 +1,10 @@
 ---
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/2.0.1/dcos_generate_config.sh"
-  download_checksum: "sha256:4c23098d14ca7920062114def614f2d60d3f76ab5f59783ddfb713aa96718ed8"
-  download_win: "https://downloads.dcos.io/dcos/testing/master/windows/dcos_generate_config_win.sh"
+  download: "https://downloads.mesosphere.com/dcos-enterprise/stable/2.0.1/dcos_generate_config.ee.sh"
+  download_checksum: "sha256:b41ed2fbb5e82562c6c666777054b24a563fedfccf604b6a4b44f5ee2af464a7"
+  download_win: "https://downloads.mesosphere.com/dcos-enterprise/testing/master/windows/dcos_generate_config_win.ee.sh"
   version: "2.0.1"
-  enterprise_dcos: false
+  enterprise_dcos: true
 
   selinux_mode: permissive
 
@@ -13,6 +13,7 @@ dcos:
     # Please see https://docs.mesosphere.com/1.13/installing/production/advanced-configuration/configuration-reference/
     # for parameter reference.
     cluster_name: "examplecluster"
+    license_key_contents: "<REPLACE WITH VALID LICENSE>"
     security: strict
     bootstrap_url: http://int-bootstrap1-examplecluster.example.com:8080
     exhibitor_storage_backend: static

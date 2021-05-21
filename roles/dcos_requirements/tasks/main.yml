@@ -88,7 +88,7 @@
     when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
 
   - name: "Sync time with ntpd"
-    shell: "ntpd -gq"
+    command: "ntpd -gq"
     when: "ntp_time_sync is defined and ntp_time_sync.rc is defined and ntp_time_sync.rc == 1"
     register: time_sync_done_ntpd
 
@@ -122,6 +122,13 @@
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
 
+- name: "Preinstall containerd.io for docker-ce on CentOS preventing kmem bug"
+  yum:
+    name: "{{ dcos_containerd_pkg_name }}"
+    update_cache: true
+    state: present
+  when: ansible_distribution == 'CentOS' and yum_list_docker.results | selectattr("yumstate", "match", "installed") | list | length == 0
+
 - block:
   - name: "Finding RHEL extras repository name (Only EL systems)"
     shell: |
@@ -132,9 +139,9 @@
 
   - name: "Docker installed"
     yum:
-      name: "{{ dcos_docker_pkg_name }}"
+      name: "{{ dcos_docker_pkgs }}"
       update_cache: true
-      enablerepo: "{{ rhel_exras_repo_name.stdout | default('') }}"
+      enablerepo: "{{ rhel_exras_repo_name.stdout | default(omit) }}"
       state: present
     register: dcos_yum_docker_install
     until: dcos_yum_docker_install is success
@@ -188,10 +195,13 @@
     policy: targeted
     state: "{{ dcos['selinux_mode'] | default('permissive') }}"
 
-- name: "Ensure groups 'nogroup' and 'docker' exist"
+- name: "Ensure 'docker' group exists"
   group:
-    name: "{{ item }}"
+    name: docker
     state: present
-  with_items:
-    - nogroup
-    - docker
+
+- name: "Ensure 'nogroup' group exists for DC/OS version < 2.0"
+  group:
+    name: nogroup
+    state: present
+  when: dcos['version'] is version_compare('2.0', '<')

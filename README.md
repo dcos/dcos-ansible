@@ -70,8 +70,9 @@ dcos_legacy_node_type_name=slave_public
 
 ```yml
 dcos:
-  download: "https://downloads.dcos.io/dcos/stable/1.13.3/dcos_generate_config.sh"
-  version: "1.13.3"
+  download: "https://downloads.dcos.io/dcos/stable/1.13.4/dcos_generate_config.sh"
+  download_checksum: "sha256:a3d295de33ad55b10f5dc66c9594d9175a40f5aaec7734d664493968a9f751fd"
+  version: "1.13.4"
   enterprise_dcos: false
   selinux_mode: enforcing
 
@@ -90,6 +91,7 @@ dcos:
 | Name                    | Required?    | Description                                                                                                                                                                                                                                        |
 |:------------------------|:-------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | download                | REQUIRED     | (https) URL to download the Mesosphere DC/OS install from                                                                                                                                                                                          |
+| download_checksum       | no           | Checksum to check the download against. It should start with the method being used. E.g. "sha256:<checksum>"
 | version                 | REQUIRED     | Version string that reflects the version that the installer (given by `download`) installs. Can be collected by running `dcos_generate_config.sh --version`.                                                                                       |
 | version_to_upgrade_from | for upgrades | Version string of Mesosphere DC/OS the upgrade procedure expectes to upgrade FROM. A per-version upgrade script will be generated on the bootstrap machine, each cluster node downloads the proper upgrade for its currenly running DC/OS version. |
 | image_commit            | no           | Can be used to force same version / same config upgrades. Mostly useful for deploying/upgrading non-released versions, e.g. `1.12-dev`. This parameter takes precedence over `version`.                                                            |

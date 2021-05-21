@@ -4,45 +4,59 @@
   connection: local
   gather_facts: false
   no_log: "{{ not (lookup('env', 'MOLECULE_DEBUG') | bool or molecule_yml.provisioner.log|default(false) | bool) }}"
+  vars:
+    security_group_name: "molecule_{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
+    keypair_name: "molecule_key_{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
   tasks:
-    - block:
-        - name: Populate instance config
-          set_fact:
-            instance_conf: "{{ lookup('file', molecule_instance_config) | molecule_from_yaml }}"
-            skip_instances: false
-      rescue:
-        - name: Populate instance config when file missing
-          set_fact:
-            instance_conf: {}
-            skip_instances: true
+    - name: "check if {{ molecule_instance_config }} file exists"
+      stat:
+        path: "{{ molecule_instance_config }}"
+      register: molecule_instance_config_stat
 
-    - name: Destroy molecule instance(s)
+    - name: Populate instance config
+      set_fact:
+        instance_conf: "{{ lookup('file', molecule_instance_config) | molecule_from_yaml }}"
+        skip_instances: false
+      when: molecule_instance_config_stat.stat.exists
+
+    - name: Populate instance config when file missing
+      set_fact:
+        instance_conf: {}
+        skip_instances: true
+      when: not molecule_instance_config_stat.stat.exists
+
+    - name: Destroy molecule instances
       ec2:
         state: absent
         instance_ids: "{{ item.instance_ids }}"
         region: "{{ item.region }}"
+        wait: true
+        wait_timeout: 600
       register: server
       with_items: "{{ instance_conf }}"
       when: not skip_instances
-      async: 7200
-      poll: 0
 
-    - name: Wait for instance(s) deletion to complete
-      async_status:
-        jid: "{{ item.ansible_job_id }}"
-      register: ec2_jobs
-      until: ec2_jobs.finished
-      retries: 300
-      with_items: "{{ server.results }}"
+    - name: Delete remote keypair
+      ec2_key:
+        name: "{{ keypair_name }}"
+        state: absent
+        region: "{{ molecule_yml.platforms[0].region }}"
+
+    - name: Destroy molecule security_group
+      ec2_group:
+        name: "{{ security_group_name }}"
+        state: absent
+        region: "{{ molecule_yml.platforms[0].region }}"
 
     # Mandatory configuration for Molecule to function.
 
     - name: Populate instance config
       set_fact:
         instance_conf: {}
+      register: clear_config
 
     - name: Dump instance config
       copy:
         content: "{{ instance_conf | to_json | from_json | molecule_to_yaml | molecule_header }}"
         dest: "{{ molecule_instance_config }}"
-      when: server.changed | bool
+      when: clear_config

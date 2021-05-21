@@ -7,19 +7,21 @@
   vars:
     ssh_user: ec2-user
     ssh_port: 22
+    spot_price_max_calc: 5
 
-    security_group_name: molecule
+    admin_ip: "{{ lookup('url', 'http://whatismyip.akamai.com') }}"
+    security_group_name: "molecule_{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
     security_group_description: Security group for testing Molecule
     security_group_rules:
       - proto: tcp
         from_port: "{{ ssh_port }}"
         to_port: "{{ ssh_port }}"
-        cidr_ip: "0.0.0.0/0"
+        cidr_ip: "{{ admin_ip }}/32"
       - proto: icmp
         from_port: 8
         to_port: -1
-        cidr_ip: "0.0.0.0/0"
-      - proto: tcp
+        cidr_ip: "{{ admin_ip }}/32"
+      - proto: all
         from_port: 0
         to_port: 65535
         cidr_ip: "172.31.0.0/16"
@@ -29,7 +31,7 @@
         to_port: 0
         cidr_ip: "0.0.0.0/0"
 
-    keypair_name: molecule_key
+    keypair_name: "molecule_key_{{ lookup('env', 'HOSTNAME') | default(lookup('env', 'USER') | to_uuid, true) }}"
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
   tasks:
     - debug:
@@ -40,45 +42,31 @@
         description: "{{ security_group_name }}"
         rules: "{{ security_group_rules }}"
         rules_egress: "{{ security_group_rules_egress }}"
-        region: "{{ item.region }}"
-      with_items: "{{ molecule_yml.platforms }}"
+        region: "{{ molecule_yml.platforms[0].region }}"
+      register: security_group
 
-    - name: Test for presence of local keypair
-      stat:
-        path: "{{ keypair_path }}"
-      register: keypair_local
-
-    - name: Delete remote keypair
+    - name: Create keypair
       ec2_key:
         name: "{{ keypair_name }}"
-        state: absent
-        region: "{{ item.region }}"
-      with_items: "{{ molecule_yml.platforms }}"
-      when: not keypair_local.stat.exists
+        region: "{{ molecule_yml.platforms[0].region }}"
+      register: keypair
 
-    - name: Create keypairs
-      ec2_key:
-        name: "{{ keypair_name }}"
-        region: "{{ item.region }}"
-      with_items: "{{ molecule_yml.platforms }}"
-      register: keypairs
-
-    - name: Persist the keypairs
-      blockinfile:
-        path: "{{ keypair_path }}"
-        create: yes
-        state: present
-        block: "{{ item.key.private_key }}"
+    - name: Persist the keypair
+      copy:
+        dest: "{{ keypair_path }}"
+        content: "{{ keypair.key.private_key }}"
         mode: 0600
-      when: item.changed
-      with_items: "{{ keypairs.results }}"
+      when: keypair.changed
 
     - name: Create molecule instance(s)
       ec2:
         key_name: "{{ keypair_name }}"
         image: "{{ item.image }}"
         region: "{{ item.region }}"
+        zone: "{{ item.zone|default(omit) }}"
+        instance_initiated_shutdown_behavior: terminate
         instance_type: "{{ item.instance_type }}"
+        spot_price: "{{ item.spot_price | ternary(item.spot_price, omit) if item.spot_price is defined else spot_price_max_calc }}"
         group: "{{ security_group_name }}"
         volumes:
           - device_name: /dev/sda1
@@ -86,7 +74,7 @@
             volume_type: gp2
             delete_on_termination: yes
         instance_tags:
-          Name: "molecule {{ item.name }} {{ lookup('env', 'USER') | default('ci', true) }}@{{ lookup('env', 'HOSTNAME') | default((lookup('env', 'USER') + lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S')) | to_uuid, true) }}"
+          Name: "molecule {{ item.name }}"
           instance: "{{ item.name }}"
           molecule_region: "{{ item.region }}"
           molecule_ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
@@ -95,7 +83,9 @@
         count_tag:
           instance: "{{ item.name }}"
       register: server
-      with_items: "{{ molecule_yml.platforms }}"
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        index_var: index
       async: 7200
       poll: 0
 
@@ -121,7 +111,7 @@
             "identity_file": "{{ keypair_path }}",
             "instance_ids": "{{ item.instance_ids }}",
           }
-      with_items: "{{ ec2_jobs.results | default(server.results) }}"
+      with_items: "{{ ec2_jobs.results }}"
       register: instance_config_dict
       when: server.changed | bool
 
@@ -147,4 +137,4 @@
 
     - name: Wait for boot process to finish
       pause:
-        seconds: 42
+        seconds: 2

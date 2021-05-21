@@ -48,7 +48,9 @@
 
 - name: Install python docker bindings
   pip:
-    name: docker
+    name:
+      - docker==4.4.4
+      - websocket-client<1.0.0
     state: present
   register: dcos_pip_docker_install
   retries: 3
@@ -74,11 +76,60 @@
 - name: Create install directory/genconf
   file: path={{ download_path }}/genconf state=directory mode=0755
 
+- name: Create bootstrap CA directory
+  file: path={{ download_path }}/genconf/ca state=directory mode=0700
+
+- name: "Set PSK path"
+  set_fact:
+    psk_path: "{{ download_path }}/genconf/ca/psk"
+  when: dcos.enterprise_dcos
+
+- name: "Stat the existing PSK"
+  stat:
+    path: "{{ psk_path }}"
+  register: psk_stat
+  when: dcos.enterprise_dcos
+
+- name: "Read existing PSK contents"
+  slurp:
+    src: "{{ psk_path }}"
+  register: psk_contents
+  when: dcos.enterprise_dcos and psk_stat.stat.exists
+
+- name: "Generate PSK for exhibitor bootstrap"
+  set_fact:
+    random_psk_result: "{{ lookup('password', '/dev/null length=16 chars=ascii_letters') }}"
+  when: dcos.enterprise_dcos and not psk_stat.stat.exists
+
+- name: Write CA service PSK
+  copy:
+    dest: "{{ psk_path }}"
+    mode: 0600
+    content: "{{ random_psk_result }}"
+  when: dcos.enterprise_dcos and not psk_stat.stat.exists
+
+- name: Delegate psk variable from disk
+  set_fact:
+    delegated_psk: "{{ psk_contents['content'] | b64decode }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  with_items: "{{ groups['masters'] }}"
+  when: dcos.enterprise_dcos and psk_stat.stat.exists
+
+- name: Delegate psk variable from password generator
+  set_fact:
+    delegated_psk: "{{ random_psk_result }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: true
+  with_items: "{{ groups['masters'] }}"
+  when: dcos.enterprise_dcos and not psk_stat.stat.exists
+
 #  vvv DOWNLOAD vvv
 
 - name: Download installation file
   get_url:
     url: "{{ dcos['download'] }}"
+    checksum: "{{ dcos['download_checksum'] | default(omit) }}"
     dest: "{{ download_path }}/{{ install_file }}"
     mode: 0440
 
